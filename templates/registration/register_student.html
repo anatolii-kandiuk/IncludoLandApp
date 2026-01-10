@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Реєстрація дитини{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-7 mx-auto">
+        <div class="card">
+            <div class="card-body p-4">
+                <h1 class="h4 mb-2">Реєстрація дитини</h1>
+                <div class="text-muted mb-4">Створіть профіль, щоб бачити прогрес та нагороди.</div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="id_username">Логін (ім'я)</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                            <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="id_email">Email (необов'язково)</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="id_password1">Пароль</label>
+                            {{ form.password1 }}
+                            {% if form.password1.errors %}
+                            <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="id_password2">Повторіть пароль</label>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}
+                            <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-grid gap-2">
+                        <button class="btn btn-primary btn-lg" type="submit">Створити профіль</button>
+                        <a class="btn btn-outline-secondary" href="{% url 'users:login' %}">У мене вже є акаунт</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

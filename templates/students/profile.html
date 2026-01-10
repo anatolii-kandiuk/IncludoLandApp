@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+
+{% block title %}Профіль учня{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
+                    <div>
+                        <div class="text-muted small">Профіль</div>
+                        <h1 class="display-6 mb-0 text-uppercase fw-bold" style="letter-spacing: 0.02em;">
+                            {{ profile.user.username|upper }}
+                        </h1>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-muted small">Зірочки</div>
+                        <div class="h3 mb-0">{{ profile.stars }}</div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                            <div class="fw-semibold">Нагороди</div>
+                            <div class="text-muted small">{{ achievements|length }}</div>
+                        </div>
+
+                        {% if achievements %}
+                        <div class="row g-3">
+                            {% for a in achievements %}
+                            <div class="col-12 col-md-6">
+                                <div class="p-3 rounded border bg-primary-subtle">
+                                    <div class="d-flex align-items-center gap-3">
+                                        {% if a.achievement.icon %}
+                                        <img src="{{ a.achievement.icon.url }}" alt="" width="56" height="56"
+                                            class="rounded">
+                                        {% else %}
+                                        <div class="rounded-circle bg-white border d-flex align-items-center justify-content-center text-primary"
+                                            style="width:56px;height:56px;">
+                                            <i class="bi bi-award" style="font-size: 1.5rem;"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold" style="font-size: 1.05rem;">{{ a.achievement.title }}
+                                            </div>
+                                            {% if a.achievement.description %}
+                                            <div class="text-muted small">{{ a.achievement.description }}</div>
+                                            {% endif %}
+                                            <div class="text-muted small mt-1">{{ a.awarded_at|date:"d.m.Y" }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-muted">Поки що немає нагород. Виконайте перше завдання — і з’явиться перша
+                            відзнака.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="p-3 rounded bg-light mb-4">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div>
+                            <div class="text-muted small">Точність (загалом)</div>
+                            <div class="fw-semibold">{{ stats.accuracy }}%</div>
+                        </div>
+                        <div class="flex-grow-1" style="min-width: 220px;">
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar" role="progressbar" style="width: {{ stats.accuracy }}%;"
+                                    aria-valuenow="{{ stats.accuracy }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="text-muted small mt-2">Середній результат: {{ stats.avg_score }}% · Виконано
+                                завдань: {{ stats.completed_count }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 rounded bg-light">
+                            <div class="text-muted">Остання вправа</div>
+                            <div class="fw-semibold">
+                                {% if profile.last_exercise_type %}
+                                {{ profile.last_exercise_type.name }}
+                                {% else %}
+                                —
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 rounded bg-light">
+                            <div class="text-muted">Оновлено</div>
+                            <div class="fw-semibold">
+                                {% if profile.last_completed_at %}
+                                {{ profile.last_completed_at|date:"d.m.Y, H:i" }}
+                                {% else %}
+                                —
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="p-3 rounded bg-light">
+                            <div class="text-muted">Правильних</div>
+                            <div class="fw-semibold">{{ profile.last_correct }}/{{ profile.last_total }}</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="p-3 rounded bg-light">
+                            <div class="text-muted">Відсоток</div>
+                            <div class="fw-semibold">{{ profile.last_score }}%</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="p-3 rounded bg-light">
+                            <div class="text-muted">Виконано завдань</div>
+                            <div class="fw-semibold">{{ stats.completed_count }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-1">
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 rounded bg-light">
+                            <div class="text-muted">Розв’язано прикладів</div>
+                            <div class="fw-semibold">{{ stats.total_questions }}</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 rounded bg-light">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                                <div class="text-muted">Особливі потреби</div>
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#specialNeedsEdit" aria-expanded="false"
+                                    aria-controls="specialNeedsEdit" title="Редагувати">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                            <div class="fw-semibold">
+                                {% if profile.special_needs %}
+                                {{ profile.special_needs }}
+                                {% else %}
+                                —
+                                {% endif %}
+                            </div>
+
+                            <div class="collapse mt-2" id="specialNeedsEdit">
+                                <form method="post" class="mb-0">
+                                    {% csrf_token %}
+                                    {{ special_needs_form.special_needs }}
+                                    {% if special_needs_form.special_needs.errors %}
+                                    <div class="text-danger small mt-1">{{ special_needs_form.special_needs.errors }}
+                                    </div>
+                                    {% endif %}
+                                    <div class="d-grid d-md-flex justify-content-end mt-2">
+                                        <button class="btn btn-primary" type="submit">Зберегти</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="fw-semibold">Діаграма успішності</div>
+                                <div class="text-muted small">Останні виконані завдання</div>
+                            </div>
+                            <div style="height: 260px;" class="mt-2">
+                                <canvas id="successChart" aria-label="Діаграма успішності" role="img"></canvas>
+                            </div>
+                            {% if not chart_labels %}
+                            <div class="text-muted small mt-2">Поки що немає даних — виконайте перше завдання.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-1">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="fw-semibold mb-2">Останні спроби</div>
+                                {% if recent_progress %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Дата</th>
+                                                <th>Тема</th>
+                                                <th class="text-end">Результат</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for p in recent_progress %}
+                                            <tr>
+                                                <td class="text-muted">{{ p.created_at|date:"d.m.Y" }}</td>
+                                                <td>
+                                                    {% if p.exercise_type %}
+                                                    {{ p.exercise_type.name }}
+                                                    {% elif p.exercise %}
+                                                    {{ p.exercise.title }}
+                                                    {% else %}
+                                                    —
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-end fw-semibold">{{ p.score|floatformat:0 }}%</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="text-muted">Ще немає спроб.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-grid d-md-flex gap-2">
+                    <a class="btn btn-primary" href="{% url 'exercises:block_list' %}">
+                        <i class="bi bi-trophy"></i> До вправ
+                    </a>
+                    <a class="btn btn-outline-secondary" href="{% url 'core:home' %}">
+                        <i class="bi bi-house"></i> На головну
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+{{ chart_labels|json_script:"chart-labels" }}
+{{ chart_scores|json_script:"chart-scores" }}
+
+<script>
+    (function () {
+        const labelsEl = document.getElementById('chart-labels');
+        const scoresEl = document.getElementById('chart-scores');
+        if (!labelsEl || !scoresEl) return;
+
+        const labels = JSON.parse(labelsEl.textContent || '[]');
+        const scores = JSON.parse(scoresEl.textContent || '[]');
+        const canvas = document.getElementById('successChart');
+        if (!canvas || labels.length === 0) return;
+
+        const styles = getComputedStyle(document.documentElement);
+        const primary = styles.getPropertyValue('--bs-primary').trim() || '#2f6fed';
+        const primaryRgb = styles.getPropertyValue('--bs-primary-rgb').trim() || '47, 111, 237';
+        const fill = `rgba(${primaryRgb}, 0.12)`;
+
+        new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Результат (%)',
+                    data: scores,
+                    borderColor: primary,
+                    backgroundColor: fill,
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        suggestedMin: 0,
+                        suggestedMax: 100,
+                        ticks: { callback: (v) => v + '%' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => (ctx.parsed.y ?? 0) + '%'
+                        }
+                    }
+                }
+            }
+        });
+    })();
+</script>
+{% endblock %}

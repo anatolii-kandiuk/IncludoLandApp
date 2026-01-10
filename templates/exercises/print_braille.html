@@ -1,0 +1,68 @@
+{% load braille %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8">
+    <title>Друк — {{ exercise_type.name }}</title>
+    <style>
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .braille {
+            font-size: 22px;
+            line-height: 1.5;
+            letter-spacing: 0.04em;
+        }
+
+        .q {
+            margin: 18px 0;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .muted {
+            color: #666;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="no-print" style="margin-bottom: 14px;">
+        <button onclick="window.print()">Друкувати</button>
+    </div>
+
+    <h2>{{ exercise_block.name }} — {{ exercise_type.name }}</h2>
+    {% if exercise_type.description %}<p class="muted">{{ exercise_type.description }}</p>{% endif %}
+
+    {% for q in questions %}
+    <div class="q">
+        <div><strong>Питання:</strong> {{ q.question_text }}</div>
+        <div class="braille"><strong>Braille:</strong> {{ q.question_text|to_braille }}</div>
+
+        {% if q.options %}
+        <div style="margin-top: 10px;"><strong>Варіанти:</strong></div>
+        <ol>
+            {% for opt in q.options %}
+            <li>
+                <div>{{ opt }}</div>
+                <div class="braille">{{ opt|to_braille }}</div>
+            </li>
+            {% endfor %}
+        </ol>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p>Немає питань для друку.</p>
+    {% endfor %}
+</body>
+
+</html>

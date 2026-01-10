@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Вхід{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card">
+            <div class="card-body p-4">
+                <h1 class="h4 mb-3">Вхід</h1>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label" for="id_username">{{ form.username.label }}</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                        <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="id_password">Пароль</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}
+                        <div class="text-danger small mt-1">{{ form.password.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary btn-lg" type="submit">
+                            Увійти
+                        </button>
+                        <a class="btn btn-outline-secondary" href="{% url 'users:register_student' %}">Створити профіль
+                            дитини</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

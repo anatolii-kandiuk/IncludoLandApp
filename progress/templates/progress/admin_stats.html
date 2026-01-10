@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Статистика учнів{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <h2 class="mb-4 text-center"><i class="bi bi-people"></i> Статистика учнів</h2>
+        <form method="get" class="mb-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <label for="exercise_type" class="col-form-label">Тип вправи:</label>
+                </div>
+                <div class="col-auto">
+                    <select name="exercise_type" id="exercise_type" class="form-select">
+                        <option value="">Всі</option>
+                        {% for et in exercise_types %}
+                        <option value="{{ et }}" {% if request.GET.exercise_type==et %}selected{% endif %}>{{ et }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label for="student" class="col-form-label">Учень:</label>
+                </div>
+                <div class="col-auto">
+                    <select name="student" id="student" class="form-select">
+                        <option value="">Всі</option>
+                        {% for s in student_usernames %}
+                        <option value="{{ s }}" {% if request.GET.student==s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Фільтрувати</button>
+                </div>
+                <div class="col-auto">
+                    <a href="{% url 'progress:export_stats_csv' %}" class="btn btn-success">Експорт у CSV</a>
+                </div>
+                <div class="col-auto">
+                    <a href="{% url 'progress:export_stats_pdf' %}" class="btn btn-danger">Експорт у PDF</a>
+                </div>
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Учень</th>
+                        <th>Тип вправи</th>
+                        <th>Спроб</th>
+                        <th>Правильних</th>
+                        <th>Всього питань</th>
+                        <th>Найкращий результат</th>
+                        <th>Останній результат</th>
+                        <th>Всього проходжень</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key, stat in summary.items %}
+                    {% if not request.GET.exercise_type or key.1 == request.GET.exercise_type %}
+                    <tr>
+                        <td><a href="{% url 'progress:student_detail' key.0 %}">{{ key.0 }}</a></td>
+                        <td>{{ key.1 }}</td>
+                        <td>{{ stat.attempts }}</td>
+                        <td>{{ stat.correct }}</td>
+                        <td>{{ stat.total }}</td>
+                        <td>{{ stat.max_score|floatformat:0 }}%</td>
+                        <td>{{ stat.last_score|floatformat:0 }}%</td>
+                        <td>{{ stat.count }}</td>
+                    </tr>
+                    {% endif %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">Немає даних</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ block.name }} - Вправи{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'exercises:block_list' %}">Блоки</a></li>
+                <li class="breadcrumb-item active">{{ block.name }}</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex align-items-center mb-4">
+            <i class="bi {{ block.icon }} text-{{ block.color }} me-3" style="font-size: 3rem;"></i>
+            <div>
+                <h2 class="mb-0">Вправи</h2>
+                <div class="fw-normal text-secondary">Блок: <span class="fw-bold">{{ block.name }}</span></div>
+                {% if block.description %}
+                <p class="text-muted mb-0">{{ block.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% for exercise_type in exercise_types %}
+            <div class="col-12 col-md-6">
+                <a href="{% url 'exercises:task_list' exercise_type.block.slug exercise_type.slug %}"
+                    class="text-decoration-none d-block h-100">
+                    <div class="card h-100 shadow-sm type-tile">
+                        <div class="card-body p-4 p-md-5">
+                            <div class="d-flex align-items-start justify-content-between gap-3">
+                                <div class="flex-grow-1">
+                                    <h3 class="h5 mb-1 fw-bold">{{ exercise_type.name }}</h3>
+                                    {% if exercise_type.description %}
+                                    <div class="text-muted">{{ exercise_type.description }}</div>
+                                    {% endif %}
+                                    <div class="text-muted mt-3">
+                                        <i class="bi bi-list-check"></i> 10 завдань
+                                    </div>
+                                </div>
+                                <i class="bi bi-chevron-right text-muted" style="font-size: 1.25rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Немає доступних вправ у цьому блоці.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

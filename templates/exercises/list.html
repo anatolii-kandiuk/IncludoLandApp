@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Вправи - IncludoLand{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <h2 class="mb-4">
+            <i class="bi bi-trophy-fill text-warning"></i> Вправи
+        </h2>
+
+        <div class="mb-4">
+            <div class="btn-group" role="group">
+                <a href="{% url 'exercises:list' %}"
+                    class="btn {% if not selected_category %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    Всі
+                </a>
+                {% for category in categories %}
+                <a href="{% url 'exercises:list' %}?category={{ category.slug }}"
+                    class="btn {% if selected_category == category.slug %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    {{ category.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% for exercise in exercises %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    {% if exercise.image %}
+                    <img src="{{ exercise.image.url }}" class="card-img-top" alt="{{ exercise.title }}">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                        <i class="bi bi-pencil-square text-secondary" style="font-size: 4rem;"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ exercise.title }}</h5>
+                        <div class="mb-2">
+                            {% if exercise.category %}
+                            <span class="badge bg-info">{{ exercise.category.name }}</span>
+                            {% endif %}
+                            <span class="badge bg-secondary">Рівень {{ exercise.difficulty }}</span>
+                        </div>
+                        <a href="{% url 'exercises:detail' exercise.pk %}" class="btn btn-primary w-100">
+                            <i class="bi bi-play-circle"></i> Почати
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Немає доступних вправ у цій категорії.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

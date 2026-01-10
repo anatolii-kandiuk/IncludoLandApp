@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Головна - IncludoLand{% endblock %}
+
+{% block content %}
+<section class="py-3 py-md-4">
+    <div class="row align-items-center g-4">
+        <div class="col-12 col-lg-6">
+            <div class="mb-3">
+                <span class="badge rounded-pill text-bg-primary">IncludoLand</span>
+            </div>
+            <h1 class="display-4 fw-bold mb-3">IncludoLand</h1>
+            <p class="lead mb-4">
+                Вправи для дітей — прості, зрозумілі та зручні на телефоні й планшеті.
+            </p>
+
+            <div class="d-grid gap-2 d-sm-flex">
+                <a href="{% url 'exercises:block_list' %}" class="btn btn-primary btn-lg px-4">
+                    Почати вправи
+                </a>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="h5 fw-bold mb-1">Обери блок</div>
+                            <div class="text-muted">Математика • Мовлення • Логіка</div>
+                        </div>
+                        <div class="text-primary" style="font-size: 2.5rem;">
+                            <i class="bi bi-phone"></i>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center"
+                                style="width: 52px; height: 52px;">
+                                <i class="bi bi-play-fill text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Натискай і виконуй</div>
+                                <div class="text-muted">Багато прикладів у кожному завданні</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-4 py-md-5">
+    <h2 class="h3 fw-bold mb-3">Мета програми</h2>
+    <div class="row g-3">
+        <div class="col-12 col-lg-6">
+            <div class="card h-100 border-0 bg-primary-subtle">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex gap-3">
+                        <div class="rounded-circle bg-white d-flex align-items-center justify-content-center"
+                            style="width: 44px; height: 44px;">
+                            <span class="fw-bold text-primary">1</span>
+                        </div>
+                        <div>
+                            <div class="h5 fw-bold mb-2">Навчання без стресу</div>
+                            <div class="text-muted">Короткі, зрозумілі завдання з чіткими кроками.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card h-100 border-0 bg-info-subtle">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex gap-3">
+                        <div class="rounded-circle bg-white d-flex align-items-center justify-content-center"
+                            style="width: 44px; height: 44px;">
+                            <span class="fw-bold text-primary">2</span>
+                        </div>
+                        <div>
+                            <div class="h5 fw-bold mb-2">Мовлення та комунікація</div>
+                            <div class="text-muted">Вправи для розвитку мовлення та розуміння.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card h-100 border-0 bg-warning-subtle">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex gap-3">
+                        <div class="rounded-circle bg-white d-flex align-items-center justify-content-center"
+                            style="width: 44px; height: 44px;">
+                            <span class="fw-bold text-primary">3</span>
+                        </div>
+                        <div>
+                            <div class="h5 fw-bold mb-2">Логіка й увага</div>
+                            <div class="text-muted">Завдання на послідовності, вибір і концентрацію.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card h-100 border-0 bg-success-subtle">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex gap-3">
+                        <div class="rounded-circle bg-white d-flex align-items-center justify-content-center"
+                            style="width: 44px; height: 44px;">
+                            <span class="fw-bold text-primary">4</span>
+                        </div>
+                        <div>
+                            <div class="h5 fw-bold mb-2">Зручно всюди</div>
+                            <div class="text-muted">Працює на телефоні, планшеті та комп’ютері.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

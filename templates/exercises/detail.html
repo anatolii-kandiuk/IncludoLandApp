@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exercise.title }} - IncludoLand{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'exercises:list' %}">Вправи</a></li>
+                <li class="breadcrumb-item active">{{ exercise.title }}</li>
+            </ol>
+        </nav>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h3 class="card-title mb-0">{{ exercise.title }}</h3>
+                    <div>
+                        {% if exercise.category %}
+                        <span class="badge bg-info">{{ exercise.category.name }}</span>
+                        {% endif %}
+                        <span class="badge bg-secondary">Рівень {{ exercise.difficulty }}</span>
+                    </div>
+                </div>
+
+                {% if exercise.image %}
+                <img src="{{ exercise.image.url }}" class="img-fluid rounded mb-3" alt="{{ exercise.title }}">
+                {% endif %}
+
+                {% if exercise.audio %}
+                <div class="mb-3">
+                    <audio controls class="w-100">
+                        <source src="{{ exercise.audio.url }}" type="audio/mpeg">
+                        Ваш браузер не підтримує аудіо.
+                    </audio>
+                </div>
+                {% endif %}
+
+                <div class="mb-4">
+                    <h5>Завдання:</h5>
+                    <p class="fs-5">{{ exercise.content.question|default:"Виконайте вправу" }}</p>
+                </div>
+
+                {% if student_profile %}
+                <form method="post" action="{% url 'exercises:submit' exercise.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="answer" class="form-label fs-5">Ваша відповідь:</label>
+                        <input type="text" name="answer" id="answer" class="form-control form-control-lg"
+                            placeholder="Введіть відповідь..." required autofocus>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle"></i> Перевірити відповідь
+                        </button>
+                    </div>
+                </form>
+                {% else %}
+                <div class="alert alert-warning">
+                    Тільки учні можуть виконувати вправи.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if student_profile and previous_attempts %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Ваші спроби:</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Спроб</th>
+                                <th>Правильних</th>
+                                <th>Бал</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in previous_attempts %}
+                            <tr>
+                                <td>{{ attempt.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+                                <td>{{ attempt.attempts }}</td>
+                                <td>{{ attempt.correct }}</td>
+                                <td>{{ attempt.score }}</td>
+                                <td>
+                                    {% if attempt.completed %}
+                                    <span class="badge bg-success">Завершено</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">В процесі</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
