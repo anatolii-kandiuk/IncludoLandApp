@@ -4,6 +4,11 @@ set -e
 # Railway sets PORT; default to 8000 for local runs.
 : "${PORT:=8000}"
 
+if [ -z "${SECRET_KEY:-}" ]; then
+  echo "ERROR: SECRET_KEY is not set. Configure it in Railway Variables (or provide a local .env when running locally)." >&2
+  exit 1
+fi
+
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 
