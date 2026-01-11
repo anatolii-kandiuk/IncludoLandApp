@@ -99,12 +99,10 @@ else:
     raw_db_host = config('DB_HOST', default='')
     # Allow a single .env to work both locally (venv) and in docker-compose:
     # - In docker-compose, DB_HOST should be the service name (default: "db")
-    # - On the host machine, that name won't resolve, so fall back to localhost
+    # - For local venv runs, set DB_HOST=localhost in your local .env
     db_host = raw_db_host
     if not db_host:
         db_host = 'db' if IN_DOCKER else 'localhost'
-    elif db_host == 'db' and not IN_DOCKER:
-        db_host = 'localhost'
 
     DATABASES = {
         'default': {
