@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Нагороди{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-9 mx-auto">
+        <div class="card">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                    <div>
+                        <div class="text-muted small">Система нагород</div>
+                        <h1 class="display-6 mb-0 fw-bold">НАГОРОДИ</h1>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-muted small">Зірочки</div>
+                        <div class="h3 mb-0">{{ profile.stars }}</div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-12 col-lg-7">
+                        <div class="fw-semibold mb-2">Призи</div>
+                        {% if rewards %}
+                        <div class="row g-3">
+                            {% for r in rewards %}
+                            <div class="col-12">
+                                <div class="p-3 rounded border bg-light">
+                                    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+                                        <div>
+                                            <div class="fw-bold">{{ r.name }}</div>
+                                            {% if r.description %}
+                                            <div class="text-muted small">{{ r.description }}</div>
+                                            {% endif %}
+                                            <div class="text-muted small mt-1">Ціна: <span class="fw-semibold">{{ r.cost }}</span> ⭐</div>
+                                        </div>
+                                        <div class="text-end">
+                                            <form method="post" class="mb-0">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="reward_id" value="{{ r.id }}" />
+                                                <button class="btn btn-primary" type="submit" {% if profile.stars < r.cost %}disabled{% endif %} data-speak="Отримати нагороду">
+                                                    Отримати
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-muted">Поки що немає призів. Додайте призи в адмінці.</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 col-lg-5">
+                        <div class="fw-semibold mb-2">Отримано</div>
+                        {% if redeemed %}
+                        <div class="list-group">
+                            {% for item in redeemed %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold">{{ item.reward.name }}</div>
+                                    <div class="text-muted small">{{ item.redeemed_at|date:"d.m.Y, H:i" }}</div>
+                                </div>
+                                <div class="text-muted">-{{ item.cost }} ⭐</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-muted">Ще немає отриманих призів.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mt-4 d-grid d-md-flex gap-2">
+                    <a class="btn btn-outline-secondary" href="{% url 'students:profile' %}"
+                        data-speak="Повернутися до профілю">
+                        <i class="bi bi-arrow-left"></i> Назад
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

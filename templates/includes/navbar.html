@@ -8,17 +8,34 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'exercises:block_list' %}">
-                        <i class="bi bi-trophy"></i> Вправи
-                    </a>
-                </li>
                 {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'students:profile' %}">
                         <i class="bi bi-person"></i> Профіль
                     </a>
                 </li>
+                {% if user.role == 'child' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'students:games' %}" data-speak="Ігри">
+                        <i class="bi bi-controller"></i> Ігри
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'students:rewards' %}" data-speak="Нагороди">
+                        <i class="bi bi-award"></i> Нагороди
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'students:audiostories' %}" data-speak="Аудіоказки">
+                        <i class="bi bi-headphones"></i> Аудіоказки
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'students:nature_sounds' %}" data-speak="Звуки природи">
+                        <i class="bi bi-volume-up"></i> Звуки
+                    </a>
+                </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'users:logout' %}">
                         <i class="bi bi-box-arrow-right"></i> Вийти

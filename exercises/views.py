@@ -237,6 +237,19 @@ def task_submit(request, block_slug, type_slug, question_id):
                 completed=True,
             )
 
+            # Stars reward (gamification currency)
+            # Keep it simple and consistent: higher score -> more stars.
+            stars_earned = 0
+            if score >= 80:
+                stars_earned = int(exercise_type.difficulty or 1) * 10
+            elif score >= 50:
+                stars_earned = int(exercise_type.difficulty or 1) * 5
+
+            if stars_earned > 0:
+                profile.stars += stars_earned
+                profile.save(update_fields=['stars', 'updated_at'])
+                messages.success(request, f'Чудово! Ви отримали {stars_earned} зірочок.')
+
             # Minimal achievements (optional, but makes the dashboard meaningful)
             try:
                 from achievements.models import Achievement, StudentAchievement

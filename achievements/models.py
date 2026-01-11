@@ -32,3 +32,16 @@ class Reward(models.Model):
 	def __str__(self):
 		return self.name
 
+
+class RewardRedemption(models.Model):
+	student = models.ForeignKey('students.StudentProfile', on_delete=models.CASCADE, related_name='reward_redemptions')
+	reward = models.ForeignKey(Reward, on_delete=models.PROTECT, related_name='redemptions')
+	cost = models.PositiveIntegerField(default=0)
+	redeemed_at = models.DateTimeField(auto_now_add=True)
+
+	class Meta:
+		ordering = ['-redeemed_at']
+
+	def __str__(self):
+		return f"{self.student.user.username} -> {self.reward.name}"
+

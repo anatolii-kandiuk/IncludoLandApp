@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}Гра на пам’ять{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                    <div>
+                        <div class="text-muted small">Ігри → Пам’ять</div>
+                        <h1 class="display-6 mb-0 fw-bold">ПАМ’ЯТЬ</h1>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <form id="finishForm" method="post" action="{% url 'students:game_finish' %}" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="game" value="memory">
+                            <input type="hidden" name="score" id="finishScore" value="0">
+                            <button id="finish" class="btn btn-success" type="submit" data-speak="Завершити">
+                                <i class="bi bi-flag"></i> Завершити
+                            </button>
+                        </form>
+                        <button id="reset" class="btn btn-outline-secondary" type="button" data-speak="Почати спочатку">
+                            <i class="bi bi-arrow-repeat"></i> Заново
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-muted small mb-3">Знайди однакові пари.</div>
+
+                <div id="grid" class="row g-3"></div>
+
+                <div class="mt-3 d-flex justify-content-between flex-wrap gap-2">
+                    <div class="text-muted">Ходи: <span id="moves" class="fw-semibold">0</span></div>
+                    <div class="text-muted">Знайдено пар: <span id="pairs" class="fw-semibold">0</span>/8</div>
+                </div>
+
+                <div class="mt-4 d-grid d-md-flex gap-2">
+                    <a class="btn btn-outline-secondary" href="{% url 'students:games' %}"
+                        data-speak="Повернутися до списку ігор">
+                        <i class="bi bi-arrow-left"></i> Назад
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function () {
+        const symbols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        const deck = [...symbols, ...symbols];
+        const grid = document.getElementById('grid');
+        const movesEl = document.getElementById('moves');
+        const pairsEl = document.getElementById('pairs');
+        const resetBtn = document.getElementById('reset');
+        const finishBtn = document.getElementById('finish');
+        const finishForm = document.getElementById('finishForm');
+        const finishScore = document.getElementById('finishScore');
+
+        let open = [];
+        let locked = false;
+        let moves = 0;
+        let pairs = 0;
+
+        function shuffle(a) {
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function render() {
+            grid.innerHTML = '';
+            shuffle(deck);
+            open = [];
+            locked = false;
+            moves = 0;
+            pairs = 0;
+            movesEl.textContent = String(moves);
+            pairsEl.textContent = String(pairs);
+
+            deck.forEach((sym, idx) => {
+                const col = document.createElement('div');
+                col.className = 'col-3';
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-light w-100 kid-tile';
+                btn.style.minHeight = '84px';
+                btn.setAttribute('aria-label', 'Картка');
+                btn.dataset.symbol = sym;
+                btn.dataset.index = String(idx);
+                btn.textContent = '?';
+
+                btn.addEventListener('click', () => onPick(btn));
+
+                col.appendChild(btn);
+                grid.appendChild(col);
+            });
+        }
+
+        function onPick(btn) {
+            if (locked) return;
+            if (btn.disabled) return;
+            if (open.includes(btn)) return;
+
+            btn.textContent = btn.dataset.symbol;
+            open.push(btn);
+
+            if (open.length === 2) {
+                moves += 1;
+                movesEl.textContent = String(moves);
+
+                const [a, b] = open;
+                if (a.dataset.symbol === b.dataset.symbol) {
+                    a.disabled = true;
+                    b.disabled = true;
+                    a.classList.remove('btn-light');
+                    b.classList.remove('btn-light');
+                    a.classList.add('btn-success');
+                    b.classList.add('btn-success');
+                    open = [];
+                    pairs += 1;
+                    pairsEl.textContent = String(pairs);
+                } else {
+                    locked = true;
+                    setTimeout(() => {
+                        a.textContent = '?';
+                        b.textContent = '?';
+                        open = [];
+                        locked = false;
+                    }, 650);
+                }
+            }
+        }
+
+        resetBtn.addEventListener('click', render);
+
+        function computeScore() {
+            // 0..8 pairs => 0..100
+            return Math.round((pairs / 8) * 100);
+        }
+
+        if (finishForm) {
+            finishForm.addEventListener('submit', () => {
+                if (finishScore) finishScore.value = String(computeScore());
+            });
+        }
+        render();
+    })();
+</script>
+{% endblock %}

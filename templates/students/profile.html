@@ -170,15 +170,56 @@
                     <div class="card border-0 bg-light">
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                                <div class="fw-semibold">Діаграма успішності</div>
-                                <div class="text-muted small">Останні виконані завдання</div>
+                                <div class="fw-semibold">Діаграма успішності (ігри)</div>
+                                <div class="text-muted small">Останні результати ігор</div>
+                            </div>
+
+                            <div class="mt-2 d-flex gap-2 flex-wrap">
+                                <button id="chartToggleBar" class="btn btn-sm btn-primary"
+                                    type="button">Діаграма</button>
+                                <button id="chartToggleRadar" class="btn btn-sm btn-outline-primary"
+                                    type="button">Кругова</button>
                             </div>
                             <div style="height: 260px;" class="mt-2">
                                 <canvas id="successChart" aria-label="Діаграма успішності" role="img"></canvas>
+                                <canvas id="successChartRadar" class="d-none" aria-label="Кругова діаграма"
+                                    role="img"></canvas>
                             </div>
                             {% if not chart_labels %}
-                            <div class="text-muted small mt-2">Поки що немає даних — виконайте перше завдання.</div>
+                            <div class="text-muted small mt-2">Поки що немає даних — зіграйте першу гру.</div>
                             {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-1">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="fw-semibold mb-2">Статистика ігор</div>
+                                {% if game_results %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Назва гри</th>
+                                                <th class="text-end">Результат</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for r in game_results %}
+                                            <tr>
+                                                <td>{{ r.game_name }}</td>
+                                                <td class="text-end fw-semibold">{{ r.score }}%</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="text-muted">Ще немає результатів ігор.</div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -226,8 +267,19 @@
                 </div>
 
                 <div class="mt-4 d-grid d-md-flex gap-2">
-                    <a class="btn btn-primary" href="{% url 'exercises:block_list' %}">
-                        <i class="bi bi-trophy"></i> До вправ
+                    <a class="btn btn-success" href="{% url 'students:games' %}" data-speak="Ігри">
+                        <i class="bi bi-controller"></i> Ігри
+                    </a>
+                    <a class="btn btn-outline-primary" href="{% url 'students:rewards' %}" data-speak="Нагороди">
+                        <i class="bi bi-award"></i> Нагороди
+                    </a>
+                    <a class="btn btn-outline-secondary" href="{% url 'students:audiostories' %}"
+                        data-speak="Аудіоказки">
+                        <i class="bi bi-headphones"></i> Аудіоказки
+                    </a>
+                    <a class="btn btn-outline-secondary" href="{% url 'students:nature_sounds' %}"
+                        data-speak="Звуки природи">
+                        <i class="bi bi-volume-up"></i> Звуки
                     </a>
                     <a class="btn btn-outline-secondary" href="{% url 'core:home' %}">
                         <i class="bi bi-house"></i> На головну
@@ -254,15 +306,16 @@
         const labels = JSON.parse(labelsEl.textContent || '[]');
         const scores = JSON.parse(scoresEl.textContent || '[]');
         const canvas = document.getElementById('successChart');
-        if (!canvas || labels.length === 0) return;
+        const canvasRadar = document.getElementById('successChartRadar');
+        if (!canvas || !canvasRadar || labels.length === 0) return;
 
         const styles = getComputedStyle(document.documentElement);
         const primary = styles.getPropertyValue('--bs-primary').trim() || '#2f6fed';
         const primaryRgb = styles.getPropertyValue('--bs-primary-rgb').trim() || '47, 111, 237';
         const fill = `rgba(${primaryRgb}, 0.12)`;
 
-        new Chart(canvas, {
-            type: 'line',
+        const barChart = new Chart(canvas, {
+            type: 'bar',
             data: {
                 labels,
                 datasets: [{
@@ -270,10 +323,7 @@
                     data: scores,
                     borderColor: primary,
                     backgroundColor: fill,
-                    fill: true,
-                    tension: 0.3,
-                    pointRadius: 3,
-                    pointHoverRadius: 5
+                    borderWidth: 1
                 }]
             },
             options: {
@@ -296,6 +346,69 @@
                 }
             }
         });
+
+        const radarChart = new Chart(canvasRadar, {
+            type: 'radar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Результат (%)',
+                    data: scores,
+                    borderColor: primary,
+                    backgroundColor: fill,
+                    pointBackgroundColor: primary,
+                    pointRadius: 3,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        suggestedMin: 0,
+                        suggestedMax: 100,
+                        ticks: {
+                            callback: (v) => v + '%'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => (ctx.parsed.r ?? 0) + '%'
+                        }
+                    }
+                }
+            }
+        });
+
+        const btnBar = document.getElementById('chartToggleBar');
+        const btnRadar = document.getElementById('chartToggleRadar');
+
+        function showBar() {
+            canvas.classList.remove('d-none');
+            canvasRadar.classList.add('d-none');
+            btnBar?.classList.remove('btn-outline-primary');
+            btnBar?.classList.add('btn-primary');
+            btnRadar?.classList.remove('btn-primary');
+            btnRadar?.classList.add('btn-outline-primary');
+            barChart.resize();
+        }
+
+        function showRadar() {
+            canvas.classList.add('d-none');
+            canvasRadar.classList.remove('d-none');
+            btnRadar?.classList.remove('btn-outline-primary');
+            btnRadar?.classList.add('btn-primary');
+            btnBar?.classList.remove('btn-primary');
+            btnBar?.classList.add('btn-outline-primary');
+            radarChart.resize();
+        }
+
+        btnBar?.addEventListener('click', showBar);
+        btnRadar?.addEventListener('click', showRadar);
+        showBar();
     })();
 </script>
 {% endblock %}
