@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 import dj_database_url
@@ -88,19 +89,31 @@ WSGI_APPLICATION = 'includoland.wsgi.application'
 
 DATABASE_URL = config('DATABASE_URL', default=None)
 
+IN_DOCKER = os.path.exists('/.dockerenv')
+
 if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=not DEBUG),
     }
 else:
+    raw_db_host = config('DB_HOST', default='')
+    # Allow a single .env to work both locally (venv) and in docker-compose:
+    # - In docker-compose, DB_HOST should be the service name (default: "db")
+    # - On the host machine, that name won't resolve, so fall back to localhost
+    db_host = raw_db_host
+    if not db_host:
+        db_host = 'db' if IN_DOCKER else 'localhost'
+    elif db_host == 'db' and not IN_DOCKER:
+        db_host = 'localhost'
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': config('DB_NAME'),
             'USER': config('DB_USER'),
             'PASSWORD': config('DB_PASSWORD'),
-            'HOST': config('DB_HOST'),
-            'PORT': config('DB_PORT'),
+            'HOST': db_host,
+            'PORT': config('DB_PORT', default='5432'),
         }
     }
 
