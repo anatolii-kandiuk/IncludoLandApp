@@ -1,0 +1,78 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Памʼять — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/memory.css' %}">
+</head>
+
+<body>
+    <main class="page page--game">
+        <header class="topbar">
+            <a class="brand" href="/" aria-label="На головну">
+                <div class="brand__mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" role="img" focusable="false">
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
+            </a>
+
+            <div class="status" aria-label="Статистика">
+                <div class="status__item">
+                    <span class="status__value">{{ stars }}</span>
+                    <span class="status__label">зірок</span>
+                    <span class="status__icon" aria-hidden="true">★</span>
+                </div>
+                <div class="status__item status__chat" title="Повідомлення">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
+                        <path
+                            d="M4 5.5C4 4.12 5.12 3 6.5 3h11C18.88 3 20 4.12 20 5.5v7c0 1.38-1.12 2.5-2.5 2.5H10l-4.5 4v-4H6.5C5.12 15 4 13.88 4 12.5v-7z"
+                            fill="#ffffff" opacity="0.9" />
+                    </svg>
+                </div>
+            </div>
+        </header>
+
+        <h1 class="game-title">ПАМʼЯТЬ: Знайди Пару</h1>
+
+        <section class="memory" aria-label="Гра Памʼять">
+            <div class="memory-grid" id="memory-grid" data-pairs="6" aria-label="Поле з картками"></div>
+            <p class="sr-only" id="memory-instructions">Відкривай по дві картки. Якщо іконки однакові — це пара.</p>
+        </section>
+
+        <footer class="hud" aria-label="Панель гри">
+            <div class="hud__left">
+                <div class="owl" aria-hidden="true">
+                    <div class="owl__face"></div>
+                    <div class="owl__eyes"><span></span><span></span></div>
+                    <div class="owl__beak"></div>
+                </div>
+                <div class="hud__bubble" role="status" aria-live="polite">
+                    <span class="hud__msg" id="memory-msg">Зосередься!</span>
+                </div>
+            </div>
+
+            <div class="hud__center" aria-label="Прогрес">
+                <div class="hud__dots" aria-hidden="true">
+                    <span></span><span></span>
+                </div>
+                <div class="hud__counter"><span id="memory-counter">0</span>/<span id="memory-total">6</span> Пар</div>
+            </div>
+
+            <div class="hud__right">
+                <a class="hud__close" href="{% url 'games' %}" aria-label="Вийти з гри">×</a>
+            </div>
+        </footer>
+    </main>
+
+    <script src="{% static 'js/memory.js' %}" defer></script>
+</body>
+
+</html>

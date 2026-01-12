@@ -1,0 +1,120 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+</head>
+
+<body>
+    <main class="page">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand__mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" role="img" focusable="false">
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="brand__text">
+                    <span class="brand__name">IncludoLand</span>
+                </div>
+            </div>
+
+            <div class="status" aria-label="Статистика">
+                <div class="status__item">
+                    <span class="status__value">{{ stars }}</span>
+                    <span class="status__label">зірок</span>
+                    <span class="status__icon" aria-hidden="true">★</span>
+                </div>
+                <div class="status__item status__chat" title="Повідомлення">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
+                        <path
+                            d="M4 5.5C4 4.12 5.12 3 6.5 3h11C18.88 3 20 4.12 20 5.5v7c0 1.38-1.12 2.5-2.5 2.5H10l-4.5 4v-4H6.5C5.12 15 4 13.88 4 12.5v-7z"
+                            fill="#ffffff" opacity="0.9" />
+                    </svg>
+                </div>
+            </div>
+        </header>
+
+        <section class="menu" aria-label="Головне меню">
+            <a class="tile tile--green" href="{% url 'games' %}">
+                <div class="tile__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path
+                            d="M7.5 9h9c1.6 0 2.9 1.3 2.9 2.9v2.6c0 1.1-.7 2.1-1.8 2.5l-1.5.5c-.7.2-1.4-.1-1.8-.7l-1-1.4c-.2-.3-.5-.4-.8-.4h-1.1c-.3 0-.6.1-.8.4l-1 1.4c-.4.6-1.1.9-1.8.7l-1.5-.5c-1.1-.4-1.8-1.4-1.8-2.5v-2.6C4.6 10.3 5.9 9 7.5 9z"
+                            fill="#ffffff" />
+                        <path
+                            d="M8.2 12.3h1.1v-1.1c0-.4.3-.7.7-.7s.7.3.7.7v1.1h1.1c.4 0 .7.3.7.7s-.3.7-.7.7h-1.1v1.1c0 .4-.3.7-.7.7s-.7-.3-.7-.7v-1.1H8.2c-.4 0-.7-.3-.7-.7s.3-.7.7-.7z"
+                            fill="#1c8f60" />
+                        <circle cx="15.9" cy="12.6" r="0.9" fill="#1c8f60" />
+                        <circle cx="17.9" cy="13.8" r="0.9" fill="#1c8f60" />
+                    </svg>
+                </div>
+                <div class="tile__label">ГРАТИ</div>
+            </a>
+
+            <a class="tile tile--blue" href="{% url 'stories' %}">
+                <div class="tile__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path d="M6 4.5h10.5c1.1 0 2 .9 2 2V18c0 .6-.5 1-1 1H8c-1.1 0-2-.9-2-2V4.5z" fill="#ffffff" />
+                        <path d="M6 17.2c.5-.4 1.2-.7 2-.7h10.5" fill="none" stroke="#1b79c5" stroke-width="1.8"
+                            stroke-linecap="round" />
+                        <path d="M9 7.5h6.5" stroke="#1b79c5" stroke-width="1.6" stroke-linecap="round" />
+                        <path d="M9 10h5.5" stroke="#1b79c5" stroke-width="1.6" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="tile__label">КАЗКИ</div>
+            </a>
+
+            <a class="tile tile--teal" href="{% url 'sounds' %}">
+                <div class="tile__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path
+                            d="M7.8 8.8c0-1.2 1-2.2 2.2-2.2h4c1.2 0 2.2 1 2.2 2.2v6.4c0 1.2-1 2.2-2.2 2.2h-4c-1.2 0-2.2-1-2.2-2.2V8.8z"
+                            fill="#ffffff" />
+                        <path d="M7.3 10.3H6c-1.2 0-2.2 1-2.2 2.2v.9c0 1.2 1 2.2 2.2 2.2h1.3" fill="none"
+                            stroke="#0a8b89" stroke-width="2" stroke-linecap="round" />
+                        <path d="M16.7 10.3H18c1.2 0 2.2 1 2.2 2.2v.9c0 1.2-1 2.2-2.2 2.2h-1.3" fill="none"
+                            stroke="#0a8b89" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="tile__label">ЗВУКИ</div>
+            </a>
+
+            <a class="tile tile--yellow" href="{% url 'rewards' %}">
+                <div class="tile__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path d="M12 3.5l6.5 3V12c0 4.5-3 7.8-6.5 8.5C8.5 19.8 5.5 16.5 5.5 12V6.5L12 3.5z"
+                            fill="#ffffff" />
+                        <path d="M9.2 11.8l1.8 1.8 3.8-4" fill="none" stroke="#c28700" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <div class="tile__label">НАГОРОДИ</div>
+            </a>
+        </section>
+
+        <section class="helper" aria-label="Підказка">
+            <div class="helper__owl" aria-hidden="true">
+                <div class="owl">
+                    <div class="owl__face"></div>
+                    <div class="owl__eyes">
+                        <span></span><span></span>
+                    </div>
+                    <div class="owl__beak"></div>
+                </div>
+            </div>
+            <div class="helper__bubble">
+                <div class="helper__title">ПРИВІТ!</div>
+                <div class="helper__text">ДАВАЙ ГРАТИ!</div>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

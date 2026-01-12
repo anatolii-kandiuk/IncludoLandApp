@@ -15,5 +15,12 @@ def games(request):
     return render(request, 'games.html', context)
 
 
+def game_memory(request):
+    context = {
+        'stars': 1250,
+    }
+    return render(request, 'games/memory.html', context)
+
+
 def coming_soon(request, section: str):
     return render(request, 'coming_soon.html', {'section': section})
