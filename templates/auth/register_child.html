@@ -1,0 +1,61 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Реєстрація дитини — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+
+<body>
+    <main class="page">
+        <header class="topbar">
+            <a class="brand" href="/" aria-label="На головну">
+                <div class="brand__mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" role="img" focusable="false">
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
+            </a>
+        </header>
+
+        <section class="auth-card">
+            <h1 class="auth-title">Реєстрація (Дитина)</h1>
+
+            {% if form.errors %}
+            <div class="auth-error">Перевірте дані: логін може бути зайнятий або паролі не співпадають.</div>
+            {% endif %}
+
+            <form class="auth-form" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+
+                <label class="auth-label" for="id_username">Логін</label>
+                <input class="auth-input" type="text" name="username" id="id_username" maxlength="150"
+                    autocomplete="username" required>
+
+                <label class="auth-label" for="id_password1">Пароль</label>
+                <input class="auth-input" type="password" name="password1" id="id_password1" autocomplete="new-password"
+                    required>
+
+                <label class="auth-label" for="id_password2">Повторіть пароль</label>
+                <input class="auth-input" type="password" name="password2" id="id_password2" autocomplete="new-password"
+                    required>
+
+                <button class="auth-btn auth-btn--primary" type="submit">Створити акаунт</button>
+            </form>
+
+            <div class="auth-footer">
+                <a href="{% url 'register' %}?next={{ next|urlencode }}">← Назад до вибору</a>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

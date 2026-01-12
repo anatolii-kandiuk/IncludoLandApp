@@ -1,0 +1,152 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Профіль спеціаліста — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+    <script src="{% static 'js/specialist_charts.js' %}" defer></script>
+</head>
+
+<body>
+    <div class="shell">
+        <aside class="sidebar" aria-label="Навігація">
+            <div class="sidebar__brand">
+                <div class="brand__mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" role="img" focusable="false">
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
+            </div>
+
+            <nav class="nav">
+                <a class="nav__item nav__item--active" href="{% url 'specialist_profile' %}">
+                    <span class="nav__icon" aria-hidden="true">🏠</span>
+                    <span class="nav__label">Мої Учні</span>
+                </a>
+                <a class="nav__item" href="{% url 'home' %}">
+                    <span class="nav__icon" aria-hidden="true">👥</span>
+                    <span class="nav__label">Учні</span>
+                </a>
+                <a class="nav__item" href="{% url 'games' %}">
+                    <span class="nav__icon" aria-hidden="true">🧩</span>
+                    <span class="nav__label">Конструктор Ігор</span>
+                </a>
+                <a class="nav__item" href="{% url 'home' %}">
+                    <span class="nav__icon" aria-hidden="true">🤖</span>
+                    <span class="nav__label">ML-Аналітика</span>
+                </a>
+
+                <div class="nav__spacer"></div>
+
+                <a class="nav__item nav__item--logout" href="{% url 'logout' %}">
+                    <span class="nav__icon" aria-hidden="true">⎋</span>
+                    <span class="nav__label">Вихід</span>
+                </a>
+            </nav>
+
+            <section class="helper helper--sidebar" aria-label="Підказка">
+                <div class="helper__owl" aria-hidden="true">
+                    <div class="owl">
+                        <div class="owl__face"></div>
+                        <div class="owl__eyes"><span></span><span></span></div>
+                        <div class="owl__beak"></div>
+                    </div>
+                </div>
+                <div class="helper__bubble">
+                    <div class="helper__title">Вітаю!</div>
+                    <div class="helper__text">Успішного дня!</div>
+                </div>
+            </section>
+        </aside>
+
+        <main class="main">
+            <header class="top">
+                <div class="top__left"></div>
+                <div class="top__right">
+                    <div class="chip chip--user">
+                        <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
+                        <span class="chip__text">{{ username }}</span>
+                    </div>
+                    <div class="chip">
+                        <span class="chip__icon" aria-hidden="true">★</span>
+                        <span class="chip__text">{{ coins }}</span>
+                    </div>
+                    <div class="chip chip--icon" title="Повідомлення">
+                        <span aria-hidden="true">💬</span>
+                    </div>
+                    <div class="chip chip--icon" title="Сповіщення">
+                        <span aria-hidden="true">🔔</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="page-title">
+                    <h1 class="page-title__h">Мої Учні</h1>
+                </div>
+
+                <div class="grid">
+                    <section class="card">
+                        <div class="card__head">
+                            <h2 class="card__title">Потребують Уваги</h2>
+                        </div>
+
+                        <div class="attention">
+                            {% for s in attention_students %}
+                            <div class="student">
+                                <div class="student__avatar" aria-hidden="true">👦</div>
+                                <div class="student__meta">
+                                    <div class="student__name">{{ s.name }}</div>
+                                    <div class="student__sub">{{ s.subtitle }}</div>
+                                    <div class="student__bar" role="progressbar" aria-valuenow="{{ s.progress }}"
+                                        aria-valuemin="0" aria-valuemax="100">
+                                        <div class="student__fill" style="width: {{ s.progress }}%"></div>
+                                    </div>
+                                </div>
+                                <button class="student__btn" type="button">Рекомендації</button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <div class="card__head">
+                            <h2 class="card__title">Активність Учнів за Тиждень</h2>
+                            <div class="legend" aria-label="Легенда">
+                                <span class="legend__item"><i class="legend__dot legend__dot--yellow"
+                                        aria-hidden="true"></i>Памʼять</span>
+                                <span class="legend__item"><i class="legend__dot legend__dot--teal"
+                                        aria-hidden="true"></i>Логіка</span>
+                            </div>
+                        </div>
+                        <canvas id="activityChart" height="160" data-labels='{{ activity_labels|safe }}'
+                            data-yellow='{{ activity_yellow|safe }}' data-teal='{{ activity_teal|safe }}'></canvas>
+                    </section>
+
+                    <section class="card card--full">
+                        <div class="card__head">
+                            <h2 class="card__title">Поради Штучного Інтелекту</h2>
+                        </div>
+                        <div class="ai">
+                            <div class="ai__text">
+                                На основі останніх даних, рекомендуємо провести групові заняття на розвиток навичок
+                                "Уваги" для учнів.
+                            </div>
+                            <a class="ai__btn" href="{% url 'game_memory' %}">Створити завдання</a>
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Нагороди — IncludoLand</title>
+    <title>Реєстрація — IncludoLand</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/auth.css' %}">
 </head>
@@ -26,14 +26,18 @@
         </header>
 
         <section class="auth-card">
-            <h1 class="auth-title">Нагороди доступні після входу</h1>
-            <p class="auth-subtitle">Увійдіть або зареєструйтесь, щоб бачити профіль дитини та статистику.</p>
+            <h1 class="auth-title">Реєстрація</h1>
+            <p class="auth-subtitle">Оберіть тип акаунта:</p>
 
             <div class="auth-actions">
-                <a class="auth-btn auth-btn--primary" href="{% url 'login' %}?next={{ next|urlencode }}">Увійти</a>
-                <a class="auth-btn" href="{% url 'register_child' %}?next={{ next|urlencode }}">Реєстрація дитини</a>
-                <a class="auth-btn" href="{% url 'register_specialist' %}?next={{ next|urlencode }}">Реєстрація
-                    спеціаліста</a>
+                <a class="auth-btn auth-btn--primary"
+                    href="{% url 'register_child' %}?next={{ next|urlencode }}">Дитина</a>
+                <a class="auth-btn" href="{% url 'register_specialist' %}?next={{ next|urlencode }}">Спеціаліст</a>
+            </div>
+
+            <div class="auth-footer">
+                <span>Вже є акаунт?</span>
+                <a href="{% url 'login' %}?next={{ next|urlencode }}">Увійти</a>
             </div>
         </section>
     </main>
