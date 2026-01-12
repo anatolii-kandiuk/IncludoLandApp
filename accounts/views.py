@@ -3,11 +3,13 @@ import json
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from .forms import RegisterForm
-from .models import ChildProfile, SpecialistProfile
+from .models import ChildProfile, GameResult, SpecialistProfile
 
 
 def rewards_entry(request):
@@ -97,17 +99,37 @@ def child_profile(request):
         {'title': 'Увага', 'subtitle': '5 ігор', 'tone': 'teal', 'icon': 'target'},
     ]
 
+    results = list(
+        GameResult.objects.filter(user=request.user)
+        .only('game_type', 'score', 'created_at')
+        .order_by('created_at')
+    )
+
+    line_labels = [r.created_at.strftime('%d.%m %H:%M') for r in results]
+    math_values = [r.score if r.game_type == GameResult.GameType.MATH else None for r in results]
+    memory_values = [r.score if r.game_type == GameResult.GameType.MEMORY else None for r in results]
+
+    def avg_score(game_type: str) -> int:
+        values = [r.score for r in results if r.game_type == game_type]
+        if not values:
+            return 0
+        return int(round(sum(values) / len(values)))
+
+    math_avg = avg_score(GameResult.GameType.MATH)
+    memory_avg = avg_score(GameResult.GameType.MEMORY)
+
     progress = [
-        {'label': 'Пазли слів', 'value': 75},
-        {'label': "Памʼять", 'value': 50},
-        {'label': 'Увага', 'value': 30},
+        {'label': 'Математика', 'value': math_avg},
+        {'label': "Памʼять", 'value': memory_avg},
     ]
 
-    line_labels = ['0', '1', '2', '3', '4', '5', '6']
-    line_values = [0, 8, 22, 45, 62, 78, 92]
+    radar_labels = ['Математика', "Памʼять"]
+    radar_values = [math_avg, memory_avg]
 
-    radar_labels = ['Математика', "Памʼять", 'Пазли', 'Увага']
-    radar_values = [55, 72, 40, 60]
+    line_datasets = [
+        {'label': 'Математика', 'data': math_values, 'color': '#2b97e5'},
+        {'label': "Памʼять", 'data': memory_values, 'color': '#19b3b9'},
+    ]
 
     context = {
         'username': request.user.username,
@@ -115,7 +137,7 @@ def child_profile(request):
         'rewards': rewards,
         'progress': progress,
         'line_labels': json.dumps(line_labels, ensure_ascii=False),
-        'line_values': json.dumps(line_values),
+        'line_datasets': json.dumps(line_datasets, ensure_ascii=False),
         'radar_labels': json.dumps(radar_labels, ensure_ascii=False),
         'radar_values': json.dumps(radar_values),
     }
@@ -157,3 +179,58 @@ def specialist_profile(request):
         'activity_teal': json.dumps(activity_teal),
     }
     return render(request, 'profile/specialist_profile.html', context)
+
+
+@login_required
+@require_POST
+def record_game_result(request):
+    if hasattr(request.user, 'specialist_profile'):
+        return JsonResponse({'ok': False, 'error': 'specialist_cannot_record'}, status=403)
+
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'ok': False, 'error': 'invalid_json'}, status=400)
+
+    game_type = payload.get('game_type')
+    if game_type not in (GameResult.GameType.MATH, GameResult.GameType.MEMORY):
+        return JsonResponse({'ok': False, 'error': 'invalid_game_type'}, status=400)
+
+    def to_int(value, *, min_value=None, max_value=None):
+        if value is None:
+            return None
+        try:
+            iv = int(value)
+        except (TypeError, ValueError):
+            return None
+        if min_value is not None and iv < min_value:
+            return None
+        if max_value is not None and iv > max_value:
+            return None
+        return iv
+
+    score = to_int(payload.get('score'), min_value=0, max_value=100)
+    if score is None:
+        return JsonResponse({'ok': False, 'error': 'invalid_score'}, status=400)
+
+    raw_score = to_int(payload.get('raw_score'), min_value=0)
+    max_score = to_int(payload.get('max_score'), min_value=0)
+    duration_seconds = to_int(payload.get('duration_seconds'), min_value=0)
+
+    details = payload.get('details')
+    if details is None:
+        details = {}
+    if not isinstance(details, dict):
+        return JsonResponse({'ok': False, 'error': 'invalid_details'}, status=400)
+
+    result = GameResult.objects.create(
+        user=request.user,
+        game_type=game_type,
+        score=score,
+        raw_score=raw_score,
+        max_score=max_score,
+        duration_seconds=duration_seconds,
+        details=details,
+    )
+
+    return JsonResponse({'ok': True, 'id': result.id})

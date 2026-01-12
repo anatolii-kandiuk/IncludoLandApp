@@ -2,44 +2,62 @@
     function parseData(el) {
         const labelsRaw = el.getAttribute('data-labels');
         const valuesRaw = el.getAttribute('data-values');
+        const datasetsRaw = el.getAttribute('data-datasets');
         let labels = [];
         let values = [];
+        let datasets = null;
         try {
             labels = JSON.parse(labelsRaw || '[]');
             values = JSON.parse(valuesRaw || '[]');
+            datasets = datasetsRaw ? JSON.parse(datasetsRaw) : null;
         } catch (_e) {
             labels = [];
             values = [];
+            datasets = null;
         }
-        return { labels, values };
+        return { labels, values, datasets };
     }
 
     function initLine() {
         const el = document.getElementById('lineChart');
         if (!el || !window.Chart) return;
-        const { labels, values } = parseData(el);
+        const { labels, values, datasets } = parseData(el);
+
+        const ds = Array.isArray(datasets) && datasets.length
+            ? datasets.map((d) => ({
+                label: d.label || '',
+                data: Array.isArray(d.data) ? d.data : [],
+                borderColor: d.color || '#2b97e5',
+                backgroundColor: 'rgba(43,151,229,.12)',
+                fill: false,
+                tension: 0.35,
+                pointRadius: 3,
+                pointHoverRadius: 4,
+                spanGaps: true,
+            }))
+            : [
+                {
+                    label: 'Успішність',
+                    data: values,
+                    borderColor: '#2b97e5',
+                    backgroundColor: 'rgba(43,151,229,.15)',
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 3,
+                    pointHoverRadius: 4,
+                },
+            ];
 
         // eslint-disable-next-line no-new
         new window.Chart(el.getContext('2d'), {
             type: 'line',
             data: {
                 labels,
-                datasets: [
-                    {
-                        label: 'Успішність',
-                        data: values,
-                        borderColor: '#2b97e5',
-                        backgroundColor: 'rgba(43,151,229,.15)',
-                        fill: true,
-                        tension: 0.35,
-                        pointRadius: 3,
-                        pointHoverRadius: 4,
-                    },
-                ],
+                datasets: ds,
             },
             options: {
                 plugins: {
-                    legend: { display: false },
+                    legend: { display: Array.isArray(datasets) && datasets.length > 1 },
                 },
                 scales: {
                     y: {

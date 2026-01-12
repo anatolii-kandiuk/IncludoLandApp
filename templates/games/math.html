@@ -1,0 +1,93 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Математика — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/math.css' %}">
+</head>
+
+<body>
+    <main class="page page--game">
+        <header class="topbar">
+            <a class="brand" href="/" aria-label="На головну">
+                <div class="brand__mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" role="img" focusable="false">
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
+            </a>
+
+            <div class="status" aria-label="Статистика">
+                <div class="status__item">
+                    <span class="status__value">{{ stars }}</span>
+                    <span class="status__label">зірок</span>
+                    <span class="status__icon" aria-hidden="true">★</span>
+                </div>
+                <div class="status__item status__chat" title="Повідомлення">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
+                        <path
+                            d="M4 5.5C4 4.12 5.12 3 6.5 3h11C18.88 3 20 4.12 20 5.5v7c0 1.38-1.12 2.5-2.5 2.5H10l-4.5 4v-4H6.5C5.12 15 4 13.88 4 12.5v-7z"
+                            fill="#ffffff" opacity="0.9" />
+                    </svg>
+                </div>
+            </div>
+        </header>
+
+        <h1 class="game-title">МАТЕМАТИКА: Розв’яжи приклад</h1>
+
+        <section class="math">
+            <div class="math-card math-card--play" aria-label="Гра Математика">
+                <div class="math-progress" aria-label="Прогрес">
+                    <div class="math-progress__bar"><span id="math-progress-fill" style="width: 0%"></span></div>
+                    <div class="math-progress__text"><span id="math-step">0</span>/<span id="math-total">10</span></div>
+                </div>
+
+                <div class="math-question" aria-label="Питання">
+                    <div class="math-expression" id="math-expression">Натисни “Почати”,<br>щоб зіграти</div>
+                    <div class="math-hint" id="math-msg" role="status" aria-live="polite">Обери рівень та операцію.
+                    </div>
+                    <div class="math-inputrow">
+                        <input class="math-input" id="math-answer" type="number" inputmode="numeric" autocomplete="off"
+                            placeholder="Відповідь" disabled>
+                        <button class="math-btn math-btn--check" id="math-submit" type="button"
+                            disabled>Перевірити</button>
+                    </div>
+                </div>
+
+                <div class="math-pillrow" aria-label="Налаштування">
+                    <button class="math-pillbtn" id="math-level-pill" type="button">Рівень: Легко</button>
+                    <button class="math-pillbtn" id="math-op-pill" type="button">Операція: Мікс</button>
+                    <select id="math-level" class="sr-only" aria-label="Рівень">
+                        <option value="easy">Легко</option>
+                        <option value="medium">Середньо</option>
+                        <option value="hard">Складно</option>
+                    </select>
+                    <select id="math-op" class="sr-only" aria-label="Операція">
+                        <option value="mix">Мікс</option>
+                        <option value="add">+</option>
+                        <option value="sub">−</option>
+                        <option value="mul">×</option>
+                    </select>
+                </div>
+
+                <button class="math-btn math-btn--primary math-btn--start" id="math-start" type="button">Почати</button>
+
+                <div class="math-meta" aria-label="Статистика гри">
+                    <div class="math-pill">Рекорд: <strong id="math-best">0</strong>/10</div>
+                    <div class="math-pill">Час: <strong id="math-time">0</strong>с</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'js/math.js' %}" defer></script>
+</body>
+
+</html>

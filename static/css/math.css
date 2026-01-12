@@ -1,0 +1,391 @@
+:root {
+    --m-bg: #f6fbff;
+    --m-surface: #ffffff;
+    --m-ink: #0f2b3a;
+    --m-muted: #6b7d88;
+    --m-brand: #0f7aa5;
+    --m-brand-2: #19b3b9;
+    --m-warn: #ffb020;
+    --m-ok: #31c26a;
+    --m-bad: #ff4d4d;
+    --m-radius: 18px;
+    --m-shadow: 0 12px 30px rgba(16, 42, 56, 0.12);
+}
+
+.page--game {
+    min-height: 100vh;
+    background: radial-gradient(1000px 520px at 80% 10%, rgba(25, 179, 185, 0.18), transparent 60%),
+        radial-gradient(900px 520px at 15% 30%, rgba(15, 122, 165, 0.18), transparent 55%),
+        var(--m-bg);
+    padding: 20px 16px 28px;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 auto 18px;
+    max-width: 1120px;
+}
+
+.game-title {
+    max-width: 1120px;
+    margin: 8px auto 18px;
+    font-size: 34px;
+    line-height: 1.1;
+    letter-spacing: 0.5px;
+    color: var(--m-ink);
+    text-align: center;
+}
+
+.math {
+    max-width: 720px;
+    margin: 0 auto;
+    display: block;
+}
+
+.math-card {
+    background: var(--m-surface);
+    border-radius: var(--m-radius);
+    box-shadow: var(--m-shadow);
+    border: 1px solid rgba(15, 43, 58, 0.06);
+    padding: 16px;
+}
+
+.math-card--play {
+    padding: 18px;
+    min-height: 320px;
+    text-align: center;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.math-btn {
+    border: 0;
+    border-radius: 14px;
+    padding: 10px 14px;
+    font-weight: 800;
+    cursor: pointer;
+    background: rgba(15, 122, 165, 0.1);
+    color: var(--m-brand);
+    transition: transform .06s ease, filter .12s ease;
+    user-select: none;
+}
+
+.math-btn:active {
+    transform: translateY(1px);
+}
+
+.math-btn[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.math-btn--primary {
+    background: linear-gradient(135deg, var(--m-brand), var(--m-brand-2));
+    color: #fff;
+}
+
+.math-btn--start {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px 16px;
+    font-size: 16px;
+}
+
+.math-btn--check {
+    background: rgba(15, 43, 58, 0.06);
+    color: var(--m-ink);
+    font-weight: 900;
+}
+
+.math-meta {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.math-pill {
+    padding: 8px 10px;
+    border-radius: 999px;
+    background: rgba(15, 43, 58, 0.06);
+    color: var(--m-ink);
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.math-progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.math-progress__bar {
+    flex: 1;
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(15, 43, 58, 0.08);
+    overflow: hidden;
+}
+
+.math-progress__bar span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--m-brand), var(--m-brand-2));
+    transition: width .22s ease;
+}
+
+.math-progress__text {
+    min-width: 70px;
+    text-align: right;
+    font-weight: 900;
+    color: var(--m-ink);
+}
+
+.math-question {
+    display: grid;
+    gap: 12px;
+}
+
+.math-expression {
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 900;
+    color: var(--m-ink);
+    padding: 18px 16px;
+    border-radius: 16px;
+    background: rgba(15, 43, 58, 0.06);
+    text-align: center;
+    min-height: 96px;
+    display: grid;
+    place-items: center;
+}
+
+.math-hint {
+    color: var(--m-muted);
+    font-weight: 700;
+    font-size: 13px;
+    margin-top: -4px;
+}
+
+.math-inputrow {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.math-input {
+    border-radius: 14px;
+    border: 1px solid rgba(15, 43, 58, 0.14);
+    padding: 12px 14px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.math-pillrow {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.math-pillbtn {
+    border: 0;
+    border-radius: 999px;
+    padding: 10px 14px;
+    font-weight: 900;
+    color: #fff;
+    background: linear-gradient(135deg, var(--m-brand), var(--m-brand-2));
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(16, 42, 56, 0.10);
+    text-align: center;
+}
+
+.math-pillbtn:active {
+    transform: translateY(1px);
+}
+
+.math-choices {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+}
+
+@media (min-width: 560px) {
+    .math-choices {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.choice {
+    border-radius: 16px;
+    border: 1px solid rgba(15, 43, 58, 0.1);
+    background: #fff;
+    box-shadow: 0 8px 18px rgba(16, 42, 56, 0.08);
+    padding: 12px 12px;
+    font-weight: 900;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform .06s ease, filter .12s ease;
+}
+
+.choice:active {
+    transform: translateY(1px);
+}
+
+.choice.correct {
+    border-color: rgba(49, 194, 106, 0.55);
+    background: rgba(49, 194, 106, 0.12);
+}
+
+.choice.wrong {
+    border-color: rgba(255, 77, 77, 0.55);
+    background: rgba(255, 77, 77, 0.12);
+}
+
+.hud {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(15, 43, 58, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.hud__left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.hud__bubble {
+    background: #fff;
+    border: 1px solid rgba(15, 43, 58, 0.1);
+    border-radius: 999px;
+    padding: 10px 14px;
+    box-shadow: 0 10px 22px rgba(16, 42, 56, 0.08);
+    min-width: 0;
+    max-width: 760px;
+}
+
+.hud__msg {
+    color: var(--m-ink);
+    font-weight: 700;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hud__center {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--m-ink);
+    font-weight: 900;
+}
+
+.hud__dots span {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(15, 122, 165, 0.25);
+    margin-right: 6px;
+}
+
+.hud__counter {
+    white-space: nowrap;
+}
+
+.hud__right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hud__close {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: rgba(15, 43, 58, 0.08);
+    color: var(--m-ink);
+    font-size: 26px;
+    display: grid;
+    place-items: center;
+    text-decoration: none;
+    font-weight: 900;
+}
+
+/* Simple owl icon */
+.owl {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(255, 176, 32, 0.35), rgba(25, 179, 185, 0.25));
+    position: relative;
+    flex: 0 0 auto;
+    box-shadow: 0 10px 22px rgba(16, 42, 56, 0.08);
+}
+
+.owl__face {
+    position: absolute;
+    inset: 9px;
+    border-radius: 14px;
+    background: #fff;
+    opacity: 0.9;
+}
+
+.owl__eyes {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.owl__eyes span {
+    width: 10px;
+    height: 10px;
+    background: var(--m-ink);
+    border-radius: 50%;
+}
+
+.owl__beak {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid rgba(255, 176, 32, 0.95);
+    transform: translate(-50%, 6px);
+}

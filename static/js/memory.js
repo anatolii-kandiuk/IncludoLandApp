@@ -51,6 +51,40 @@
     let second = null;
     let locked = false;
     let matchedPairs = 0;
+    let startedAt = null;
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    async function postResult(payload) {
+        try {
+            const csrf = getCookie('csrftoken');
+            const res = await fetch('/api/game-results/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(csrf ? { 'X-CSRFToken': csrf } : {}),
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(payload),
+            });
+            return res.ok;
+        } catch (_e) {
+            return false;
+        }
+    }
+
+    function computeScore(timeSec, pairs) {
+        // Score 0..100 (higher is better). For 6 pairs: ~100 at 20s, ~60 at 40s, ~20 at 60s.
+        const baseline = 18 + pairs * 2;
+        const penaltyPerSec = 2;
+        const raw = Math.round(100 - Math.max(0, timeSec - baseline) * penaltyPerSec);
+        return Math.max(0, Math.min(100, raw));
+    }
 
     function setMsg(text) {
         if (msgEl) msgEl.textContent = text;
@@ -90,6 +124,8 @@
         if (btn.dataset.state === 'matched') return;
         if (btn.dataset.state === 'flipped') return;
 
+        if (!startedAt) startedAt = Date.now();
+
         btn.dataset.state = 'flipped';
         btn.setAttribute('aria-pressed', 'true');
 
@@ -112,6 +148,21 @@
             matchedPairs += 1;
             setCounter(matchedPairs);
             setMsg(matchedPairs === totalPairs ? 'Молодець! Усі пари знайдено.' : 'Супер! Пара знайдена.');
+
+            if (matchedPairs === totalPairs) {
+                const timeSec = startedAt ? Math.floor((Date.now() - startedAt) / 1000) : 0;
+                const score = computeScore(timeSec, totalPairs);
+                postResult({
+                    game_type: 'memory',
+                    score,
+                    raw_score: totalPairs,
+                    max_score: totalPairs,
+                    duration_seconds: timeSec,
+                    details: {
+                        pairs: totalPairs,
+                    },
+                });
+            }
 
             first = null;
             second = null;
