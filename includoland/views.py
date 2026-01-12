@@ -1,5 +1,12 @@
-from django.http import HttpResponse
+from django.shortcuts import render
 
 
-def hello_world(request):
-    return HttpResponse("Hello World")
+def home(request):
+    context = {
+        'stars': 1250,
+    }
+    return render(request, 'home.html', context)
+
+
+def coming_soon(request, section: str):
+    return render(request, 'coming_soon.html', {'section': section})
