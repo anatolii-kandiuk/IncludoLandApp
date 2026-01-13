@@ -25,6 +25,7 @@
                 <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
             </a>
 
+            {% if stars %}
             <div class="status" aria-label="Статистика">
                 <div class="status__item">
                     <span class="status__value">{{ stars }}</span>
@@ -32,6 +33,7 @@
                     <span class="status__icon" aria-hidden="true">★</span>
                 </div>
             </div>
+            {% endif %}
         </header>
 
         <h1 class="sounds-title">Слухай та Релакуй</h1>
