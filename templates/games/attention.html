@@ -1,0 +1,73 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Увага — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/attention.css' %}">
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+    <main class="page page--attention">
+        <header class="topbar">
+            <a class="brand" href="/" aria-label="На головну">
+                <div class="brand__mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" role="img" focusable="false">
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
+            </a>
+
+            {% if stars %}
+            <div class="status" aria-label="Статистика">
+                <div class="status__item">
+                    <span class="status__value">{{ stars }}</span>
+                    <span class="status__label">зірок</span>
+                    <span class="status__icon" aria-hidden="true">★</span>
+                </div>
+            </div>
+            {% endif %}
+        </header>
+
+        <h1 class="attention-title">УВАГА: Знайди Відмінності</h1>
+
+        <section class="board" aria-label="Поле гри">
+            <div class="board__pair">
+                <div class="board__card" id="left-card" aria-label="Ліва картинка"></div>
+                <div class="board__card board__card--right" id="right-card" aria-label="Права картинка">
+                    <div id="diff-overlay" class="diff-overlay" aria-hidden="true"></div>
+                    <div id="hotspots" class="hotspots" aria-label="Зони для пошуку"></div>
+                </div>
+            </div>
+
+            <div class="progress" aria-label="Прогрес">
+                <div class="progress__dots" id="dots" aria-hidden="true"></div>
+                <div class="progress__text"><span id="progress-text">0/5</span></div>
+            </div>
+        </section>
+
+        <section class="helper" aria-label="Підказка">
+            <div class="helper__owl" aria-hidden="true">
+                <div class="owl owl--pink">
+                    <div class="owl__face"></div>
+                    <div class="owl__eyes"><span></span><span></span></div>
+                    <div class="owl__beak"></div>
+                </div>
+            </div>
+            <div class="helper__bubble" role="status" aria-live="polite" id="helper-msg">Будь уважним!</div>
+        </section>
+
+        <a class="exit" href="{% url 'games' %}" aria-label="Вийти з гри">×</a>
+    </main>
+
+    <script src="{% static 'js/attention.js' %}" defer></script>
+</body>
+
+</html>

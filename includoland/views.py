@@ -45,5 +45,13 @@ def game_sounds(request):
     return render(request, 'games/sounds.html', context)
 
 
+@ensure_csrf_cookie
+def game_attention(request):
+    context = {
+        'stars': _child_stars(request),
+    }
+    return render(request, 'games/attention.html', context)
+
+
 def coming_soon(request, section: str):
     return render(request, 'coming_soon.html', {'section': section})
