@@ -1,0 +1,79 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Пазли слів — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/words.css' %}">
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+    <main class="page page--game page--words">
+        <header class="topbar">
+            <a class="brand" href="/" aria-label="На головну">
+                <div class="brand__mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" role="img" focusable="false">
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
+            </a>
+
+            {% if stars %}
+            <div class="status" aria-label="Статистика">
+                <div class="status__item">
+                    <span class="status__value">{{ stars }}</span>
+                    <span class="status__label">зірок</span>
+                    <span class="status__icon" aria-hidden="true">★</span>
+                </div>
+            </div>
+            {% endif %}
+        </header>
+
+        <h1 class="game-title">ПАЗЛИ СЛІВ: Склади слово</h1>
+
+        <section class="words" aria-label="Гра Пазли слів">
+            {% csrf_token %}
+            <div class="words-card" role="group" aria-label="Пазл">
+                <div class="words-meta" aria-label="Прогрес">
+                    <div class="words-chip"><span>Раунд</span> <strong id="words-round">0</strong>/<span
+                            id="words-total">5</span></div>
+                    <div class="words-chip"><span>Час</span> <strong id="words-time">0</strong>с</div>
+                </div>
+
+                <div class="words-prompt" id="words-prompt" aria-label="Підказка">
+                    <div class="words-hero" id="words-hero" aria-hidden="true">
+                        <span class="words-emoji" id="words-emoji">🧩</span>
+                    </div>
+                    <div class="words-hint">
+                        <div class="words-hint__title">Підказка</div>
+                        <div class="words-hint__text" id="words-hint">Натисни “Почати”</div>
+                    </div>
+                </div>
+
+                <div class="words-slots" id="words-slots" aria-label="Слово"></div>
+
+                <div class="words-bank" id="words-bank" aria-label="Літери"></div>
+
+                <div class="words-actions" aria-label="Керування">
+                    <button class="words-btn" id="words-clear" type="button">Очистити</button>
+                    <button class="words-btn words-btn--primary" id="words-start" type="button">Почати</button>
+                    <a class="words-btn words-btn--ghost" href="{% url 'games' %}">Вийти</a>
+                </div>
+
+                <div class="words-msg" id="words-msg" role="status" aria-live="polite">Складай слово з літер.
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'js/words.js' %}" defer></script>
+</body>
+
+</html>

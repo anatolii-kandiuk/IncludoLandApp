@@ -29,6 +29,7 @@ class GameResult(models.Model):
         MATH = 'math', 'Math'
         MEMORY = 'memory', 'Memory'
         SOUND = 'sound', 'Sound'
+        WORDS = 'words', 'Words'
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

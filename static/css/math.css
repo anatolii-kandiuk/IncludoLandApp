@@ -1,10 +1,10 @@
 :root {
-    --m-bg: #f6fbff;
+    --m-bg: #fffaf0;
     --m-surface: #ffffff;
     --m-ink: #0f2b3a;
     --m-muted: #6b7d88;
-    --m-brand: #0f7aa5;
-    --m-brand-2: #19b3b9;
+    --m-brand: #e1a400;
+    --m-brand-2: #ffc93b;
     --m-warn: #ffb020;
     --m-ok: #31c26a;
     --m-bad: #ff4d4d;
@@ -14,8 +14,8 @@
 
 .page--game {
     min-height: 100vh;
-    background: radial-gradient(1000px 520px at 80% 10%, rgba(25, 179, 185, 0.18), transparent 60%),
-        radial-gradient(900px 520px at 15% 30%, rgba(15, 122, 165, 0.18), transparent 55%),
+    background: radial-gradient(1000px 520px at 80% 10%, rgba(255, 201, 59, 0.22), transparent 60%),
+        radial-gradient(900px 520px at 15% 30%, rgba(225, 164, 0, 0.18), transparent 55%),
         var(--m-bg);
     padding: 20px 16px 28px;
 }

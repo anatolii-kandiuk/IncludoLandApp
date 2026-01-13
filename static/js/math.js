@@ -23,9 +23,9 @@
     const storageKey = 'includoland_math_best_v1';
 
     const LEVELS = ['easy', 'medium', 'hard'];
-    const OPS = ['mix', 'add', 'sub', 'mul'];
+    const OPS = ['mix', 'add', 'sub', 'mul', 'div'];
     const LEVEL_LABEL = { easy: 'Легко', medium: 'Середньо', hard: 'Складно' };
-    const OP_LABEL = { mix: 'Мікс', add: '+', sub: '−', mul: '×' };
+    const OP_LABEL = { mix: 'Мікс', add: '+', sub: '−', mul: '×', div: '÷' };
 
     const state = {
         active: false,
@@ -121,39 +121,75 @@
         if (op === 'add') return '+';
         if (op === 'sub') return '−';
         if (op === 'mul') return '×';
+        if (op === 'div') return '÷';
         return '?';
     }
 
+    function allowedOpsForLevel(level) {
+        if (level === 'hard') return new Set(['mul', 'div']);
+        return new Set(['add', 'sub']);
+    }
+
+    function normalizeSettings() {
+        const level = els.level.value;
+        const allowed = allowedOpsForLevel(level);
+
+        // Disable incompatible operations in the <select>.
+        if (els.op) {
+            Array.from(els.op.options).forEach((opt) => {
+                if (opt.value === 'mix') {
+                    opt.disabled = false;
+                    return;
+                }
+                opt.disabled = !allowed.has(opt.value);
+            });
+        }
+
+        // Coerce op to something valid for this level.
+        if (els.op.value !== 'mix' && !allowed.has(els.op.value)) {
+            els.op.value = 'mix';
+        }
+    }
+
     function generateProblem(level, opMode) {
-        const ranges = {
-            easy: { a: [0, 10], b: [0, 10] },
-            medium: { a: [0, 20], b: [0, 20] },
-            hard: { a: [5, 50], b: [5, 50] },
-        };
+        // Level rules per request:
+        // - easy: digits 0..9
+        // - medium: 10..100
+        // - hard: multiplication & division (integer-only)
+        const allowedSet = allowedOpsForLevel(level);
+        const allowed = opMode === 'mix' ? Array.from(allowedSet) : [opMode];
+        const op = allowedSet.has(allowed[0]) ? allowed[0] : pick(Array.from(allowedSet));
 
-        const range = ranges[level] || ranges.easy;
-
-        const allowed = opMode === 'mix' ? ['add', 'sub', 'mul'] : [opMode];
-        const op = pick(allowed);
-
-        let a = randInt(range.a[0], range.a[1]);
-        let b = randInt(range.b[0], range.b[1]);
-
-        // Keep subtraction non-negative for kid-friendly mode.
-        if (op === 'sub' && b > a) {
-            [a, b] = [b, a];
-        }
-
-        // Slightly simplify multiplication on easy.
-        if (op === 'mul' && level === 'easy') {
-            a = randInt(0, 10);
-            b = randInt(0, 10);
-        }
-
+        let a;
+        let b;
         let answer;
-        if (op === 'add') answer = a + b;
-        else if (op === 'sub') answer = a - b;
-        else answer = a * b;
+
+        if (level === 'easy') {
+            a = randInt(0, 9);
+            b = randInt(0, 9);
+
+            if (op === 'sub' && b > a) [a, b] = [b, a];
+            answer = op === 'add' ? a + b : a - b;
+        } else if (level === 'medium') {
+            a = randInt(10, 100);
+            b = randInt(10, 100);
+
+            if (op === 'sub' && b > a) [a, b] = [b, a];
+            answer = op === 'add' ? a + b : a - b;
+        } else {
+            // hard
+            if (op === 'div') {
+                const divisor = randInt(2, 12);
+                const quotient = randInt(2, 12);
+                a = divisor * quotient;
+                b = divisor;
+                answer = quotient;
+            } else {
+                a = randInt(2, 12);
+                b = randInt(2, 12);
+                answer = a * b;
+            }
+        }
 
         const text = `${a} ${opSymbol(op)} ${b} = ?`;
         return { a, b, op, answer, text };
@@ -179,6 +215,7 @@
     }
 
     function nextQuestion() {
+        normalizeSettings();
         const level = els.level.value;
         const opMode = els.op.value;
         state.current = generateProblem(level, opMode);
@@ -252,6 +289,7 @@
     }
 
     function startGame() {
+        normalizeSettings();
         state.active = true;
         state.step = 0;
         state.correct = 0;
@@ -267,6 +305,7 @@
     }
 
     els.best.textContent = String(readBest());
+    normalizeSettings();
     syncPills();
 
     els.start.addEventListener('click', startGame);
@@ -277,12 +316,14 @@
 
     // If user changes settings mid-game, restart.
     els.level.addEventListener('change', () => {
+        normalizeSettings();
         syncPills();
         if (!state.active) return;
         setMsg('Налаштування змінено — починаю заново.', 'warn');
         startGame();
     });
     els.op.addEventListener('change', () => {
+        normalizeSettings();
         syncPills();
         if (!state.active) return;
         setMsg('Налаштування змінено — починаю заново.', 'warn');

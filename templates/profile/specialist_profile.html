@@ -28,22 +28,56 @@
             </div>
 
             <nav class="nav">
-                <a class="nav__item nav__item--active" href="{% url 'specialist_profile' %}">
-                    <span class="nav__icon" aria-hidden="true">🏠</span>
-                    <span class="nav__label">Мої Учні</span>
-                </a>
-                <a class="nav__item" href="{% url 'home' %}">
-                    <span class="nav__icon" aria-hidden="true">👥</span>
-                    <span class="nav__label">Учні</span>
-                </a>
-                <a class="nav__item" href="{% url 'games' %}">
-                    <span class="nav__icon" aria-hidden="true">🧩</span>
-                    <span class="nav__label">Конструктор Ігор</span>
-                </a>
-                <a class="nav__item" href="{% url 'home' %}">
-                    <span class="nav__icon" aria-hidden="true">🤖</span>
-                    <span class="nav__label">ML-Аналітика</span>
-                </a>
+                <div class="nav__section" aria-label="Головне">
+                    <a class="nav__item nav__item--active" href="{% url 'specialist_profile' %}">
+                        <span class="nav__icon" aria-hidden="true">🏠</span>
+                        <span class="nav__label">Мої Учні</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'home' %}">
+                        <span class="nav__icon" aria-hidden="true">👥</span>
+                        <span class="nav__label">Учні</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'home' %}">
+                        <span class="nav__icon" aria-hidden="true">🤖</span>
+                        <span class="nav__label">ML-Аналітика</span>
+                    </a>
+                </div>
+
+                <div class="nav__section" aria-label="Бібліотека">
+                    <div class="nav__title">Бібліотека</div>
+                    <a class="nav__item" href="{% url 'stories' %}">
+                        <span class="nav__icon" aria-hidden="true">📖</span>
+                        <span class="nav__label">Казки</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'sounds' %}">
+                        <span class="nav__icon" aria-hidden="true">🔊</span>
+                        <span class="nav__label">Звуки</span>
+                    </a>
+                </div>
+
+                <div class="nav__section" aria-label="Ігри">
+                    <div class="nav__title">Ігри</div>
+                    <a class="nav__item" href="{% url 'games' %}">
+                        <span class="nav__icon" aria-hidden="true">🧩</span>
+                        <span class="nav__label">Конструктор Ігор</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'game_words' %}">
+                        <span class="nav__icon" aria-hidden="true">🔤</span>
+                        <span class="nav__label">Пазли слів</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'game_memory' %}">
+                        <span class="nav__icon" aria-hidden="true">🧠</span>
+                        <span class="nav__label">Памʼять</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'game_attention' %}">
+                        <span class="nav__icon" aria-hidden="true">🎯</span>
+                        <span class="nav__label">Увага</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'game_math' %}">
+                        <span class="nav__icon" aria-hidden="true">➗</span>
+                        <span class="nav__label">Математика</span>
+                    </a>
+                </div>
 
                 <div class="nav__spacer"></div>
 

@@ -109,6 +109,7 @@ def child_profile(request):
     math_values = [r.score if r.game_type == GameResult.GameType.MATH else None for r in results]
     memory_values = [r.score if r.game_type == GameResult.GameType.MEMORY else None for r in results]
     sound_values = [r.score if r.game_type == GameResult.GameType.SOUND else None for r in results]
+    words_values = [r.score if r.game_type == GameResult.GameType.WORDS else None for r in results]
 
     def avg_score(game_type: str) -> int:
         values = [r.score for r in results if r.game_type == game_type]
@@ -119,20 +120,23 @@ def child_profile(request):
     math_avg = avg_score(GameResult.GameType.MATH)
     memory_avg = avg_score(GameResult.GameType.MEMORY)
     sound_avg = avg_score(GameResult.GameType.SOUND)
+    words_avg = avg_score(GameResult.GameType.WORDS)
 
     progress = [
         {'label': 'Математика', 'value': math_avg},
         {'label': "Памʼять", 'value': memory_avg},
         {'label': 'Звуки', 'value': sound_avg},
+        {'label': 'Пазли слів', 'value': words_avg},
     ]
 
-    radar_labels = ['Математика', "Памʼять", 'Звуки']
-    radar_values = [math_avg, memory_avg, sound_avg]
+    radar_labels = ['Математика', "Памʼять", 'Звуки', 'Пазли слів']
+    radar_values = [math_avg, memory_avg, sound_avg, words_avg]
 
     line_datasets = [
         {'label': 'Математика', 'data': math_values, 'color': '#2b97e5'},
         {'label': "Памʼять", 'data': memory_values, 'color': '#19b3b9'},
         {'label': 'Звуки', 'data': sound_values, 'color': '#c28b00'},
+        {'label': 'Пазли слів', 'data': words_values, 'color': '#7c3aed'},
     ]
 
     context = {
@@ -197,7 +201,12 @@ def record_game_result(request):
         return JsonResponse({'ok': False, 'error': 'invalid_json'}, status=400)
 
     game_type = payload.get('game_type')
-    if game_type not in (GameResult.GameType.MATH, GameResult.GameType.MEMORY, GameResult.GameType.SOUND):
+    if game_type not in (
+        GameResult.GameType.MATH,
+        GameResult.GameType.MEMORY,
+        GameResult.GameType.SOUND,
+        GameResult.GameType.WORDS,
+    ):
         return JsonResponse({'ok': False, 'error': 'invalid_game_type'}, status=400)
 
     def to_int(value, *, min_value=None, max_value=None):

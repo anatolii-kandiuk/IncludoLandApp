@@ -44,6 +44,21 @@ body {
     gap: 10px
 }
 
+.nav__section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nav__title {
+    font-weight: 1000;
+    font-size: 12px;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    opacity: .7;
+    padding: 6px 10px 0;
+}
+
 .nav__item {
     display: flex;
     align-items: center;
