@@ -12,11 +12,11 @@
 }
 
 .sounds-grid {
-    max-width: 1100px;
+    max-width: 1180px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
 }
 
 .sound-card {
@@ -27,7 +27,7 @@
     overflow: hidden;
     cursor: pointer;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
-    min-height: 190px;
+    min-height: 230px;
     transition: transform .1s ease, box-shadow .12s ease;
 }
 
