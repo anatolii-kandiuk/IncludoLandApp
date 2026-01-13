@@ -1,0 +1,68 @@
+{% load static %}
+<header class="pill-header">
+    <nav class="pill-nav">
+        <a class="pill" href="{% url 'child_profile' %}">
+            <span class="pill__ico" aria-hidden="true">👤</span>
+            <span>Профіль</span>
+        </a>
+        <a class="pill" href="{% url 'login' %}">
+            <span class="pill__ico" aria-hidden="true">➜</span>
+            <span>Логін</span>
+        </a>
+        {% if not user.is_authenticated %}
+        <a class="pill" href="{% url 'register' %}">
+            <span class="pill__ico" aria-hidden="true">👥</span>
+            <span>Реєстрація</span>
+        </a>
+        {% endif %}
+        <a class="pill" href="{% url 'logout' %}">
+            <span class="pill__ico" aria-hidden="true">⇦</span>
+            <span>Вихід</span>
+        </a>
+    </nav>
+</header>
+<style>
+    .pill-header {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 12px;
+        position: relative;
+        z-index: 50;
+    }
+
+    .pill-nav {
+        display: flex;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.86);
+        border-radius: 18px;
+        padding: 8px 10px;
+        box-shadow: 0 6px 18px rgba(15, 43, 58, 0.08);
+        border: 1px solid rgba(15, 43, 58, 0.06);
+        backdrop-filter: blur(6px);
+    }
+
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 14px;
+        background: #f3f8fb;
+        color: #0f2b3a;
+        text-decoration: none;
+        font-weight: 800;
+        font-size: 15px;
+        border: 1px solid rgba(15, 43, 58, 0.08);
+        transition: background .12s ease, box-shadow .12s ease;
+    }
+
+    .pill:hover {
+        background: #e8f4ff;
+        box-shadow: 0 3px 10px rgba(15, 43, 58, 0.08);
+    }
+
+    .pill__ico {
+        font-size: 16px;
+    }
+</style>
