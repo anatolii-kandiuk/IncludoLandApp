@@ -1,0 +1,76 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Звуки — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sounds.css' %}">
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+    <main class="page page--sounds">
+        <header class="topbar">
+            <a class="brand" href="/" aria-label="На головну">
+                <div class="brand__mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" role="img" focusable="false">
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
+            </a>
+
+            <div class="status" aria-label="Статистика">
+                <div class="status__item">
+                    <span class="status__value">{{ stars }}</span>
+                    <span class="status__label">зірок</span>
+                    <span class="status__icon" aria-hidden="true">★</span>
+                </div>
+            </div>
+        </header>
+
+        <h1 class="sounds-title">Слухай та Релакуй</h1>
+
+        <section class="sounds-grid" aria-label="Варіанти звуків">
+            {% csrf_token %}
+            <button class="sound-card" data-sound="forest" type="button">
+                <span class="sound-card__img sound-card__img--forest"></span>
+                <span class="sound-card__label">Ліс</span>
+            </button>
+            <button class="sound-card" data-sound="rain" type="button">
+                <span class="sound-card__img sound-card__img--rain"></span>
+                <span class="sound-card__label">Дощ</span>
+            </button>
+            <button class="sound-card" data-sound="sea" type="button">
+                <span class="sound-card__img sound-card__img--sea"></span>
+                <span class="sound-card__label">Мора</span>
+            </button>
+            <button class="sound-card" data-sound="birds" type="button">
+                <span class="sound-card__img sound-card__img--birds"></span>
+                <span class="sound-card__label">Птахи</span>
+            </button>
+        </section>
+
+        <section class="sounds-cta" aria-label="Керування грою">
+            <div class="helper">
+                <div class="helper__owl" aria-hidden="true">🦉</div>
+                <div class="helper__bubble" id="helper-bubble">Обери свою пригоду!</div>
+            </div>
+
+            <div class="play-wrap">
+                <div class="play-progress"><span id="play-progress">0/5</span></div>
+                <button class="play-btn" id="play-btn" type="button">?</button>
+                <div class="play-sub">Вгадай звук</div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'js/sounds.js' %}" defer></script>
+</body>
+
+</html>

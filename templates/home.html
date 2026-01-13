@@ -26,6 +26,7 @@
                 </div>
             </div>
 
+            {% if stars %}
             <div class="status" aria-label="Статистика">
                 <div class="status__item">
                     <span class="status__value">{{ stars }}</span>
@@ -40,6 +41,7 @@
                     </svg>
                 </div>
             </div>
+            {% endif %}
         </header>
 
         <section class="menu" aria-label="Головне меню">

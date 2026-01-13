@@ -3,7 +3,7 @@ from django.urls import path
 
 from django.urls import include
 
-from .views import coming_soon, game_math, game_memory, games, home
+from .views import coming_soon, game_math, game_memory, game_sounds, games, home
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -15,6 +15,6 @@ urlpatterns = [
     path('games/attention/', lambda r: coming_soon(r, 'Увага'), name='game_attention'),
     path('games/math/', game_math, name='game_math'),
     path('stories/', lambda r: coming_soon(r, 'Казки'), name='stories'),
-    path('sounds/', lambda r: coming_soon(r, 'Звуки'), name='sounds'),
+    path('sounds/', game_sounds, name='sounds'),
     # /rewards/ handled by accounts.urls (auth-gated)
 ]

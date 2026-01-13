@@ -28,6 +28,7 @@ class GameResult(models.Model):
     class GameType(models.TextChoices):
         MATH = 'math', 'Math'
         MEMORY = 'memory', 'Memory'
+        SOUND = 'sound', 'Sound'
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

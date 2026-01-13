@@ -24,6 +24,7 @@
                 <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
             </a>
 
+            {% if stars %}
             <div class="status" aria-label="Статистика">
                 <div class="status__item">
                     <span class="status__value">{{ stars }}</span>
@@ -38,6 +39,7 @@
                     </svg>
                 </div>
             </div>
+            {% endif %}
         </header>
 
         <h1 class="section-title">Обери гру</h1>
