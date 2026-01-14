@@ -13,80 +13,8 @@
 </head>
 
 <body>
-    {% include 'includes/header.html' %}
     <div class="shell">
-        <aside class="sidebar" aria-label="Навігація">
-            <div class="sidebar__brand">
-                <div class="brand__mark" aria-hidden="true">
-                    <svg viewBox="0 0 48 48" role="img" focusable="false">
-                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
-                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
-                            stroke-linecap="round" />
-                    </svg>
-                </div>
-                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
-            </div>
-
-            <nav class="nav">
-                <div class="nav__section" aria-label="Головне">
-                    <a class="nav__item" href="{% url 'specialist_profile' %}">
-                        <span class="nav__icon" aria-hidden="true">🏠</span>
-                        <span class="nav__label">Мої Учні</span>
-                    </a>
-                    <a class="nav__item" href="{% url 'home' %}">
-                        <span class="nav__icon" aria-hidden="true">👥</span>
-                        <span class="nav__label">Учні</span>
-                    </a>
-                    <a class="nav__item" href="{% url 'home' %}">
-                        <span class="nav__icon" aria-hidden="true">🤖</span>
-                        <span class="nav__label">ML-Аналітика</span>
-                    </a>
-                </div>
-
-                <div class="nav__section" aria-label="Бібліотека">
-                    <div class="nav__title">Бібліотека</div>
-                    <a class="nav__item nav__item--active" href="{% url 'specialist_stories' %}">
-                        <span class="nav__icon" aria-hidden="true">📖</span>
-                        <span class="nav__label">Казки</span>
-                    </a>
-                    <a class="nav__item" href="{% url 'specialist_sounds' %}">
-                        <span class="nav__icon" aria-hidden="true">🔊</span>
-                        <span class="nav__label">Звуки</span>
-                    </a>
-                </div>
-
-                <div class="nav__section" aria-label="Ігри">
-                    <div class="nav__title">Ігри</div>
-                    <a class="nav__item" href="{% url 'games' %}">
-                        <span class="nav__icon" aria-hidden="true">🧩</span>
-                        <span class="nav__label">Конструктор Ігор</span>
-                    </a>
-                    <a class="nav__item" href="{% url 'game_words' %}">
-                        <span class="nav__icon" aria-hidden="true">🔤</span>
-                        <span class="nav__label">Пазли слів</span>
-                    </a>
-                    <a class="nav__item" href="{% url 'game_memory' %}">
-                        <span class="nav__icon" aria-hidden="true">🧠</span>
-                        <span class="nav__label">Памʼять</span>
-                    </a>
-                    <a class="nav__item" href="{% url 'game_attention' %}">
-                        <span class="nav__icon" aria-hidden="true">🎯</span>
-                        <span class="nav__label">Увага</span>
-                    </a>
-                    <a class="nav__item" href="{% url 'game_math' %}">
-                        <span class="nav__icon" aria-hidden="true">➗</span>
-                        <span class="nav__label">Математика</span>
-                    </a>
-                </div>
-
-                <div class="nav__spacer"></div>
-
-                <a class="nav__item nav__item--logout" href="{% url 'logout' %}">
-                    <span class="nav__icon" aria-hidden="true">⎋</span>
-                    <span class="nav__label">Вихід</span>
-                </a>
-            </nav>
-        </aside>
+        {% include 'includes/specialist_sidebar.html' with active='stories' %}
 
         <main class="main">
             <header class="top">
@@ -95,10 +23,6 @@
                     <div class="chip chip--user">
                         <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
                         <span class="chip__text">{{ username }}</span>
-                    </div>
-                    <div class="chip">
-                        <span class="chip__icon" aria-hidden="true">★</span>
-                        <span class="chip__text">{{ coins }}</span>
                     </div>
                 </div>
             </header>
@@ -124,17 +48,25 @@
                                     required value="{{ form.title.value|default:'' }}">
                             </label>
 
+                            <label class="drop" for="id_image">
+                                <input class="drop__input" id="id_image" name="image" type="file" accept="image/*">
+                                <span class="drop__box">
+                                    <span class="drop__icon" aria-hidden="true">🖼️</span>
+                                    <span class="drop__text" id="image-drop-text">Завантажити зображення</span>
+                                </span>
+                            </label>
+
                             <div class="type">
                                 <div class="type__label">Тип контенту</div>
                                 <div class="type__row" role="radiogroup" aria-label="Тип контенту">
                                     <label class="radio">
                                         <input type="radio" name="content_type" value="text" id="ct_text" 
-                                        {% if form.content_type.value|default:'text' == 'text' %}checked{% endif %}>
+                                        {% if form.content_type.value|default:'text' == 'text' %} checked {% endif %}>
                                         <span>Вставити текст</span>
                                     </label>
                                     <label class="radio">
                                         <input type="radio" name="content_type" value="pdf" id="ct_pdf" 
-                                        {% if form.content_type.value == 'pdf' %}checked{% endif %}>
+                                        {% if form.content_type.value == 'pdf' %} checked {% endif %}>
                                         <span>Завантажити PDF</span>
                                     </label>
                                 </div>
@@ -157,6 +89,10 @@
                             </div>
 
                             <div class="current current--hidden" id="current-media" aria-label="Поточні файли">
+                                <div class="current__meta">
+                                    <div class="current__label">Поточне зображення:</div>
+                                    <div class="current__thumb" id="current-image"></div>
+                                </div>
                                 <div class="current__meta">
                                     <div class="current__label">Поточний PDF:</div>
                                     <a class="current__link" id="current-pdf" href="#" target="_blank"
@@ -205,9 +141,14 @@
                             <div class="story-item" data-story-id="{{ s.id }}" data-title="{{ s.title|escape }}"
                                 data-content-type="{{ s.content_type }}"
                                 data-text="{% if s.content_type == 'text' %}{{ s.text|escapejs }}{% endif %}"
-                                data-pdf-url="{{ s.safe_pdf_url }}" data-audio-url="{{ s.safe_audio_url }}">
+                                data-image-url="{{ s.safe_image_url }}" data-pdf-url="{{ s.safe_pdf_url }}"
+                                data-audio-url="{{ s.safe_audio_url }}">
 
                                 <div class="story-item__main">
+                                    {% if s.safe_image_url %}
+                                    <div class="story-item__thumb"
+                                        style="background-image: url('{{ s.safe_image_url }}');"></div>
+                                    {% endif %}
                                     <div class="story-item__title">{{ s.title }}</div>
                                     <div class="story-item__meta">
                                         {% if s.content_type == 'pdf' and s.safe_pdf_url %}
@@ -218,9 +159,8 @@
                                         {% else %}
                                         <span class="icon icon--muted" title="Файл відсутній">PDF</span>
                                         {% endif %}
-
                                         <button class="icon icon--audio" type="button" title="Відтворити" 
-                                        {% if not s.safe_audio_url %}disabled{% endif %}>🔊</button>
+                                        {% if not s.safe_audio_url %} disabled {% endif %}>🔊</button>
                                     </div>
                                 </div>
 

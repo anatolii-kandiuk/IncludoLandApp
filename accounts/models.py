@@ -100,6 +100,8 @@ class Story(models.Model):
     title = models.CharField(max_length=120)
     content_type = models.CharField(max_length=8, choices=ContentType.choices, default=ContentType.TEXT)
 
+    image = models.ImageField(upload_to='stories/images/', blank=True, null=True)
+
     text = models.TextField(blank=True)
     pdf_file = models.FileField(upload_to='stories/pdf/', blank=True, null=True)
     audio = models.FileField(upload_to='stories/audio/', blank=True, null=True)
@@ -114,3 +116,24 @@ class Story(models.Model):
 
     def __str__(self) -> str:
         return f"Story({self.title})"
+
+
+class StoryListen(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='story_listens',
+    )
+    story = models.ForeignKey(
+        Story,
+        on_delete=models.CASCADE,
+        related_name='listens',
+    )
+    duration_seconds = models.PositiveIntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self) -> str:
+        return f"StoryListen({self.user.username}, {self.story_id})"

@@ -13,7 +13,6 @@
 </head>
 
 <body>
-    {% include 'includes/header.html' %}
     <main class="page profile">
         <header class="topbar">
             <a class="brand" href="{% url 'specialist_profile' %}" aria-label="Назад">
@@ -44,7 +43,8 @@
             <section class="card card--wide">
                 <div class="card__header">
                     <h2 class="card__title">Прогрес Завдань</h2>
-                    <div class="card__meta">Всього спроб: {{ results_count }}</div>
+                    <div class="card__meta">Всього спроб (ігри): {{ results_count }} · Слухань казок: {{
+                        stories_listens_count }}</div>
                 </div>
 
                 <div class="progress-list">

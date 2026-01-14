@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('story-form');
     const titleInput = document.getElementById('id_title');
+    const imageInput = document.getElementById('id_image');
     const textArea = document.getElementById('id_text');
     const pdfInput = document.getElementById('id_pdf_file');
     const audioInput = document.getElementById('id_audio');
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const boxPdf = document.getElementById('box-pdf');
 
     const pdfDropText = document.getElementById('pdf-drop-text');
+    const imageDropText = document.getElementById('image-drop-text');
     const audioUploadText = document.getElementById('audio-upload-text');
 
     const formTitle = document.getElementById('form-title');
@@ -18,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelBtn = document.getElementById('cancel-edit');
 
     const currentMedia = document.getElementById('current-media');
+    const currentImage = document.getElementById('current-image');
     const currentPdf = document.getElementById('current-pdf');
     const currentAudio = document.getElementById('current-audio');
 
@@ -25,12 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const recordTimeEl = document.getElementById('record-time');
     const audioPreview = document.getElementById('audio-preview');
 
-    if (!form || !titleInput || !ctText || !ctPdf || !boxText || !boxPdf || !textArea || !pdfInput || !audioInput) return;
+    if (!form || !titleInput || !ctText || !ctPdf || !boxText || !boxPdf || !textArea || !pdfInput || !audioInput || !imageInput) return;
 
     const createAction = form.dataset.createAction || form.getAttribute('action') || '';
     const editUrlTemplate = form.dataset.editUrlTemplate || '';
 
     let editingStoryId = null;
+    let listPlayer = null;
 
     function buildEditUrl(storyId) {
         if (!editUrlTemplate) return '';
@@ -83,6 +87,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (pdfDropText) pdfDropText.textContent = `PDF: ${file.name}`;
     });
 
+    imageInput.addEventListener('change', () => {
+        const file = imageInput.files && imageInput.files[0];
+        if (!file) return;
+        if (imageDropText) imageDropText.textContent = `Зображення: ${file.name}`;
+    });
+
     audioInput.addEventListener('change', () => {
         const file = audioInput.files && audioInput.files[0];
         if (!file) return;
@@ -115,11 +125,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cancelBtn) cancelBtn.classList.add('cancel--hidden');
 
         titleInput.value = '';
+        imageInput.value = '';
         textArea.value = '';
         pdfInput.value = '';
         audioInput.value = '';
 
         if (pdfDropText) pdfDropText.textContent = 'Завантажити PDF';
+        if (imageDropText) imageDropText.textContent = 'Завантажити зображення';
         if (audioUploadText) audioUploadText.textContent = 'Завантажити аудіофайл';
 
         ctText.checked = true;
@@ -132,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (currentMedia) currentMedia.classList.add('current--hidden');
+        if (currentImage) currentImage.style.backgroundImage = '';
         if (currentPdf) currentPdf.setAttribute('href', '#');
         if (currentAudio) currentAudio.src = '';
     }
@@ -155,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/\\t/g, '\t');
         const pdfUrl = itemEl.dataset.pdfUrl || '';
         const audioUrl = itemEl.dataset.audioUrl || '';
+        const imageUrl = itemEl.dataset.imageUrl || '';
 
         const editUrl = buildEditUrl(storyId);
         if (editUrl) form.setAttribute('action', editUrl);
@@ -167,8 +181,10 @@ document.addEventListener('DOMContentLoaded', () => {
         textArea.value = text;
 
         // reset file inputs (cannot prefill)
+        imageInput.value = '';
         pdfInput.value = '';
         audioInput.value = '';
+        if (imageDropText) imageDropText.textContent = 'Замінити зображення (не обовʼязково)';
         if (pdfDropText) pdfDropText.textContent = 'Замінити PDF (не обовʼязково)';
         if (audioUploadText) audioUploadText.textContent = 'Замінити аудіо (не обовʼязково)';
 
@@ -183,6 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (currentMedia) currentMedia.classList.remove('current--hidden');
+        if (currentImage) currentImage.style.backgroundImage = imageUrl ? `url('${imageUrl}')` : '';
         if (currentPdf) {
             currentPdf.href = pdfUrl || '#';
             currentPdf.textContent = pdfUrl ? 'Відкрити' : 'Немає файлу';
@@ -222,7 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Audio playback in list
-    let listPlayer = null;
     const audioButtons = Array.from(document.querySelectorAll('.icon--audio'));
     audioButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {

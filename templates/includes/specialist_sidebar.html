@@ -1,0 +1,84 @@
+{% load static %}
+<aside class="sidebar" aria-label="Навігація">
+    <div class="sidebar__brand">
+        <div class="brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="img" focusable="false">
+                <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
+                <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
+                    stroke-linecap="round" />
+            </svg>
+        </div>
+        <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
+    </div>
+
+    <nav class="nav">
+        <div class="nav__section" aria-label="Головне">
+            <a class="nav__item{% if active == 'profile' %} nav__item--active{% endif %}"
+                href="{% url 'specialist_profile' %}">
+                <span class="nav__icon" aria-hidden="true">🏠</span>
+                <span class="nav__label">Мої Учні</span>
+            </a>
+            <a class="nav__item" href="{% url 'home' %}">
+                <span class="nav__icon" aria-hidden="true">🤖</span>
+                <span class="nav__label">ML-Аналітика</span>
+            </a>
+        </div>
+
+        <div class="nav__section" aria-label="Бібліотека">
+            <div class="nav__title">Бібліотека</div>
+            <a class="nav__item{% if active == 'stories' %} nav__item--active{% endif %}"
+                href="{% url 'specialist_stories' %}">
+                <span class="nav__icon" aria-hidden="true">📖</span>
+                <span class="nav__label">Казки</span>
+            </a>
+            <a class="nav__item{% if active == 'sounds' %} nav__item--active{% endif %}"
+                href="{% url 'specialist_sounds' %}">
+                <span class="nav__icon" aria-hidden="true">🔊</span>
+                <span class="nav__label">Звуки</span>
+            </a>
+        </div>
+
+        <div class="nav__section" aria-label="Ігри">
+            <div class="nav__title">Ігри</div>
+            <a class="nav__item" href="{% url 'game_words' %}">
+                <span class="nav__icon" aria-hidden="true">🔤</span>
+                <span class="nav__label">Пазли слів</span>
+            </a>
+            <a class="nav__item" href="{% url 'game_memory' %}">
+                <span class="nav__icon" aria-hidden="true">🧠</span>
+                <span class="nav__label">Памʼять</span>
+            </a>
+            <a class="nav__item" href="{% url 'game_attention' %}">
+                <span class="nav__icon" aria-hidden="true">🎯</span>
+                <span class="nav__label">Увага</span>
+            </a>
+            <a class="nav__item" href="{% url 'game_math' %}">
+                <span class="nav__icon" aria-hidden="true">➗</span>
+                <span class="nav__label">Математика</span>
+            </a>
+        </div>
+
+        <div class="nav__spacer"></div>
+
+        <a class="nav__item nav__item--logout" href="{% url 'logout' %}">
+            <span class="nav__icon" aria-hidden="true">⎋</span>
+            <span class="nav__label">Вихід</span>
+        </a>
+    </nav>
+
+    {% if show_helper %}
+    <section class="helper helper--sidebar" aria-label="Підказка">
+        <div class="helper__owl" aria-hidden="true">
+            <div class="owl">
+                <div class="owl__face"></div>
+                <div class="owl__eyes"><span></span><span></span></div>
+                <div class="owl__beak"></div>
+            </div>
+        </div>
+        <div class="helper__bubble">
+            <div class="helper__title">Вітаю!</div>
+            <div class="helper__text">Успішного дня!</div>
+        </div>
+    </section>
+    {% endif %}
+</aside>

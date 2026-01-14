@@ -1,0 +1,98 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Казки — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/stories.css' %}">
+    <script src="{% static 'js/stories.js' %}" defer></script>
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+
+    <main class="page">
+        <header class="topbar">
+            <a class="brand" href="/" aria-label="На головну">
+                <div class="brand__mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" role="img" focusable="false">
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
+            </a>
+
+            {% if stars %}
+            <div class="status" aria-label="Статистика">
+                <div class="status__item">
+                    <span class="status__value">{{ stars }}</span>
+                    <span class="status__label">зірок</span>
+                    <span class="status__icon" aria-hidden="true">★</span>
+                </div>
+            </div>
+            {% endif %}
+        </header>
+
+        <h1 class="section-title">Бібліотека Казок</h1>
+
+        {% if stories %}
+        <section class="stories-grid" aria-label="Казки">
+            {% for s in stories %}
+            <article class="story-card" data-story-id="{{ s.id }}" data-title="{{ s.title|escape }}"
+                data-content-type="{{ s.content_type }}"
+                data-text="{% if s.content_type == 'text' %}{{ s.text|escapejs }}{% endif %}"
+                data-audio-url="{{ s.audio_url }}" data-pdf-url="{{ s.pdf_url }}">
+                <div class="story-card__image" {% if s.image_url %}style="background-image: url('{{ s.image_url }}');"
+                    {% endif %} aria-label="{{ s.title|escape }}"></div>
+                <div class="story-card__body">
+                    <div class="story-card__title">{{ s.title }}</div>
+                    <div class="story-card__actions">
+                        {% if s.content_type == 'pdf' and s.pdf_url %}
+                        <a class="pill-btn pill-btn--read" href="{{ s.pdf_url }}" target="_blank" rel="noopener">📖
+                            Читати</a>
+                        <a class="pill-btn pill-btn--download" href="{{ s.pdf_url }}" download>⬇ Завантажити</a>
+                        {% else %}
+                        <button class="pill-btn pill-btn--read" type="button" data-action="read">📖 Читати</button>
+                        {% if s.audio_url %}
+                        <a class="pill-btn pill-btn--download" href="{{ s.audio_url }}" download>⬇ Завантажити</a>
+                        {% else %}
+                        <button class="pill-btn pill-btn--download" type="button" disabled>⬇ Завантажити</button>
+                        {% endif %}
+                        {% endif %}
+
+                        {% if s.audio_url %}
+                        <button class="pill-btn pill-btn--listen" type="button" data-action="listen">🎧 Слухати</button>
+                        {% else %}
+                        <button class="pill-btn pill-btn--listen" type="button" disabled>🎧 Слухати</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+        {% else %}
+        <div class="empty">Поки що немає казок.</div>
+        {% endif %}
+
+        <div class="modal modal--hidden" id="story-modal" role="dialog" aria-modal="true"
+            aria-labelledby="story-modal-title">
+            <div class="modal__backdrop" data-action="close"></div>
+            <div class="modal__panel">
+                <div class="modal__header">
+                    <div class="modal__title" id="story-modal-title">Казка</div>
+                    <button class="modal__close" type="button" data-action="close" aria-label="Закрити">✕</button>
+                </div>
+                <div class="modal__content" id="story-modal-content"></div>
+            </div>
+        </div>
+
+        <audio id="story-audio" preload="none"></audio>
+    </main>
+</body>
+
+</html>

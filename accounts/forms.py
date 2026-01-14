@@ -34,12 +34,13 @@ class StoryForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # When editing existing story, allow keeping current files.
         if getattr(self.instance, 'pk', None):
+            self.fields['image'].required = False
             self.fields['pdf_file'].required = False
             self.fields['audio'].required = False
 
     class Meta:
         model = Story
-        fields = ('title', 'content_type', 'text', 'pdf_file', 'audio')
+        fields = ('title', 'content_type', 'image', 'text', 'pdf_file', 'audio')
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': 'Назва казки'}),
             'text': forms.Textarea(attrs={'rows': 6, 'placeholder': 'Текст казки...'}),

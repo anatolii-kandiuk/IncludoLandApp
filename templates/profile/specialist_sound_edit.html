@@ -13,37 +13,8 @@
 </head>
 
 <body>
-    {% include 'includes/header.html' %}
     <div class="shell">
-        <aside class="sidebar" aria-label="Навігація">
-            <div class="sidebar__brand">
-                <div class="brand__mark" aria-hidden="true">
-                    <svg viewBox="0 0 48 48" role="img" focusable="false">
-                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
-                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
-                            stroke-linecap="round" />
-                    </svg>
-                </div>
-                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
-            </div>
-
-            <nav class="nav">
-                <div class="nav__section" aria-label="Бібліотека">
-                    <div class="nav__title">Бібліотека</div>
-                    <a class="nav__item nav__item--active" href="{% url 'specialist_sounds' %}">
-                        <span class="nav__icon" aria-hidden="true">🔊</span>
-                        <span class="nav__label">Звуки</span>
-                    </a>
-                </div>
-
-                <div class="nav__spacer"></div>
-
-                <a class="nav__item nav__item--logout" href="{% url 'logout' %}">
-                    <span class="nav__icon" aria-hidden="true">⎋</span>
-                    <span class="nav__label">Вихід</span>
-                </a>
-            </nav>
-        </aside>
+        {% include 'includes/specialist_sidebar.html' with active='sounds' %}
 
         <main class="main">
             <header class="top">
@@ -52,10 +23,6 @@
                     <div class="chip chip--user">
                         <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
                         <span class="chip__text">{{ username }}</span>
-                    </div>
-                    <div class="chip">
-                        <span class="chip__icon" aria-hidden="true">★</span>
-                        <span class="chip__text">{{ coins }}</span>
                     </div>
                 </div>
             </header>

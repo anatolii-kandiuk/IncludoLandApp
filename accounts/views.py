@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.urls import reverse
 
 from .forms import RegisterForm, SoundCardForm, StoryForm
-from .models import ChildProfile, GameResult, SpecialistProfile, SoundCard, Story
+from .models import ChildProfile, GameResult, SpecialistProfile, SoundCard, Story, StoryListen
 
 
 def _build_child_stats_for_user(user):
@@ -37,15 +37,25 @@ def _build_child_stats_for_user(user):
     sound_avg = avg_score(GameResult.GameType.SOUND)
     words_avg = avg_score(GameResult.GameType.WORDS)
 
+    total_stories = Story.objects.filter(is_active=True).count()
+    listened_unique = (
+        StoryListen.objects.filter(user=user)
+        .values('story_id')
+        .distinct()
+        .count()
+    )
+    stories_listen_pct = int(round((listened_unique * 100) / total_stories)) if total_stories else 0
+
     progress = [
         {'label': 'Математика', 'value': math_avg},
         {'label': "Памʼять", 'value': memory_avg},
         {'label': 'Звуки', 'value': sound_avg},
         {'label': 'Пазли слів', 'value': words_avg},
+        {'label': 'Казки (слухання)', 'value': stories_listen_pct},
     ]
 
-    radar_labels = ['Математика', "Памʼять", 'Звуки', 'Пазли слів']
-    radar_values = [math_avg, memory_avg, sound_avg, words_avg]
+    radar_labels = ['Математика', "Памʼять", 'Звуки', 'Пазли слів', 'Казки']
+    radar_values = [math_avg, memory_avg, sound_avg, words_avg, stories_listen_pct]
 
     line_datasets = [
         {'label': 'Математика', 'data': math_values, 'color': '#2b97e5'},
@@ -56,6 +66,9 @@ def _build_child_stats_for_user(user):
 
     return {
         'results_count': len(results),
+        'stories_listens_count': StoryListen.objects.filter(user=user).count(),
+        'stories_listened_unique': listened_unique,
+        'stories_total': total_stories,
         'progress': progress,
         'line_labels': json.dumps(line_labels, ensure_ascii=False),
         'line_datasets': json.dumps(line_datasets, ensure_ascii=False),
@@ -66,6 +79,7 @@ def _build_child_stats_for_user(user):
             'memory': memory_avg,
             'sound': sound_avg,
             'words': words_avg,
+            'stories_listen': stories_listen_pct,
         },
     }
 
@@ -168,6 +182,9 @@ def child_profile(request):
         'line_datasets': stats['line_datasets'],
         'radar_labels': stats['radar_labels'],
         'radar_values': stats['radar_values'],
+        'stories_listens_count': stats['stories_listens_count'],
+        'stories_listened_unique': stats['stories_listened_unique'],
+        'stories_total': stats['stories_total'],
     }
     return render(request, 'profile/child_profile.html', context)
 
@@ -278,6 +295,7 @@ def specialist_student_stats(request, child_profile_id: int):
         'student_username': child.user.username,
         'student_stars': child.stars,
         'results_count': stats['results_count'],
+        'stories_listens_count': stats['stories_listens_count'],
         'progress': stats['progress'],
         'line_labels': stats['line_labels'],
         'line_datasets': stats['line_datasets'],
@@ -428,13 +446,21 @@ def specialist_stories(request):
 
     stories = list(
         Story.objects.filter(created_by=request.user)
-        .only('id', 'title', 'content_type', 'text', 'pdf_file', 'audio', 'created_at')
+        .only('id', 'title', 'content_type', 'image', 'text', 'pdf_file', 'audio', 'created_at')
         .order_by('-created_at')
     )
 
     for s in stories:
+        image_url = ''
         pdf_url = ''
         audio_url = ''
+
+        if s.image:
+            try:
+                if s.image.storage.exists(s.image.name):
+                    image_url = s.image.url
+            except Exception:
+                image_url = ''
 
         if s.pdf_file:
             try:
@@ -452,6 +478,7 @@ def specialist_stories(request):
 
         s.safe_pdf_url = pdf_url
         s.safe_audio_url = audio_url
+        s.safe_image_url = image_url
 
     context = {
         'username': request.user.username,
@@ -476,6 +503,7 @@ def specialist_story_edit(request, story_id: int):
 
     old_pdf = story.pdf_file
     old_audio = story.audio
+    old_image = story.image
 
     form = StoryForm(request.POST, request.FILES, instance=story)
     if form.is_valid():
@@ -495,6 +523,13 @@ def specialist_story_edit(request, story_id: int):
             except Exception:
                 pass
 
+        # If uploading new image, delete old.
+        if 'image' in request.FILES and old_image:
+            try:
+                old_image.delete(save=False)
+            except Exception:
+                pass
+
         # If uploading new audio, delete old.
         if 'audio' in request.FILES and old_audio:
             try:
@@ -507,12 +542,19 @@ def specialist_story_edit(request, story_id: int):
 
     stories = list(
         Story.objects.filter(created_by=request.user)
-        .only('id', 'title', 'content_type', 'text', 'pdf_file', 'audio', 'created_at')
+        .only('id', 'title', 'content_type', 'image', 'text', 'pdf_file', 'audio', 'created_at')
         .order_by('-created_at')
     )
     for s in stories:
+        image_url = ''
         pdf_url = ''
         audio_url = ''
+        if s.image:
+            try:
+                if s.image.storage.exists(s.image.name):
+                    image_url = s.image.url
+            except Exception:
+                image_url = ''
         if s.pdf_file:
             try:
                 if s.pdf_file.storage.exists(s.pdf_file.name):
@@ -527,6 +569,7 @@ def specialist_story_edit(request, story_id: int):
                 audio_url = ''
         s.safe_pdf_url = pdf_url
         s.safe_audio_url = audio_url
+        s.safe_image_url = image_url
 
     context = {
         'username': request.user.username,
@@ -554,6 +597,11 @@ def specialist_story_delete(request, story_id: int):
         try:
             if story.audio:
                 story.audio.delete(save=False)
+        except Exception:
+            pass
+        try:
+            if story.image:
+                story.image.delete(save=False)
         except Exception:
             pass
         story.delete()
@@ -620,3 +668,42 @@ def record_game_result(request):
     )
 
     return JsonResponse({'ok': True, 'id': result.id})
+
+
+@login_required
+@require_POST
+def record_story_listen(request):
+    if hasattr(request.user, 'specialist_profile'):
+        return JsonResponse({'ok': False, 'error': 'specialist_cannot_record'}, status=403)
+
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'ok': False, 'error': 'invalid_json'}, status=400)
+
+    story_id = payload.get('story_id')
+    try:
+        story_id = int(story_id)
+    except (TypeError, ValueError):
+        return JsonResponse({'ok': False, 'error': 'invalid_story_id'}, status=400)
+
+    story = Story.objects.filter(id=story_id, is_active=True).only('id').first()
+    if not story:
+        return JsonResponse({'ok': False, 'error': 'story_not_found'}, status=404)
+
+    duration_seconds = payload.get('duration_seconds')
+    if duration_seconds is not None:
+        try:
+            duration_seconds = int(duration_seconds)
+        except (TypeError, ValueError):
+            duration_seconds = None
+        if duration_seconds is not None and duration_seconds < 0:
+            duration_seconds = None
+
+    listen = StoryListen.objects.create(
+        user=request.user,
+        story=story,
+        duration_seconds=duration_seconds,
+    )
+
+    return JsonResponse({'ok': True, 'id': listen.id})
