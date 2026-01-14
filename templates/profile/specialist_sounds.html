@@ -45,7 +45,7 @@
 
                 <div class="nav__section" aria-label="Бібліотека">
                     <div class="nav__title">Бібліотека</div>
-                    <a class="nav__item" href="{% url 'stories' %}">
+                    <a class="nav__item" href="{% url 'specialist_stories' %}">
                         <span class="nav__icon" aria-hidden="true">📖</span>
                         <span class="nav__label">Казки</span>
                     </a>
@@ -175,8 +175,8 @@
                         <div class="lib-card" data-card-id="{{ c.id }}" data-title="{{ c.title|escape }}"
                             data-image-url="{{ c.safe_image_url }}" data-audio-url="{{ c.safe_audio_url }}"
                             role="button" tabindex="0" aria-label="Редагувати: {{ c.title|escape }}">
-                            <div class="lib-card__img" {% if c.safe_image_url
-                                %}style="background-image: url('{{ c.safe_image_url }}');" {% endif %}></div>
+                            <div class="lib-card__img" 
+                            {% if c.safe_image_url %} style="background-image: url('{{ c.safe_image_url }}');" {% endif %}></div>
                             <div class="lib-card__label">{{ c.title }}</div>
                             <div class="lib-card__actions">
                                 <button class="lib-card__play" type="button" data-audio-url="{{ c.safe_audio_url }}" {%

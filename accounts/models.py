@@ -84,3 +84,33 @@ class SoundCard(models.Model):
 
     def __str__(self) -> str:
         return f"SoundCard({self.title})"
+
+
+class Story(models.Model):
+    class ContentType(models.TextChoices):
+        TEXT = 'text', 'Text'
+        PDF = 'pdf', 'PDF'
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='stories',
+    )
+
+    title = models.CharField(max_length=120)
+    content_type = models.CharField(max_length=8, choices=ContentType.choices, default=ContentType.TEXT)
+
+    text = models.TextField(blank=True)
+    pdf_file = models.FileField(upload_to='stories/pdf/', blank=True, null=True)
+    audio = models.FileField(upload_to='stories/audio/', blank=True, null=True)
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self) -> str:
+        return f"Story({self.title})"

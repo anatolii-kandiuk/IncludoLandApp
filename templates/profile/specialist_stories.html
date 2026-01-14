@@ -1,0 +1,249 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Керування казками — Профіль спеціаліста</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist_stories.css' %}">
+    <script src="{% static 'js/specialist_stories.js' %}" defer></script>
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+    <div class="shell">
+        <aside class="sidebar" aria-label="Навігація">
+            <div class="sidebar__brand">
+                <div class="brand__mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" role="img" focusable="false">
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
+            </div>
+
+            <nav class="nav">
+                <div class="nav__section" aria-label="Головне">
+                    <a class="nav__item" href="{% url 'specialist_profile' %}">
+                        <span class="nav__icon" aria-hidden="true">🏠</span>
+                        <span class="nav__label">Мої Учні</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'home' %}">
+                        <span class="nav__icon" aria-hidden="true">👥</span>
+                        <span class="nav__label">Учні</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'home' %}">
+                        <span class="nav__icon" aria-hidden="true">🤖</span>
+                        <span class="nav__label">ML-Аналітика</span>
+                    </a>
+                </div>
+
+                <div class="nav__section" aria-label="Бібліотека">
+                    <div class="nav__title">Бібліотека</div>
+                    <a class="nav__item nav__item--active" href="{% url 'specialist_stories' %}">
+                        <span class="nav__icon" aria-hidden="true">📖</span>
+                        <span class="nav__label">Казки</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'specialist_sounds' %}">
+                        <span class="nav__icon" aria-hidden="true">🔊</span>
+                        <span class="nav__label">Звуки</span>
+                    </a>
+                </div>
+
+                <div class="nav__section" aria-label="Ігри">
+                    <div class="nav__title">Ігри</div>
+                    <a class="nav__item" href="{% url 'games' %}">
+                        <span class="nav__icon" aria-hidden="true">🧩</span>
+                        <span class="nav__label">Конструктор Ігор</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'game_words' %}">
+                        <span class="nav__icon" aria-hidden="true">🔤</span>
+                        <span class="nav__label">Пазли слів</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'game_memory' %}">
+                        <span class="nav__icon" aria-hidden="true">🧠</span>
+                        <span class="nav__label">Памʼять</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'game_attention' %}">
+                        <span class="nav__icon" aria-hidden="true">🎯</span>
+                        <span class="nav__label">Увага</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'game_math' %}">
+                        <span class="nav__icon" aria-hidden="true">➗</span>
+                        <span class="nav__label">Математика</span>
+                    </a>
+                </div>
+
+                <div class="nav__spacer"></div>
+
+                <a class="nav__item nav__item--logout" href="{% url 'logout' %}">
+                    <span class="nav__icon" aria-hidden="true">⎋</span>
+                    <span class="nav__label">Вихід</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main">
+            <header class="top">
+                <div class="top__left"></div>
+                <div class="top__right">
+                    <div class="chip chip--user">
+                        <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
+                        <span class="chip__text">{{ username }}</span>
+                    </div>
+                    <div class="chip">
+                        <span class="chip__icon" aria-hidden="true">★</span>
+                        <span class="chip__text">{{ coins }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="page-title">
+                    <h1 class="page-title__h">Керування казками</h1>
+                </div>
+
+                <div class="stories">
+                    <section class="panel">
+                        <h2 class="panel__title" id="form-title">Додати нову казку</h2>
+
+                        <form class="story-form" id="story-form" method="post" enctype="multipart/form-data"
+                            action="{% url 'specialist_stories' %}" data-create-action="{% url 'specialist_stories' %}"
+                            data-edit-url-template="{% url 'specialist_story_edit' 0 %}"
+                            data-edit-story-id="{% if edit_story_id %}{{ edit_story_id }}{% endif %}">
+                            {% csrf_token %}
+
+                            <label class="field">
+                                <span class="field__label">Назва казки</span>
+                                <input class="field__input" id="id_title" name="title" type="text" maxlength="120"
+                                    required value="{{ form.title.value|default:'' }}">
+                            </label>
+
+                            <div class="type">
+                                <div class="type__label">Тип контенту</div>
+                                <div class="type__row" role="radiogroup" aria-label="Тип контенту">
+                                    <label class="radio">
+                                        <input type="radio" name="content_type" value="text" id="ct_text" 
+                                        {% if form.content_type.value|default:'text' == 'text' %}checked{% endif %}>
+                                        <span>Вставити текст</span>
+                                    </label>
+                                    <label class="radio">
+                                        <input type="radio" name="content_type" value="pdf" id="ct_pdf" 
+                                        {% if form.content_type.value == 'pdf' %}checked{% endif %}>
+                                        <span>Завантажити PDF</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="content-box" id="box-text">
+                                <textarea class="textarea" id="id_text"
+                                    name="text">{{ form.text.value|default:'' }}</textarea>
+                            </div>
+
+                            <div class="content-box content-box--hidden" id="box-pdf">
+                                <label class="drop" for="id_pdf_file">
+                                    <input class="drop__input" id="id_pdf_file" name="pdf_file" type="file"
+                                        accept="application/pdf">
+                                    <span class="drop__box">
+                                        <span class="drop__icon" aria-hidden="true">📄</span>
+                                        <span class="drop__text" id="pdf-drop-text">Завантажити PDF</span>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="current current--hidden" id="current-media" aria-label="Поточні файли">
+                                <div class="current__meta">
+                                    <div class="current__label">Поточний PDF:</div>
+                                    <a class="current__link" id="current-pdf" href="#" target="_blank"
+                                        rel="noopener">Відкрити</a>
+                                </div>
+                                <div class="current__meta">
+                                    <div class="current__label">Поточний аудіосупровід:</div>
+                                    <audio class="current__audio" id="current-audio" controls></audio>
+                                </div>
+                            </div>
+
+                            <div class="audio">
+                                <div class="audio__label">Аудіосупровід</div>
+                                <button class="record" id="record-btn" type="button">🎙 Записати аудіо <span
+                                        id="record-time">(00:00)</span></button>
+
+                                <label class="upload" for="id_audio">
+                                    <input class="upload__input" id="id_audio" name="audio" type="file"
+                                        accept="audio/*">
+                                    <span class="upload__btn" id="audio-upload-text">Завантажити аудіофайл</span>
+                                </label>
+
+                                <audio class="audio__preview" id="audio-preview" controls></audio>
+                            </div>
+
+                            <div class="actions">
+                                <button class="save" id="save-btn" type="submit">Зберегти казку</button>
+                                <button class="cancel cancel--hidden" id="cancel-edit" type="button">Скасувати
+                                    редагування</button>
+                            </div>
+
+                            {% if form.errors %}
+                            <div class="form-errors" role="alert">
+                                {{ form.errors }}
+                            </div>
+                            {% endif %}
+                        </form>
+                    </section>
+
+                    <section class="panel">
+                        <h2 class="panel__title">Список казок</h2>
+
+                        {% if stories %}
+                        <div class="story-list" aria-label="Список казок">
+                            {% for s in stories %}
+                            <div class="story-item" data-story-id="{{ s.id }}" data-title="{{ s.title|escape }}"
+                                data-content-type="{{ s.content_type }}"
+                                data-text="{% if s.content_type == 'text' %}{{ s.text|escapejs }}{% endif %}"
+                                data-pdf-url="{{ s.safe_pdf_url }}" data-audio-url="{{ s.safe_audio_url }}">
+
+                                <div class="story-item__main">
+                                    <div class="story-item__title">{{ s.title }}</div>
+                                    <div class="story-item__meta">
+                                        {% if s.content_type == 'pdf' and s.safe_pdf_url %}
+                                        <a class="icon" href="{{ s.safe_pdf_url }}" target="_blank" rel="noopener"
+                                            title="Відкрити PDF">PDF</a>
+                                        {% elif s.content_type == 'text' %}
+                                        <span class="icon" title="Текст">TXT</span>
+                                        {% else %}
+                                        <span class="icon icon--muted" title="Файл відсутній">PDF</span>
+                                        {% endif %}
+
+                                        <button class="icon icon--audio" type="button" title="Відтворити" 
+                                        {% if not s.safe_audio_url %}disabled{% endif %}>🔊</button>
+                                    </div>
+                                </div>
+
+                                <div class="story-item__actions">
+                                    <button class="btn btn--edit" type="button">Редагувати</button>
+                                    <form method="post" action="{% url 'specialist_story_delete' s.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{% url 'specialist_stories' %}">
+                                        <button class="btn btn--danger" type="submit"
+                                            onclick="return confirm('Видалити казку «{{ s.title|escapejs }}»?');">Видалити</button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty">Поки що немає казок.</div>
+                        {% endif %}
+                    </section>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

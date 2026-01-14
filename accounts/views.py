@@ -9,8 +9,8 @@ from django.shortcuts import redirect, render
 from django.db.models import Q
 from django.urls import reverse
 
-from .forms import RegisterForm, SoundCardForm
-from .models import ChildProfile, GameResult, SpecialistProfile, SoundCard
+from .forms import RegisterForm, SoundCardForm, StoryForm
+from .models import ChildProfile, GameResult, SpecialistProfile, SoundCard, Story
 
 
 def _build_child_stats_for_user(user):
@@ -408,6 +408,157 @@ def specialist_sound_delete(request, card_id: int):
         card.delete()
 
     next_url = request.POST.get('next') or reverse('specialist_sounds')
+    return redirect(next_url)
+
+
+@login_required
+def specialist_stories(request):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    if request.method == 'POST':
+        form = StoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            story = form.save(commit=False)
+            story.created_by = request.user
+            story.save()
+            return redirect('specialist_stories')
+    else:
+        form = StoryForm()
+
+    stories = list(
+        Story.objects.filter(created_by=request.user)
+        .only('id', 'title', 'content_type', 'text', 'pdf_file', 'audio', 'created_at')
+        .order_by('-created_at')
+    )
+
+    for s in stories:
+        pdf_url = ''
+        audio_url = ''
+
+        if s.pdf_file:
+            try:
+                if s.pdf_file.storage.exists(s.pdf_file.name):
+                    pdf_url = s.pdf_file.url
+            except Exception:
+                pdf_url = ''
+
+        if s.audio:
+            try:
+                if s.audio.storage.exists(s.audio.name):
+                    audio_url = s.audio.url
+            except Exception:
+                audio_url = ''
+
+        s.safe_pdf_url = pdf_url
+        s.safe_audio_url = audio_url
+
+    context = {
+        'username': request.user.username,
+        'coins': request.user.specialist_profile.coins,
+        'form': form,
+        'stories': stories,
+    }
+    return render(request, 'profile/specialist_stories.html', context)
+
+
+@login_required
+def specialist_story_edit(request, story_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    story = Story.objects.filter(id=story_id, created_by=request.user).first()
+    if not story:
+        return redirect('specialist_stories')
+
+    if request.method != 'POST':
+        return redirect('specialist_stories')
+
+    old_pdf = story.pdf_file
+    old_audio = story.audio
+
+    form = StoryForm(request.POST, request.FILES, instance=story)
+    if form.is_valid():
+        updated = form.save(commit=False)
+        # If switching to TEXT, delete old PDF.
+        if updated.content_type == Story.ContentType.TEXT and old_pdf:
+            try:
+                old_pdf.delete(save=False)
+            except Exception:
+                pass
+            updated.pdf_file = None
+
+        # If uploading new PDF, delete old.
+        if 'pdf_file' in request.FILES and old_pdf:
+            try:
+                old_pdf.delete(save=False)
+            except Exception:
+                pass
+
+        # If uploading new audio, delete old.
+        if 'audio' in request.FILES and old_audio:
+            try:
+                old_audio.delete(save=False)
+            except Exception:
+                pass
+
+        updated.save()
+        return redirect('specialist_stories')
+
+    stories = list(
+        Story.objects.filter(created_by=request.user)
+        .only('id', 'title', 'content_type', 'text', 'pdf_file', 'audio', 'created_at')
+        .order_by('-created_at')
+    )
+    for s in stories:
+        pdf_url = ''
+        audio_url = ''
+        if s.pdf_file:
+            try:
+                if s.pdf_file.storage.exists(s.pdf_file.name):
+                    pdf_url = s.pdf_file.url
+            except Exception:
+                pdf_url = ''
+        if s.audio:
+            try:
+                if s.audio.storage.exists(s.audio.name):
+                    audio_url = s.audio.url
+            except Exception:
+                audio_url = ''
+        s.safe_pdf_url = pdf_url
+        s.safe_audio_url = audio_url
+
+    context = {
+        'username': request.user.username,
+        'coins': request.user.specialist_profile.coins,
+        'form': form,
+        'stories': stories,
+        'edit_story_id': story.id,
+    }
+    return render(request, 'profile/specialist_stories.html', context)
+
+
+@login_required
+@require_POST
+def specialist_story_delete(request, story_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    story = Story.objects.filter(id=story_id, created_by=request.user).first()
+    if story:
+        try:
+            if story.pdf_file:
+                story.pdf_file.delete(save=False)
+        except Exception:
+            pass
+        try:
+            if story.audio:
+                story.audio.delete(save=False)
+        except Exception:
+            pass
+        story.delete()
+
+    next_url = request.POST.get('next') or reverse('specialist_stories')
     return redirect(next_url)
 
 
