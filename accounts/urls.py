@@ -9,6 +9,14 @@ urlpatterns = [
     path('profile/', views.child_profile, name='child_profile'),
     path('specialist/', views.specialist_profile, name='specialist_profile'),
 
+    path('specialist/sounds/', views.specialist_sounds, name='specialist_sounds'),
+    path('specialist/sounds/<int:card_id>/edit/', views.specialist_sound_edit, name='specialist_sound_edit'),
+    path('specialist/sounds/<int:card_id>/delete/', views.specialist_sound_delete, name='specialist_sound_delete'),
+
+    path('specialist/students/add/', views.specialist_add_student, name='specialist_add_student'),
+    path('specialist/students/<int:child_profile_id>/', views.specialist_student_stats, name='specialist_student_stats'),
+    path('specialist/students/<int:child_profile_id>/remove/', views.specialist_remove_student, name='specialist_remove_student'),
+
     path('login/', views.RoleAwareLoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('register/', views.register_choice, name='register'),

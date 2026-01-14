@@ -6,10 +6,68 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.shortcuts import redirect, render
+from django.db.models import Q
 from django.urls import reverse
 
-from .forms import RegisterForm
-from .models import ChildProfile, GameResult, SpecialistProfile
+from .forms import RegisterForm, SoundCardForm
+from .models import ChildProfile, GameResult, SpecialistProfile, SoundCard
+
+
+def _build_child_stats_for_user(user):
+    results = list(
+        GameResult.objects.filter(user=user)
+        .only('game_type', 'score', 'created_at')
+        .order_by('created_at')
+    )
+
+    line_labels = [r.created_at.strftime('%d.%m %H:%M') for r in results]
+    math_values = [r.score if r.game_type == GameResult.GameType.MATH else None for r in results]
+    memory_values = [r.score if r.game_type == GameResult.GameType.MEMORY else None for r in results]
+    sound_values = [r.score if r.game_type == GameResult.GameType.SOUND else None for r in results]
+    words_values = [r.score if r.game_type == GameResult.GameType.WORDS else None for r in results]
+
+    def avg_score(game_type: str) -> int:
+        values = [r.score for r in results if r.game_type == game_type]
+        if not values:
+            return 0
+        return int(round(sum(values) / len(values)))
+
+    math_avg = avg_score(GameResult.GameType.MATH)
+    memory_avg = avg_score(GameResult.GameType.MEMORY)
+    sound_avg = avg_score(GameResult.GameType.SOUND)
+    words_avg = avg_score(GameResult.GameType.WORDS)
+
+    progress = [
+        {'label': 'Математика', 'value': math_avg},
+        {'label': "Памʼять", 'value': memory_avg},
+        {'label': 'Звуки', 'value': sound_avg},
+        {'label': 'Пазли слів', 'value': words_avg},
+    ]
+
+    radar_labels = ['Математика', "Памʼять", 'Звуки', 'Пазли слів']
+    radar_values = [math_avg, memory_avg, sound_avg, words_avg]
+
+    line_datasets = [
+        {'label': 'Математика', 'data': math_values, 'color': '#2b97e5'},
+        {'label': "Памʼять", 'data': memory_values, 'color': '#19b3b9'},
+        {'label': 'Звуки', 'data': sound_values, 'color': '#c28b00'},
+        {'label': 'Пазли слів', 'data': words_values, 'color': '#7c3aed'},
+    ]
+
+    return {
+        'results_count': len(results),
+        'progress': progress,
+        'line_labels': json.dumps(line_labels, ensure_ascii=False),
+        'line_datasets': json.dumps(line_datasets, ensure_ascii=False),
+        'radar_labels': json.dumps(radar_labels, ensure_ascii=False),
+        'radar_values': json.dumps(radar_values),
+        'avg': {
+            'math': math_avg,
+            'memory': memory_avg,
+            'sound': sound_avg,
+            'words': words_avg,
+        },
+    }
 
 
 def rewards_entry(request):
@@ -99,80 +157,60 @@ def child_profile(request):
         {'title': 'Увага', 'subtitle': '5 ігор', 'tone': 'teal', 'icon': 'target'},
     ]
 
-    results = list(
-        GameResult.objects.filter(user=request.user)
-        .only('game_type', 'score', 'created_at')
-        .order_by('created_at')
-    )
-
-    line_labels = [r.created_at.strftime('%d.%m %H:%M') for r in results]
-    math_values = [r.score if r.game_type == GameResult.GameType.MATH else None for r in results]
-    memory_values = [r.score if r.game_type == GameResult.GameType.MEMORY else None for r in results]
-    sound_values = [r.score if r.game_type == GameResult.GameType.SOUND else None for r in results]
-    words_values = [r.score if r.game_type == GameResult.GameType.WORDS else None for r in results]
-
-    def avg_score(game_type: str) -> int:
-        values = [r.score for r in results if r.game_type == game_type]
-        if not values:
-            return 0
-        return int(round(sum(values) / len(values)))
-
-    math_avg = avg_score(GameResult.GameType.MATH)
-    memory_avg = avg_score(GameResult.GameType.MEMORY)
-    sound_avg = avg_score(GameResult.GameType.SOUND)
-    words_avg = avg_score(GameResult.GameType.WORDS)
-
-    progress = [
-        {'label': 'Математика', 'value': math_avg},
-        {'label': "Памʼять", 'value': memory_avg},
-        {'label': 'Звуки', 'value': sound_avg},
-        {'label': 'Пазли слів', 'value': words_avg},
-    ]
-
-    radar_labels = ['Математика', "Памʼять", 'Звуки', 'Пазли слів']
-    radar_values = [math_avg, memory_avg, sound_avg, words_avg]
-
-    line_datasets = [
-        {'label': 'Математика', 'data': math_values, 'color': '#2b97e5'},
-        {'label': "Памʼять", 'data': memory_values, 'color': '#19b3b9'},
-        {'label': 'Звуки', 'data': sound_values, 'color': '#c28b00'},
-        {'label': 'Пазли слів', 'data': words_values, 'color': '#7c3aed'},
-    ]
+    stats = _build_child_stats_for_user(request.user)
 
     context = {
         'username': request.user.username,
         'stars': profile.stars,
         'rewards': rewards,
-        'progress': progress,
-        'line_labels': json.dumps(line_labels, ensure_ascii=False),
-        'line_datasets': json.dumps(line_datasets, ensure_ascii=False),
-        'radar_labels': json.dumps(radar_labels, ensure_ascii=False),
-        'radar_values': json.dumps(radar_values),
+        'progress': stats['progress'],
+        'line_labels': stats['line_labels'],
+        'line_datasets': stats['line_datasets'],
+        'radar_labels': stats['radar_labels'],
+        'radar_values': stats['radar_values'],
     }
     return render(request, 'profile/child_profile.html', context)
 
 
 @login_required
 def specialist_profile(request):
-    # NOTE: No classes are stored in DB by request; this page uses mock data only.
-
     if not hasattr(request.user, 'specialist_profile'):
         return redirect('child_profile')
 
     specialist = request.user.specialist_profile
 
-    attention_students = [
-        {
-            'name': 'Іван І.',
-            'subtitle': 'Зосередженість: Памʼять',
-            'progress': 35,
-        },
-        {
-            'name': 'Іван І.',
-            'subtitle': 'Зосередженість: Памʼять',
-            'progress': 70,
-        },
-    ]
+    q = (request.GET.get('q') or '').strip()
+    my_students = list(
+        specialist.students.select_related('user')
+        .order_by('user__username')
+    )
+
+    my_ids = {s.id for s in my_students}
+
+    search_results = []
+    if q:
+        search_results = list(
+            ChildProfile.objects.select_related('user')
+            .filter(
+                Q(user__username__icontains=q)
+                | Q(user__first_name__icontains=q)
+                | Q(user__last_name__icontains=q)
+            )
+            .exclude(id__in=my_ids)
+            .order_by('user__username')[:20]
+        )
+
+    attention_students = []
+    for s in my_students[:6]:
+        stats = _build_child_stats_for_user(s.user)
+        attention_students.append(
+            {
+                'id': s.id,
+                'name': s.user.username,
+                'subtitle': 'Зосередженість: Памʼять',
+                'progress': stats['avg']['memory'],
+            }
+        )
 
     activity_labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']
     activity_yellow = [20, 45, 30, 80, 55, 70, 90]
@@ -182,11 +220,195 @@ def specialist_profile(request):
         'username': request.user.username,
         'coins': specialist.coins,
         'attention_students': attention_students,
+        'my_students': my_students,
+        'q': q,
+        'search_results': search_results,
         'activity_labels': json.dumps(activity_labels, ensure_ascii=False),
         'activity_yellow': json.dumps(activity_yellow),
         'activity_teal': json.dumps(activity_teal),
     }
     return render(request, 'profile/specialist_profile.html', context)
+
+
+@login_required
+@require_POST
+def specialist_add_student(request):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    specialist = request.user.specialist_profile
+    child_id = request.POST.get('child_id')
+    try:
+        child_id_int = int(child_id)
+    except (TypeError, ValueError):
+        return redirect('specialist_profile')
+
+    target = ChildProfile.objects.filter(id=child_id_int).first()
+    if target:
+        specialist.students.add(target)
+
+    next_url = request.POST.get('next') or reverse('specialist_profile')
+    return redirect(next_url)
+
+
+@login_required
+@require_POST
+def specialist_remove_student(request, child_profile_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    specialist = request.user.specialist_profile
+    specialist.students.remove(child_profile_id)
+    next_url = request.POST.get('next') or reverse('specialist_profile')
+    return redirect(next_url)
+
+
+@login_required
+def specialist_student_stats(request, child_profile_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    specialist = request.user.specialist_profile
+    child = specialist.students.select_related('user').filter(id=child_profile_id).first()
+    if not child:
+        return redirect('specialist_profile')
+
+    stats = _build_child_stats_for_user(child.user)
+    context = {
+        'student_username': child.user.username,
+        'student_stars': child.stars,
+        'results_count': stats['results_count'],
+        'progress': stats['progress'],
+        'line_labels': stats['line_labels'],
+        'line_datasets': stats['line_datasets'],
+        'radar_labels': stats['radar_labels'],
+        'radar_values': stats['radar_values'],
+    }
+    return render(request, 'profile/student_stats.html', context)
+
+
+@login_required
+def specialist_sounds(request):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    if request.method == 'POST':
+        form = SoundCardForm(request.POST, request.FILES)
+        if form.is_valid():
+            card = form.save(commit=False)
+            card.created_by = request.user
+            card.save()
+            return redirect('specialist_sounds')
+    else:
+        form = SoundCardForm()
+
+    cards = list(
+        SoundCard.objects.filter(created_by=request.user)
+        .only('id', 'title', 'image', 'audio', 'created_at')
+        .order_by('-created_at')
+    )
+
+    for c in cards:
+        image_url = ''
+        audio_url = ''
+
+        if c.image:
+            try:
+                if c.image.storage.exists(c.image.name):
+                    image_url = c.image.url
+            except Exception:
+                image_url = ''
+
+        if c.audio:
+            try:
+                if c.audio.storage.exists(c.audio.name):
+                    audio_url = c.audio.url
+            except Exception:
+                audio_url = ''
+
+        c.safe_image_url = image_url
+        c.safe_audio_url = audio_url
+
+    context = {
+        'username': request.user.username,
+        'coins': request.user.specialist_profile.coins,
+        'form': form,
+        'cards': cards,
+    }
+    return render(request, 'profile/specialist_sounds.html', context)
+
+
+@login_required
+def specialist_sound_edit(request, card_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    card = SoundCard.objects.filter(id=card_id, created_by=request.user).first()
+    if not card:
+        return redirect('specialist_sounds')
+
+    if request.method != 'POST':
+        return redirect('specialist_sounds')
+
+    if request.method == 'POST':
+        old_image = card.image
+        old_audio = card.audio
+        form = SoundCardForm(request.POST, request.FILES, instance=card)
+        if form.is_valid():
+            updated = form.save(commit=False)
+            # If user uploaded new files, delete old ones.
+            if 'image' in request.FILES and old_image:
+                try:
+                    old_image.delete(save=False)
+                except Exception:
+                    pass
+            if 'audio' in request.FILES and old_audio:
+                try:
+                    old_audio.delete(save=False)
+                except Exception:
+                    pass
+            updated.save()
+            return redirect('specialist_sounds')
+
+        cards = list(
+            SoundCard.objects.filter(created_by=request.user)
+            .only('id', 'title', 'image', 'audio', 'created_at')
+            .order_by('-created_at')
+        )
+
+    context = {
+        'username': request.user.username,
+        'coins': request.user.specialist_profile.coins,
+        'form': form,
+        'cards': cards,
+        'edit_card_id': card.id,
+    }
+    return render(request, 'profile/specialist_sounds.html', context)
+
+
+@login_required
+@require_POST
+def specialist_sound_delete(request, card_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    card = SoundCard.objects.filter(id=card_id, created_by=request.user).first()
+    if card:
+        # Best-effort cleanup of stored files.
+        try:
+            if card.image:
+                card.image.delete(save=False)
+        except Exception:
+            pass
+        try:
+            if card.audio:
+                card.audio.delete(save=False)
+        except Exception:
+            pass
+        card.delete()
+
+    next_url = request.POST.get('next') or reverse('specialist_sounds')
+    return redirect(next_url)
 
 
 @login_required

@@ -42,38 +42,6 @@
     background-position: center;
 }
 
-.sound-card__img--forest {
-    background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80');
-}
-
-.sound-card__img--rain {
-    background-image: url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80');
-}
-
-.sound-card__img--sea {
-    background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80');
-}
-
-.sound-card__img--birds {
-    background-image: url('https://images.unsplash.com/photo-1501706362039-c06b2d715385?auto=format&fit=crop&w=800&q=80');
-}
-
-.sound-card__img--fire {
-    background-image: url('https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=800&q=80');
-}
-
-.sound-card__img--city {
-    background-image: url('https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80');
-}
-
-.sound-card__img--night {
-    background-image: url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80');
-}
-
-.sound-card__img--river {
-    background-image: url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80');
-}
-
 .sound-card__label {
     position: absolute;
     left: 0;

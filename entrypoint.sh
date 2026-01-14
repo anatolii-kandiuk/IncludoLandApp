@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 set -eu
 
+mkdir -p /app/media
+
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput || true
 

@@ -21,6 +21,8 @@ services:
       ALLOWED_HOSTS: "*"
       DATABASE_URL: "postgresql://includoland_user:includoland_password@db:5432/includoland_db"
       PORT: "8000"
+    volumes:
+      - ./media:/app/media
     ports:
       - "8000:8000"
     depends_on:

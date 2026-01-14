@@ -1,0 +1,126 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Редагувати звук — Профіль спеціаліста</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist_sounds.css' %}">
+    <script src="{% static 'js/specialist_sounds.js' %}" defer></script>
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+    <div class="shell">
+        <aside class="sidebar" aria-label="Навігація">
+            <div class="sidebar__brand">
+                <div class="brand__mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" role="img" focusable="false">
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
+            </div>
+
+            <nav class="nav">
+                <div class="nav__section" aria-label="Бібліотека">
+                    <div class="nav__title">Бібліотека</div>
+                    <a class="nav__item nav__item--active" href="{% url 'specialist_sounds' %}">
+                        <span class="nav__icon" aria-hidden="true">🔊</span>
+                        <span class="nav__label">Звуки</span>
+                    </a>
+                </div>
+
+                <div class="nav__spacer"></div>
+
+                <a class="nav__item nav__item--logout" href="{% url 'logout' %}">
+                    <span class="nav__icon" aria-hidden="true">⎋</span>
+                    <span class="nav__label">Вихід</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main">
+            <header class="top">
+                <div class="top__left"></div>
+                <div class="top__right">
+                    <div class="chip chip--user">
+                        <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
+                        <span class="chip__text">{{ username }}</span>
+                    </div>
+                    <div class="chip">
+                        <span class="chip__icon" aria-hidden="true">★</span>
+                        <span class="chip__text">{{ coins }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="page-title">
+                    <h1 class="page-title__h">Редагувати картку</h1>
+                </div>
+
+                <div class="sound-builder">
+                    <form class="sound-form" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="current-files" aria-label="Поточні файли">
+                            <div class="current-files__row">
+                                <div class="current-files__label">Поточне зображення:</div>
+                                <div class="current-files__img" style="background-image: url('{{ card.image.url }}');">
+                                </div>
+                            </div>
+                            <div class="current-files__row">
+                                <div class="current-files__label">Поточний звук:</div>
+                                <audio controls src="{{ card.audio.url }}"></audio>
+                            </div>
+                        </div>
+
+                        <label class="drop" for="id_image">
+                            <input class="drop__input" id="id_image" name="image" type="file" accept="image/*">
+                            <span class="drop__box">
+                                <span class="drop__icon" aria-hidden="true">🖼️</span>
+                                <span class="drop__text">Замінити зображення (не обовʼязково)</span>
+                            </span>
+                        </label>
+
+                        <input class="sound-input" id="id_title" name="title" type="text" maxlength="80"
+                            placeholder="Підпис до картинки" value="{{ card.title }}" required>
+
+                        <label class="audio" for="id_audio">
+                            <input class="audio__input" id="id_audio" name="audio" type="file" accept="audio/*">
+                            <span class="audio__btn">Замінити аудіофайл (не обовʼязково)</span>
+                        </label>
+
+                        <button class="save" type="submit">Зберегти зміни</button>
+
+                        <a class="save save--ghost" href="{% url 'specialist_sounds' %}">Скасувати</a>
+
+                        {% if form.errors %}
+                        <div class="form-errors" role="alert">{{ form.errors }}</div>
+                        {% endif %}
+                    </form>
+
+                    <aside class="preview" aria-label="Попередній перегляд">
+                        <div class="preview__title">Попередній перегляд</div>
+                        <div class="preview-card" id="preview-card">
+                            <div class="preview-card__img" id="preview-img"
+                                style="background-image: url('{{ card.image.url }}');"></div>
+                            <div class="preview-card__label" id="preview-label">{{ card.title }}</div>
+                            <button class="preview-card__play" id="preview-play" type="button"
+                                aria-label="Відтворити">▶</button>
+                            <audio id="preview-audio" src="{{ card.audio.url }}"></audio>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

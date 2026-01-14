@@ -1,0 +1,206 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Звуки — Профіль спеціаліста</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist_sounds.css' %}">
+    <script src="{% static 'js/specialist_sounds.js' %}" defer></script>
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+    <div class="shell">
+        <aside class="sidebar" aria-label="Навігація">
+            <div class="sidebar__brand">
+                <div class="brand__mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" role="img" focusable="false">
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
+            </div>
+
+            <nav class="nav">
+                <div class="nav__section" aria-label="Головне">
+                    <a class="nav__item" href="{% url 'specialist_profile' %}">
+                        <span class="nav__icon" aria-hidden="true">🏠</span>
+                        <span class="nav__label">Мої Учні</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'home' %}">
+                        <span class="nav__icon" aria-hidden="true">👥</span>
+                        <span class="nav__label">Учні</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'home' %}">
+                        <span class="nav__icon" aria-hidden="true">🤖</span>
+                        <span class="nav__label">ML-Аналітика</span>
+                    </a>
+                </div>
+
+                <div class="nav__section" aria-label="Бібліотека">
+                    <div class="nav__title">Бібліотека</div>
+                    <a class="nav__item" href="{% url 'stories' %}">
+                        <span class="nav__icon" aria-hidden="true">📖</span>
+                        <span class="nav__label">Казки</span>
+                    </a>
+                    <a class="nav__item nav__item--active" href="{% url 'specialist_sounds' %}">
+                        <span class="nav__icon" aria-hidden="true">🔊</span>
+                        <span class="nav__label">Звуки</span>
+                    </a>
+                </div>
+
+                <div class="nav__section" aria-label="Ігри">
+                    <div class="nav__title">Ігри</div>
+                    <a class="nav__item" href="{% url 'games' %}">
+                        <span class="nav__icon" aria-hidden="true">🧩</span>
+                        <span class="nav__label">Конструктор Ігор</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'game_words' %}">
+                        <span class="nav__icon" aria-hidden="true">🔤</span>
+                        <span class="nav__label">Пазли слів</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'game_memory' %}">
+                        <span class="nav__icon" aria-hidden="true">🧠</span>
+                        <span class="nav__label">Памʼять</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'game_attention' %}">
+                        <span class="nav__icon" aria-hidden="true">🎯</span>
+                        <span class="nav__label">Увага</span>
+                    </a>
+                    <a class="nav__item" href="{% url 'game_math' %}">
+                        <span class="nav__icon" aria-hidden="true">➗</span>
+                        <span class="nav__label">Математика</span>
+                    </a>
+                </div>
+
+                <div class="nav__spacer"></div>
+
+                <a class="nav__item nav__item--logout" href="{% url 'logout' %}">
+                    <span class="nav__icon" aria-hidden="true">⎋</span>
+                    <span class="nav__label">Вихід</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main">
+            <header class="top">
+                <div class="top__left"></div>
+                <div class="top__right">
+                    <div class="chip chip--user">
+                        <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
+                        <span class="chip__text">{{ username }}</span>
+                    </div>
+                    <div class="chip">
+                        <span class="chip__icon" aria-hidden="true">★</span>
+                        <span class="chip__text">{{ coins }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="page-title">
+                    <h1 class="page-title__h" id="form-title">Додати новий звук</h1>
+                </div>
+
+                <div class="sound-builder">
+                    <form class="sound-form" id="sound-form" method="post" enctype="multipart/form-data"
+                        action="{% url 'specialist_sounds' %}" data-create-action="{% url 'specialist_sounds' %}"
+                        data-edit-url-template="{% url 'specialist_sound_edit' 0 %}"
+                        data-edit-card-id="{% if edit_card_id %}{{ edit_card_id }}{% endif %}">
+                        {% csrf_token %}
+
+                        <div class="current current--hidden" id="current-media" aria-label="Поточні файли">
+                            <div class="current__meta">
+                                <div class="current__label">Поточне зображення:</div>
+                                <div class="current__thumb" id="current-thumb"></div>
+                            </div>
+                            <div class="current__meta">
+                                <div class="current__label">Поточний звук:</div>
+                                <audio class="current__audio" id="current-audio" controls></audio>
+                            </div>
+                        </div>
+
+                        <label class="drop" for="id_image">
+                            <input class="drop__input" id="id_image" name="image" type="file" accept="image/*">
+                            <span class="drop__box">
+                                <span class="drop__icon" aria-hidden="true">🖼️</span>
+                                <span class="drop__text" id="drop-text">Завантажити зображення</span>
+                            </span>
+                        </label>
+
+                        <input class="sound-input" id="id_title" name="title" type="text" maxlength="80"
+                            placeholder="Підпис до картинки" required value="{{ form.title.value|default:'' }}">
+
+                        <label class="audio" for="id_audio">
+                            <input class="audio__input" id="id_audio" name="audio" type="file" accept="audio/*">
+                            <span class="audio__btn" id="audio-btn-text">Вибрати аудіофайл</span>
+                        </label>
+
+                        <button class="save" id="save-btn" type="submit">Зберегти картку</button>
+                        <button class="cancel cancel--hidden" id="cancel-edit" type="button">Скасувати
+                            редагування</button>
+
+                        {% if form.errors %}
+                        <div class="form-errors" role="alert">
+                            {{ form.errors }}
+                        </div>
+                        {% endif %}
+                    </form>
+
+                    <aside class="preview" aria-label="Попередній перегляд">
+                        <div class="preview__title">Попередній перегляд</div>
+                        <div class="preview-card" id="preview-card">
+                            <div class="preview-card__img" id="preview-img"></div>
+                            <div class="preview-card__label" id="preview-label">—</div>
+                            <button class="preview-card__play" id="preview-play" type="button" disabled
+                                aria-label="Відтворити">
+                                ▶
+                            </button>
+                            <audio id="preview-audio"></audio>
+                        </div>
+                    </aside>
+                </div>
+
+                {% if cards %}
+                <div class="library">
+                    <h2 class="library__title">Мої додані звуки</h2>
+                    <div class="library__grid" aria-label="Список звуків">
+                        {% for c in cards %}
+                        <div class="lib-card" data-card-id="{{ c.id }}" data-title="{{ c.title|escape }}"
+                            data-image-url="{{ c.safe_image_url }}" data-audio-url="{{ c.safe_audio_url }}"
+                            role="button" tabindex="0" aria-label="Редагувати: {{ c.title|escape }}">
+                            <div class="lib-card__img" {% if c.safe_image_url
+                                %}style="background-image: url('{{ c.safe_image_url }}');" {% endif %}></div>
+                            <div class="lib-card__label">{{ c.title }}</div>
+                            <div class="lib-card__actions">
+                                <button class="lib-card__play" type="button" data-audio-url="{{ c.safe_audio_url }}" {%
+                                    if not c.safe_audio_url %}disabled title="Файл звуку відсутній" {% endif
+                                    %}>▶</button>
+                                <button class="lib-card__btn lib-card__edit" type="button"
+                                    aria-label="Редагувати">✎</button>
+                                <form class="lib-card__delete" method="post"
+                                    action="{% url 'specialist_sound_delete' c.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{% url 'specialist_sounds' %}">
+                                    <button class="lib-card__btn lib-card__btn--danger" type="submit"
+                                        onclick="return confirm('Видалити картку «{{ c.title|escapejs }}»?');"
+                                        aria-label="Видалити">🗑</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

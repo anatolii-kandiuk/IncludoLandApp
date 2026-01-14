@@ -1,0 +1,85 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Статистика учня — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+    <script src="{% static 'js/profile_charts.js' %}" defer></script>
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+    <main class="page profile">
+        <header class="topbar">
+            <a class="brand" href="{% url 'specialist_profile' %}" aria-label="Назад">
+                <div class="brand__mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" role="img" focusable="false">
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
+                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="brand__text"><span class="brand__name">← Назад</span></div>
+            </a>
+
+            <div class="status" aria-label="Учень">
+                <div class="status__item status__user">
+                    <span class="status__avatar" aria-hidden="true">👦</span>
+                    <span class="status__value">{{ student_username }}</span>
+                </div>
+                <div class="status__item">
+                    <span class="status__value">{{ student_stars }}</span>
+                    <span class="status__label">зірок</span>
+                    <span class="status__icon" aria-hidden="true">★</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="profile-grid">
+            <section class="card card--wide">
+                <div class="card__header">
+                    <h2 class="card__title">Прогрес Завдань</h2>
+                    <div class="card__meta">Всього спроб: {{ results_count }}</div>
+                </div>
+
+                <div class="progress-list">
+                    {% for p in progress %}
+                    <div class="progress-item">
+                        <div class="progress-item__row">
+                            <span class="progress-item__label">{{ p.label }}</span>
+                            <span class="progress-item__value">{{ p.value }}%</span>
+                        </div>
+                        <div class="progress-item__bar" role="progressbar" aria-valuenow="{{ p.value }}"
+                            aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-item__fill" style="width: {{ p.value }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card__header">
+                    <h2 class="card__title">Статистика успішності</h2>
+                </div>
+                <canvas id="lineChart" height="180" data-labels='{{ line_labels|safe }}'
+                    data-datasets='{{ line_datasets|safe }}'></canvas>
+            </section>
+
+            <section class="card">
+                <div class="card__header">
+                    <h2 class="card__title">Навички</h2>
+                </div>
+                <canvas id="radarChart" height="200" data-labels='{{ radar_labels|safe }}'
+                    data-values='{{ radar_values|safe }}'></canvas>
+            </section>
+        </div>
+    </main>
+</body>
+
+</html>

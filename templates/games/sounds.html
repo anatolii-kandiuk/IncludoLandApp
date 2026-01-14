@@ -38,7 +38,8 @@
 
         <h1 class="sounds-title">Слухай та Релакуй</h1>
 
-        <section class="sounds-grid" aria-label="Варіанти звуків">
+        <section class="sounds-grid" aria-label="Варіанти звуків"
+            data-sounds='{{ sound_cards_json|default:"[]"|safe }}'>
             {% csrf_token %}
             <button class="sound-card" data-sound="" type="button">
                 <span class="sound-card__img"></span>

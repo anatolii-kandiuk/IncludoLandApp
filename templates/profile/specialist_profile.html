@@ -49,7 +49,7 @@
                         <span class="nav__icon" aria-hidden="true">📖</span>
                         <span class="nav__label">Казки</span>
                     </a>
-                    <a class="nav__item" href="{% url 'sounds' %}">
+                    <a class="nav__item" href="{% url 'specialist_sounds' %}">
                         <span class="nav__icon" aria-hidden="true">🔊</span>
                         <span class="nav__label">Звуки</span>
                     </a>
@@ -177,6 +177,79 @@
                             </div>
                             <a class="ai__btn" href="{% url 'game_memory' %}">Створити завдання</a>
                         </div>
+                    </section>
+
+                    <section class="card card--full">
+                        <div class="card__head">
+                            <h2 class="card__title">Пошук учнів</h2>
+                        </div>
+
+                        <form class="student-search" action="{% url 'specialist_profile' %}" method="get">
+                            <input class="student-search__input" type="search" name="q" value="{{ q }}"
+                                placeholder="Пошук за логіном/імʼям" aria-label="Пошук учнів">
+                            <button class="student-search__btn" type="submit">Знайти</button>
+                        </form>
+
+                        {% if q %}
+                        <div class="student-search__results" aria-label="Результати пошуку">
+                            {% if search_results %}
+                            {% for s in search_results %}
+                            <div class="student-row">
+                                <div class="student-row__left">
+                                    <div class="student-row__avatar" aria-hidden="true">👦</div>
+                                    <div class="student-row__meta">
+                                        <div class="student-row__name">{{ s.user.username }}</div>
+                                        <div class="student-row__sub">Дитячий профіль</div>
+                                    </div>
+                                </div>
+                                <form action="{% url 'specialist_add_student' %}" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="child_id" value="{{ s.id }}">
+                                    <input type="hidden" name="next"
+                                        value="{% url 'specialist_profile' %}?q={{ q|urlencode }}">
+                                    <button class="student-row__btn" type="submit">Додати</button>
+                                </form>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="student-search__empty">Нічого не знайдено.</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </section>
+
+                    <section class="card card--full">
+                        <div class="card__head">
+                            <h2 class="card__title">Додані учні</h2>
+                        </div>
+
+                        {% if my_students %}
+                        <div class="student-list" aria-label="Мої додані учні">
+                            {% for s in my_students %}
+                            <div class="student-row">
+                                <div class="student-row__left">
+                                    <div class="student-row__avatar" aria-hidden="true">👦</div>
+                                    <div class="student-row__meta">
+                                        <div class="student-row__name">{{ s.user.username }}</div>
+                                        <div class="student-row__sub">Зірки: {{ s.stars }}</div>
+                                    </div>
+                                </div>
+                                <div class="student-row__actions">
+                                    <a class="student-row__link"
+                                        href="{% url 'specialist_student_stats' s.id %}">Статистика</a>
+                                    <form action="{% url 'specialist_remove_student' s.id %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{% url 'specialist_profile' %}">
+                                        <button class="student-row__btn student-row__btn--danger"
+                                            type="submit">Видалити</button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="student-search__empty">Поки що немає доданих учнів.</div>
+                        {% endif %}
                     </section>
                 </div>
             </section>

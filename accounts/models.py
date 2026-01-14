@@ -17,6 +17,12 @@ class SpecialistProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='specialist_profile')
     coins = models.PositiveIntegerField(default=0)
 
+    students = models.ManyToManyField(
+        'ChildProfile',
+        related_name='specialists',
+        blank=True,
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -55,3 +61,26 @@ class GameResult(models.Model):
 
     def __str__(self) -> str:
         return f"GameResult({self.user.username}, {self.game_type}, {self.score})"
+
+
+class SoundCard(models.Model):
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sound_cards',
+    )
+
+    title = models.CharField(max_length=80)
+    image = models.ImageField(upload_to='sounds/images/')
+    audio = models.FileField(upload_to='sounds/audio/')
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self) -> str:
+        return f"SoundCard({self.title})"
