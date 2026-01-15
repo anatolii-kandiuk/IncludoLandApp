@@ -8,6 +8,7 @@
     <title>Пазли слів — Профіль спеціаліста</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist_words.css' %}">
 </head>
 
 <body>
@@ -35,8 +36,7 @@
                         <h2 class="card__title">Додати слово</h2>
                     </div>
 
-                    <form method="post" action="{% url 'specialist_words' %}" class="chart-filters"
-                        style="gap: 10px; flex-wrap: wrap;">
+                    <form method="post" action="{% url 'specialist_words' %}" class="chart-filters">
                         {% csrf_token %}
 
                         <input class="chart-filters__control" name="word" maxlength="24" placeholder="Слово (КІТ)"
@@ -46,10 +46,9 @@
                         <input class="chart-filters__control" name="emoji" maxlength="8"
                             placeholder="Емодзі (необовʼязково)" value="{{ form.emoji.value|default:'' }}">
 
-                        <label class="chart-filters__control"
-                            style="display:flex; align-items:center; gap:8px; padding: 10px 12px;">
-                            <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or
-                                form.is_active.value is None %}checked{% endif %}>
+                        <label class="chart-filters__control words-inline-check">
+                            <input type="checkbox" name="is_active" value="true" 
+                            {% if form.is_active.value or form.is_active.value is None %}checked{% endif %}>
                             <span>Активне</span>
                         </label>
 
@@ -62,7 +61,7 @@
                     </div>
                     {% endif %}
 
-                    <div style="margin-top: 10px; opacity: .8;">
+                    <div class="words-help">
                         Порада: вводьте українськими літерами, без пробілів. Ми автоматично робимо слово ВЕЛИКИМИ
                         літерами.
                     </div>
@@ -86,9 +85,11 @@
 
                         {% for w in words %}
                         <div class="table__row" role="row">
-                            <div class="table__cell" role="cell" style="font-weight: 900;">{{ w.word }}</div>
-                            <div class="table__cell" role="cell">{{ w.hint|default:'—' }}</div>
-                            <div class="table__cell" role="cell">{{ w.emoji|default:'—' }}</div>
+                            <div class="table__cell table__cell--strong" role="cell">{{ w.word }}</div>
+                            <div class="table__cell" role="cell">{% if w.hint %}{{ w.hint }}{% else %}<span
+                                    class="table__cell--muted">—</span>{% endif %}</div>
+                            <div class="table__cell" role="cell">{% if w.emoji %}{{ w.emoji }}{% else %}<span
+                                    class="table__cell--muted">—</span>{% endif %}</div>
                             <div class="table__cell" role="cell">
                                 {% if w.is_active %}
                                 <span class="badge badge--green">Активне</span>
@@ -96,11 +97,11 @@
                                 <span class="badge badge--locked">Вимкнено</span>
                                 {% endif %}
                             </div>
-                            <div class="table__cell" role="cell">
+                            <div class="table__cell table__actions" role="cell">
                                 <form method="post" action="{% url 'specialist_word_delete' w.id %}" style="margin:0;">
                                     {% csrf_token %}
                                     <input type="hidden" name="next" value="{% url 'specialist_words' %}">
-                                    <button class="pill" type="submit"
+                                    <button class="table__btn table__btn--danger" type="submit"
                                         onclick="return confirm('Видалити слово «{{ w.word|escapejs }}»?');">🗑
                                         Видалити</button>
                                 </form>
