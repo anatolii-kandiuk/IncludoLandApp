@@ -13,36 +13,6 @@
 <body>
     {% include 'includes/header.html' %}
     <main class="page page--game">
-        <header class="topbar">
-            <a class="brand" href="/" aria-label="На головну">
-                <div class="brand__mark" aria-hidden="true">
-                    <svg viewBox="0 0 48 48" role="img" focusable="false">
-                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
-                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
-                            stroke-linecap="round" />
-                    </svg>
-                </div>
-                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
-            </a>
-
-            {% if stars %}
-            <div class="status" aria-label="Статистика">
-                <div class="status__item">
-                    <span class="status__value">{{ stars }}</span>
-                    <span class="status__label">зірок</span>
-                    <span class="status__icon" aria-hidden="true">★</span>
-                </div>
-                <div class="status__item status__chat" title="Повідомлення">
-                    <svg viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
-                        <path
-                            d="M4 5.5C4 4.12 5.12 3 6.5 3h11C18.88 3 20 4.12 20 5.5v7c0 1.38-1.12 2.5-2.5 2.5H10l-4.5 4v-4H6.5C5.12 15 4 13.88 4 12.5v-7z"
-                            fill="#ffffff" opacity="0.9" />
-                    </svg>
-                </div>
-            </div>
-            {% endif %}
-        </header>
-
         <h1 class="game-title">МАТЕМАТИКА: Розв’яжи приклад</h1>
 
         <section class="math">

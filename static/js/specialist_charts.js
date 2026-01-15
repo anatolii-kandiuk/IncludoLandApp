@@ -57,7 +57,51 @@
         });
     }
 
+    function initPerformance() {
+        const el = document.getElementById('performanceChart');
+        if (!el || !window.Chart) return;
+
+        const labels = parseJSON(el.getAttribute('data-labels'));
+        const datasetsRaw = parseJSON(el.getAttribute('data-datasets'));
+
+        const datasets = Array.isArray(datasetsRaw)
+            ? datasetsRaw.map((d) => ({
+                label: d.label || '',
+                data: Array.isArray(d.data) ? d.data : [],
+                borderColor: d.color || '#2b97e5',
+                backgroundColor: 'rgba(43,151,229,.08)',
+                tension: 0.35,
+                pointRadius: 2,
+                spanGaps: true,
+            }))
+            : [];
+
+        // eslint-disable-next-line no-new
+        new window.Chart(el.getContext('2d'), {
+            type: 'line',
+            data: { labels, datasets },
+            options: {
+                plugins: {
+                    legend: { display: datasets.length > 1 },
+                    tooltip: { enabled: true },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        suggestedMax: 100,
+                        ticks: { callback: (v) => `${v}%` },
+                        grid: { color: 'rgba(0,0,0,.06)' },
+                    },
+                    x: {
+                        grid: { display: false },
+                    },
+                },
+            },
+        });
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
         initActivity();
+        initPerformance();
     });
 })();

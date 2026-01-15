@@ -36,6 +36,11 @@
                 <span class="nav__icon" aria-hidden="true">🔊</span>
                 <span class="nav__label">Звуки</span>
             </a>
+            <a class="nav__item{% if active == 'words' %} nav__item--active{% endif %}"
+                href="{% url 'specialist_words' %}">
+                <span class="nav__icon" aria-hidden="true">🔤</span>
+                <span class="nav__label">Слова</span>
+            </a>
         </div>
 
         <div class="nav__section" aria-label="Ігри">

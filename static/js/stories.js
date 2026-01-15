@@ -15,6 +15,18 @@
             .replace(/\\t/g, '\t');
     }
 
+    function downloadTextFile(filename, text) {
+        const blob = new Blob([text ?? ''], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    }
+
     async function postListen(storyId, durationSeconds) {
         const csrftoken = getCookie('csrftoken');
         if (!csrftoken) return;
@@ -46,6 +58,16 @@
 
         let currentStoryId = null;
         let startedAt = 0;
+        let currentAudioHref = '';
+
+        function normalizeUrl(url) {
+            if (!url) return '';
+            try {
+                return new URL(url, window.location.href).href;
+            } catch {
+                return String(url);
+            }
+        }
 
         function openModal(title, text) {
             if (!modal || !modalTitle || !modalContent) return;
@@ -78,6 +100,29 @@
             } catch {
                 // ignore
             }
+            currentAudioHref = '';
+        }
+
+        function syncCardAudioButtons(card, isPlaying) {
+            const listenBtn = card.querySelector('[data-action="listen"]');
+            const pauseBtn = card.querySelector('[data-action="pause"]');
+            if (!pauseBtn) return;
+
+            if (!card.dataset.audioUrl) {
+                pauseBtn.disabled = true;
+                return;
+            }
+
+            pauseBtn.disabled = false;
+            if (isPlaying) {
+                pauseBtn.textContent = '⏸ Пауза';
+                pauseBtn.dataset.state = 'playing';
+                if (listenBtn) listenBtn.disabled = false;
+            } else {
+                pauseBtn.textContent = '▶ Продовжити';
+                pauseBtn.dataset.state = 'paused';
+                if (listenBtn) listenBtn.disabled = false;
+            }
         }
 
         document.querySelectorAll('.story-card').forEach((card) => {
@@ -91,6 +136,13 @@
                 const text = decodeEscapedText(card.dataset.text || '');
                 const audioUrl = card.dataset.audioUrl || '';
 
+                if (action === 'download-text') {
+                    if (!text) return;
+                    const safeTitle = (title || 'kazka').replace(/[\\/:*?"<>|]+/g, '_');
+                    downloadTextFile(`${safeTitle}.txt`, text);
+                    return;
+                }
+
                 if (action === 'read') {
                     openModal(title, text || 'Текст недоступний.');
                     return;
@@ -102,8 +154,36 @@
 
                     currentStoryId = storyId;
                     startedAt = Date.now();
-                    audio.src = audioUrl;
+                    currentAudioHref = normalizeUrl(audioUrl);
+                    audio.src = currentAudioHref;
                     audio.play().catch(() => { /* ignore */ });
+
+                    // enable pause button on this card
+                    syncCardAudioButtons(card, true);
+                }
+
+                if (action === 'pause') {
+                    if (!audioUrl) return;
+                    const requestedHref = normalizeUrl(audioUrl);
+                    if (currentAudioHref !== requestedHref) {
+                        // If another story is loaded, start this one instead.
+                        stopAudio();
+                        currentStoryId = storyId;
+                        startedAt = Date.now();
+                        currentAudioHref = requestedHref;
+                        audio.src = currentAudioHref;
+                        audio.play().catch(() => { /* ignore */ });
+                        syncCardAudioButtons(card, true);
+                        return;
+                    }
+
+                    if (audio.paused) {
+                        audio.play().catch(() => { /* ignore */ });
+                        syncCardAudioButtons(card, true);
+                    } else {
+                        audio.pause();
+                        syncCardAudioButtons(card, false);
+                    }
                 }
             });
         });
@@ -115,6 +195,13 @@
             currentStoryId = null;
             startedAt = 0;
             await postListen(storyId, durationSeconds);
+
+            // reset pause buttons
+            document.querySelectorAll('.story-card').forEach((card) => {
+                if (Number(card.dataset.storyId) === storyId) {
+                    syncCardAudioButtons(card, false);
+                }
+            });
         });
 
         audio.addEventListener('pause', () => {

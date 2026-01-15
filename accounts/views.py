@@ -1,4 +1,5 @@
 import json
+from datetime import timedelta
 
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
@@ -6,11 +7,112 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.shortcuts import redirect, render
-from django.db.models import Q
+from django.db.models import Avg, Q
+from django.db.models.functions import TruncDate
 from django.urls import reverse
+from django.utils import timezone
+from django.db.models import F
 
-from .forms import RegisterForm, SoundCardForm, StoryForm
-from .models import ChildProfile, GameResult, SpecialistProfile, SoundCard, Story, StoryListen
+from .forms import RegisterForm, SoundCardForm, StoryForm, WordPuzzleWordForm
+from .models import ChildProfile, GameResult, SpecialistProfile, SoundCard, Story, StoryListen, UserBadge, WordPuzzleWord
+
+
+BADGE_DEFINITIONS = [
+    {
+        'code': 'first_game',
+        'title': 'Старт',
+        'subtitle': 'Перша зіграна гра',
+        'tone': 'red',
+        'icon': 'target',
+    },
+    {
+        'code': 'math_5',
+        'title': 'Математик',
+        'subtitle': '5 ігор з математики',
+        'tone': 'orange',
+        'icon': 'calc',
+    },
+    {
+        'code': 'memory_5',
+        'title': "Памʼять",
+        'subtitle': '5 ігор на памʼять',
+        'tone': 'teal',
+        'icon': 'compass',
+    },
+    {
+        'code': 'words_5',
+        'title': 'Слова',
+        'subtitle': '5 ігор зі словами',
+        'tone': 'green',
+        'icon': 'book',
+    },
+    {
+        'code': 'sound_5',
+        'title': 'Слухач',
+        'subtitle': '5 ігор зі звуками',
+        'tone': 'yellow',
+        'icon': 'target',
+    },
+    {
+        'code': 'stories_3',
+        'title': 'Казкар',
+        'subtitle': 'Прослухав 3 різні казки',
+        'tone': 'blue',
+        'icon': 'book',
+    },
+]
+
+
+def _badge_codes_for_user(user):
+    return set(UserBadge.objects.filter(user=user).values_list('code', flat=True))
+
+
+def _award_badge(user, code: str) -> bool:
+    if not code:
+        return False
+    _obj, created = UserBadge.objects.get_or_create(user=user, code=code)
+    return created
+
+
+def _sync_badges_for_user(user) -> None:
+    total_results = GameResult.objects.filter(user=user).count()
+    if total_results >= 1:
+        _award_badge(user, 'first_game')
+
+    if GameResult.objects.filter(user=user, game_type=GameResult.GameType.MATH).count() >= 5:
+        _award_badge(user, 'math_5')
+    if GameResult.objects.filter(user=user, game_type=GameResult.GameType.MEMORY).count() >= 5:
+        _award_badge(user, 'memory_5')
+    if GameResult.objects.filter(user=user, game_type=GameResult.GameType.WORDS).count() >= 5:
+        _award_badge(user, 'words_5')
+    if GameResult.objects.filter(user=user, game_type=GameResult.GameType.SOUND).count() >= 5:
+        _award_badge(user, 'sound_5')
+
+    listened_unique = (
+        StoryListen.objects.filter(user=user)
+        .values('story_id')
+        .distinct()
+        .count()
+    )
+    if listened_unique >= 3:
+        _award_badge(user, 'stories_3')
+
+
+def _build_rewards_for_user(user):
+    unlocked = _badge_codes_for_user(user)
+    rewards = []
+    for d in BADGE_DEFINITIONS:
+        rewards.append(
+            {
+                'code': d['code'],
+                'title': d['title'],
+                'subtitle': d['subtitle'],
+                'tone': d['tone'],
+                'icon': d['icon'],
+                'unlocked': d['code'] in unlocked,
+            }
+        )
+    return rewards
 
 
 def _build_child_stats_for_user(user):
@@ -88,7 +190,18 @@ def rewards_entry(request):
     if request.user.is_authenticated:
         if hasattr(request.user, 'specialist_profile'):
             return redirect('specialist_profile')
-        return redirect('child_profile')
+        profile, _created = ChildProfile.objects.get_or_create(user=request.user, defaults={'stars': 0})
+        _sync_badges_for_user(request.user)
+        rewards = _build_rewards_for_user(request.user)
+        unlocked_count = sum(1 for r in rewards if r['unlocked'])
+        context = {
+            'username': request.user.username,
+            'stars': profile.stars,
+            'rewards': rewards,
+            'unlocked_count': unlocked_count,
+            'total_count': len(rewards),
+        }
+        return render(request, 'profile/rewards.html', context)
 
     return render(request, 'auth/auth_required.html', {'next': request.get_full_path()})
 
@@ -161,15 +274,11 @@ def child_profile(request):
 
     profile, _created = ChildProfile.objects.get_or_create(
         user=request.user,
-        defaults={'stars': 1250},
+        defaults={'stars': 0},
     )
 
-    rewards = [
-        {'title': 'Ерудит', 'subtitle': 'Пройшов 1 блок', 'tone': 'red', 'icon': 'book'},
-        {'title': 'Математик', 'subtitle': 'Вирішив 5 блоків', 'tone': 'orange', 'icon': 'calc'},
-        {'title': 'Дослідник', 'subtitle': 'Вивчив 8 блоків', 'tone': 'green', 'icon': 'compass'},
-        {'title': 'Увага', 'subtitle': '5 ігор', 'tone': 'teal', 'icon': 'target'},
-    ]
+    _sync_badges_for_user(request.user)
+    rewards = _build_rewards_for_user(request.user)
 
     stats = _build_child_stats_for_user(request.user)
 
@@ -233,6 +342,77 @@ def specialist_profile(request):
     activity_yellow = [20, 45, 30, 80, 55, 70, 90]
     activity_teal = [10, 25, 60, 50, 75, 40, 65]
 
+    # Performance chart filters (specialist dashboard)
+    perf_child_raw = (request.GET.get('perf_child') or 'all').strip()
+    perf_game_raw = (request.GET.get('perf_game') or 'all').strip()
+    perf_days_raw = (request.GET.get('perf_days') or '14').strip()
+
+    try:
+        perf_days = int(perf_days_raw)
+    except ValueError:
+        perf_days = 14
+    if perf_days not in (7, 14, 30, 90):
+        perf_days = 14
+
+    allowed_game_types = {c[0] for c in GameResult.GameType.choices}
+    perf_game = perf_game_raw if perf_game_raw in allowed_game_types else 'all'
+
+    selected_child = None
+    if perf_child_raw != 'all':
+        try:
+            perf_child_id = int(perf_child_raw)
+        except ValueError:
+            perf_child_id = None
+        if perf_child_id is not None:
+            selected_child = next((s for s in my_students if s.id == perf_child_id), None)
+
+    today = timezone.localdate()
+    start_date = today - timedelta(days=perf_days - 1)
+
+    user_ids = [selected_child.user_id] if selected_child else [s.user_id for s in my_students]
+    perf_labels = []
+    perf_datasets = []
+
+    if user_ids:
+        day_list = [start_date + timedelta(days=i) for i in range(perf_days)]
+        perf_labels = [d.strftime('%d.%m') for d in day_list]
+
+        base_qs = GameResult.objects.filter(
+            user_id__in=user_ids,
+            created_at__date__gte=start_date,
+            created_at__date__lte=today,
+        )
+
+        def build_series(game_type: str) -> list:
+            rows = (
+                base_qs.filter(game_type=game_type)
+                .annotate(day=TruncDate('created_at'))
+                .values('day')
+                .annotate(avg=Avg('score'))
+                .order_by('day')
+            )
+            by_day = {r['day']: int(round(r['avg'] or 0)) for r in rows}
+            return [by_day.get(d) for d in day_list]
+
+        game_palette = {
+            GameResult.GameType.MATH: '#2b97e5',
+            GameResult.GameType.MEMORY: '#19b3b9',
+            GameResult.GameType.SOUND: '#c28b00',
+            GameResult.GameType.WORDS: '#7c3aed',
+        }
+        game_labels = {
+            GameResult.GameType.MATH: 'Математика',
+            GameResult.GameType.MEMORY: "Памʼять",
+            GameResult.GameType.SOUND: 'Звуки',
+            GameResult.GameType.WORDS: 'Пазли слів',
+        }
+
+        if perf_game == 'all':
+            for gt in (GameResult.GameType.MATH, GameResult.GameType.MEMORY, GameResult.GameType.SOUND, GameResult.GameType.WORDS):
+                perf_datasets.append({'label': game_labels[gt], 'data': build_series(gt), 'color': game_palette[gt]})
+        else:
+            perf_datasets.append({'label': game_labels.get(perf_game, perf_game), 'data': build_series(perf_game), 'color': game_palette.get(perf_game, '#2b97e5')})
+
     context = {
         'username': request.user.username,
         'coins': specialist.coins,
@@ -243,6 +423,12 @@ def specialist_profile(request):
         'activity_labels': json.dumps(activity_labels, ensure_ascii=False),
         'activity_yellow': json.dumps(activity_yellow),
         'activity_teal': json.dumps(activity_teal),
+        'perf_labels': json.dumps(perf_labels, ensure_ascii=False),
+        'perf_datasets': json.dumps(perf_datasets, ensure_ascii=False),
+        'perf_days': perf_days,
+        'perf_game': perf_game,
+        'perf_child': selected_child.id if selected_child else 'all',
+        'perf_game_choices': list(GameResult.GameType.choices),
     }
     return render(request, 'profile/specialist_profile.html', context)
 
@@ -608,6 +794,45 @@ def specialist_story_delete(request, story_id: int):
 
     next_url = request.POST.get('next') or reverse('specialist_stories')
     return redirect(next_url)
+@login_required
+def specialist_words(request):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    if request.method == 'POST':
+        form = WordPuzzleWordForm(request.POST)
+        if form.is_valid():
+            item = form.save(commit=False)
+            item.created_by = request.user
+            item.save()
+            return redirect('specialist_words')
+    else:
+        form = WordPuzzleWordForm(initial={'is_active': True})
+
+    words = list(
+        WordPuzzleWord.objects.filter(created_by=request.user)
+        .only('id', 'word', 'hint', 'emoji', 'is_active', 'created_at')
+        .order_by('-created_at')
+    )
+
+    context = {
+        'username': request.user.username,
+        'coins': request.user.specialist_profile.coins,
+        'form': form,
+        'words': words,
+    }
+    return render(request, 'profile/specialist_words.html', context)
+
+
+@login_required
+@require_POST
+def specialist_word_delete(request, word_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    WordPuzzleWord.objects.filter(id=word_id, created_by=request.user).delete()
+    next_url = request.POST.get('next') or reverse('specialist_words')
+    return redirect(next_url)
 
 
 @login_required
@@ -667,7 +892,32 @@ def record_game_result(request):
         details=details,
     )
 
-    return JsonResponse({'ok': True, 'id': result.id})
+    profile, _created = ChildProfile.objects.get_or_create(user=request.user, defaults={'stars': 0})
+    stars_earned = max(1, int(score // 20))
+    ChildProfile.objects.filter(id=profile.id).update(stars=F('stars') + stars_earned)
+
+    # Badge rules
+    total_results = GameResult.objects.filter(user=request.user).count()
+    if total_results == 1:
+        _award_badge(request.user, 'first_game')
+
+    counts_by_game = {
+        GameResult.GameType.MATH: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.MATH).count(),
+        GameResult.GameType.MEMORY: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.MEMORY).count(),
+        GameResult.GameType.SOUND: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.SOUND).count(),
+        GameResult.GameType.WORDS: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.WORDS).count(),
+    }
+    if counts_by_game[GameResult.GameType.MATH] >= 5:
+        _award_badge(request.user, 'math_5')
+    if counts_by_game[GameResult.GameType.MEMORY] >= 5:
+        _award_badge(request.user, 'memory_5')
+    if counts_by_game[GameResult.GameType.WORDS] >= 5:
+        _award_badge(request.user, 'words_5')
+    if counts_by_game[GameResult.GameType.SOUND] >= 5:
+        _award_badge(request.user, 'sound_5')
+
+    new_total = ChildProfile.objects.filter(id=profile.id).values_list('stars', flat=True).first() or 0
+    return JsonResponse({'ok': True, 'id': result.id, 'stars_earned': stars_earned, 'stars_total': new_total})
 
 
 @login_required
@@ -691,6 +941,9 @@ def record_story_listen(request):
     if not story:
         return JsonResponse({'ok': False, 'error': 'story_not_found'}, status=404)
 
+    # Award stars for a first-time listen of this story.
+    first_time_for_story = not StoryListen.objects.filter(user=request.user, story_id=story_id).exists()
+
     duration_seconds = payload.get('duration_seconds')
     if duration_seconds is not None:
         try:
@@ -700,10 +953,22 @@ def record_story_listen(request):
         if duration_seconds is not None and duration_seconds < 0:
             duration_seconds = None
 
-    listen = StoryListen.objects.create(
-        user=request.user,
-        story=story,
-        duration_seconds=duration_seconds,
-    )
+    listen = StoryListen.objects.create(user=request.user, story=story, duration_seconds=duration_seconds)
 
-    return JsonResponse({'ok': True, 'id': listen.id})
+    profile, _created = ChildProfile.objects.get_or_create(user=request.user, defaults={'stars': 0})
+    stars_earned = 0
+    if first_time_for_story:
+        stars_earned = 2
+        ChildProfile.objects.filter(id=profile.id).update(stars=F('stars') + stars_earned)
+
+    listened_unique = (
+        StoryListen.objects.filter(user=request.user)
+        .values('story_id')
+        .distinct()
+        .count()
+    )
+    if listened_unique >= 3:
+        _award_badge(request.user, 'stories_3')
+
+    new_total = ChildProfile.objects.filter(id=profile.id).values_list('stars', flat=True).first() or 0
+    return JsonResponse({'ok': True, 'id': listen.id, 'stars_earned': stars_earned, 'stars_total': new_total})

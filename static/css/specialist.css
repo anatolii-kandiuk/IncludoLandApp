@@ -207,6 +207,38 @@ body {
     font-weight: 1000
 }
 
+.chart-filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.chart-filters__control {
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 0 10px;
+    background: rgba(255, 255, 255, .85);
+    font-weight: 900;
+    outline: none;
+}
+
+.chart-filters__btn {
+    height: 38px;
+    border-radius: 12px;
+    border: 0;
+    padding: 0 14px;
+    background: linear-gradient(135deg, #3cc38a, #28a86e);
+    color: #fff;
+    font-weight: 1000;
+    cursor: pointer;
+}
+
+.chart-filters__btn:hover {
+    filter: brightness(.98)
+}
+
 .legend {
     display: flex;
     gap: 10px;

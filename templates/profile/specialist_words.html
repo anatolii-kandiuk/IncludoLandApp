@@ -1,0 +1,120 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Пазли слів — Профіль спеціаліста</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+</head>
+
+<body>
+    <div class="shell">
+        {% include 'includes/specialist_sidebar.html' with active='words' %}
+
+        <main class="main">
+            <header class="top">
+                <div class="top__left"></div>
+                <div class="top__right">
+                    <div class="chip chip--user">
+                        <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
+                        <span class="chip__text">{{ username }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="page-title">
+                    <h1 class="page-title__h">Пазли слів: мої слова</h1>
+                </div>
+
+                <section class="card card--full">
+                    <div class="card__head">
+                        <h2 class="card__title">Додати слово</h2>
+                    </div>
+
+                    <form method="post" action="{% url 'specialist_words' %}" class="chart-filters"
+                        style="gap: 10px; flex-wrap: wrap;">
+                        {% csrf_token %}
+
+                        <input class="chart-filters__control" name="word" maxlength="24" placeholder="Слово (КІТ)"
+                            value="{{ form.word.value|default:'' }}" required>
+                        <input class="chart-filters__control" name="hint" maxlength="200"
+                            placeholder="Підказка (необовʼязково)" value="{{ form.hint.value|default:'' }}">
+                        <input class="chart-filters__control" name="emoji" maxlength="8"
+                            placeholder="Емодзі (необовʼязково)" value="{{ form.emoji.value|default:'' }}">
+
+                        <label class="chart-filters__control"
+                            style="display:flex; align-items:center; gap:8px; padding: 10px 12px;">
+                            <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or
+                                form.is_active.value is None %}checked{% endif %}>
+                            <span>Активне</span>
+                        </label>
+
+                        <button class="chart-filters__btn" type="submit">Додати</button>
+                    </form>
+
+                    {% if form.errors %}
+                    <div class="form-errors" role="alert" style="margin-top: 12px;">
+                        {{ form.errors }}
+                    </div>
+                    {% endif %}
+
+                    <div style="margin-top: 10px; opacity: .8;">
+                        Порада: вводьте українськими літерами, без пробілів. Ми автоматично робимо слово ВЕЛИКИМИ
+                        літерами.
+                    </div>
+                </section>
+
+                <section class="card card--full" style="margin-top: 18px;">
+                    <div class="card__head">
+                        <h2 class="card__title">Список слів</h2>
+                        <div class="card__meta">Ці слова будуть доступні дітям у «Пазли слів».</div>
+                    </div>
+
+                    {% if words %}
+                    <div class="table" role="table" aria-label="Слова">
+                        <div class="table__row table__row--head" role="row">
+                            <div class="table__cell" role="columnheader">Слово</div>
+                            <div class="table__cell" role="columnheader">Підказка</div>
+                            <div class="table__cell" role="columnheader">Емодзі</div>
+                            <div class="table__cell" role="columnheader">Статус</div>
+                            <div class="table__cell" role="columnheader"></div>
+                        </div>
+
+                        {% for w in words %}
+                        <div class="table__row" role="row">
+                            <div class="table__cell" role="cell" style="font-weight: 900;">{{ w.word }}</div>
+                            <div class="table__cell" role="cell">{{ w.hint|default:'—' }}</div>
+                            <div class="table__cell" role="cell">{{ w.emoji|default:'—' }}</div>
+                            <div class="table__cell" role="cell">
+                                {% if w.is_active %}
+                                <span class="badge badge--green">Активне</span>
+                                {% else %}
+                                <span class="badge badge--locked">Вимкнено</span>
+                                {% endif %}
+                            </div>
+                            <div class="table__cell" role="cell">
+                                <form method="post" action="{% url 'specialist_word_delete' w.id %}" style="margin:0;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{% url 'specialist_words' %}">
+                                    <button class="pill" type="submit"
+                                        onclick="return confirm('Видалити слово «{{ w.word|escapejs }}»?');">🗑
+                                        Видалити</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty">Поки що немає слів. Додайте перше слово вище.</div>
+                    {% endif %}
+                </section>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

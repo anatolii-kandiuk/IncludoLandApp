@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import SoundCard, Story
+from .models import SoundCard, Story, WordPuzzleWord
 
 
 class RegisterForm(UserCreationForm):
@@ -75,3 +75,32 @@ class StoryForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+
+class WordPuzzleWordForm(forms.ModelForm):
+    class Meta:
+        model = WordPuzzleWord
+        fields = ('word', 'hint', 'emoji', 'is_active')
+        widgets = {
+            'word': forms.TextInput(attrs={'placeholder': 'Слово (наприклад: КІТ)'}),
+            'hint': forms.TextInput(attrs={'placeholder': 'Підказка (необовʼязково)'}),
+            'emoji': forms.TextInput(attrs={'placeholder': 'Емодзі (необовʼязково)'}),
+        }
+
+    def clean_word(self):
+        value = (self.cleaned_data.get('word') or '').strip()
+        value = value.replace(' ', '')
+        value = value.upper()
+        if not value:
+            raise forms.ValidationError('Введіть слово.')
+
+        allowed = set('АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ')
+        if any(ch not in allowed for ch in value):
+            raise forms.ValidationError('Слово має містити лише українські літери без пробілів.')
+
+        if len(value) < 2:
+            raise forms.ValidationError('Слово повинно мати щонайменше 2 літери.')
+        if len(value) > 24:
+            raise forms.ValidationError('Слово надто довге (макс. 24 літери).')
+
+        return value

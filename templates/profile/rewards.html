@@ -1,0 +1,41 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Нагороди — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+
+    <main class="page profile">
+        <section class="card">
+            <div class="card__header">
+                <h1 class="card__title" style="font-size:22px;">Нагороди</h1>
+                <div class="card__meta">Відкрито: {{ unlocked_count }} / {{ total_count }}</div>
+            </div>
+
+            <div class="badges">
+                {% for r in rewards %}
+                <div class="badge badge--{{ r.tone }} {% if not r.unlocked %}badge--locked{% endif %}">
+                    <div class="badge__icon" aria-hidden="true">
+                        {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass' %}🧭{% else
+                        %}🎯{% endif %}
+                    </div>
+                    <div class="badge__text">
+                        <div class="badge__title">{{ r.title }}</div>
+                        <div class="badge__sub">{% if not r.unlocked %}🔒 {% endif %}{{ r.subtitle }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

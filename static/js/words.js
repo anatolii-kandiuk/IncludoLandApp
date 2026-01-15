@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const WORDS = [
+    const DEFAULT_WORDS = [
         { word: 'КІТ', hint: 'Домашній улюбленець, який муркоче', emoji: '🐱' },
         { word: 'ЛІС', hint: 'Багато дерев, можна почути пташок', emoji: '🌲' },
         { word: 'ДОЩ', hint: 'Капає з неба, потрібна парасоля', emoji: '🌧️' },
@@ -28,9 +28,30 @@ document.addEventListener('DOMContentLoaded', () => {
         { word: 'СНІГ', hint: 'Білий, падає взимку', emoji: '❄️' },
     ];
 
+    function parseWordsFromDom() {
+        const raw = cardEl?.dataset?.words;
+        if (!raw) return [];
+        try {
+            const arr = JSON.parse(raw);
+            if (!Array.isArray(arr)) return [];
+            return arr
+                .map((it) => ({
+                    word: String(it.word || '').trim().replace(/\s+/g, '').toUpperCase(),
+                    hint: String(it.hint || '').trim(),
+                    emoji: String(it.emoji || '').trim() || '🧩',
+                }))
+                .filter((it) => it.word.length >= 2);
+        } catch {
+            return [];
+        }
+    }
+
     const ALPHABET = 'АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ';
 
-    const TOTAL_ROUNDS = 5;
+    const WORDS = parseWordsFromDom();
+    const WORD_POOL = WORDS.length ? WORDS : DEFAULT_WORDS;
+    const MAX_ROUNDS = 5;
+    const TOTAL_ROUNDS = Math.min(MAX_ROUNDS, WORD_POOL.length);
     totalRoundsEl.textContent = String(TOTAL_ROUNDS);
 
     let round = 0;
@@ -260,7 +281,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function start() {
-        runWords = shuffle(WORDS).slice(0, TOTAL_ROUNDS);
+        if (!TOTAL_ROUNDS) {
+            hintEl.textContent = 'Немає слів для гри. Попросіть спеціаліста додати слова.';
+            emojiEl.textContent = '⚠️';
+            msgEl.textContent = 'Слова відсутні.';
+            startBtn.disabled = true;
+            clearBtn.disabled = true;
+            return;
+        }
+
+        runWords = shuffle(WORD_POOL).slice(0, TOTAL_ROUNDS);
         round = 0;
         correct = 0;
         startTime = Date.now();

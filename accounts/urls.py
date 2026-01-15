@@ -18,6 +18,9 @@ urlpatterns = [
     path('specialist/stories/<int:story_id>/edit/', views.specialist_story_edit, name='specialist_story_edit'),
     path('specialist/stories/<int:story_id>/delete/', views.specialist_story_delete, name='specialist_story_delete'),
 
+    path('specialist/words/', views.specialist_words, name='specialist_words'),
+    path('specialist/words/<int:word_id>/delete/', views.specialist_word_delete, name='specialist_word_delete'),
+
     path('specialist/students/add/', views.specialist_add_student, name='specialist_add_student'),
     path('specialist/students/<int:child_profile_id>/', views.specialist_student_stats, name='specialist_student_stats'),
     path('specialist/students/<int:child_profile_id>/remove/', views.specialist_remove_student, name='specialist_remove_student'),

@@ -137,3 +137,43 @@ class StoryListen(models.Model):
 
     def __str__(self) -> str:
         return f"StoryListen({self.user.username}, {self.story_id})"
+
+
+class UserBadge(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='badges',
+    )
+    code = models.CharField(max_length=48)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (('user', 'code'),)
+        ordering = ['-created_at']
+
+    def __str__(self) -> str:
+        return f"UserBadge({self.user.username}, {self.code})"
+
+
+class WordPuzzleWord(models.Model):
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='word_puzzle_words',
+    )
+
+    word = models.CharField(max_length=24)
+    hint = models.CharField(max_length=200, blank=True)
+    emoji = models.CharField(max_length=8, blank=True)
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self) -> str:
+        return f"WordPuzzleWord({self.word})"

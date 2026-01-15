@@ -15,29 +15,6 @@
     {% include 'includes/header.html' %}
 
     <main class="page">
-        <header class="topbar">
-            <a class="brand" href="/" aria-label="На головну">
-                <div class="brand__mark" aria-hidden="true">
-                    <svg viewBox="0 0 48 48" role="img" focusable="false">
-                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
-                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
-                            stroke-linecap="round" />
-                    </svg>
-                </div>
-                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
-            </a>
-
-            {% if stars %}
-            <div class="status" aria-label="Статистика">
-                <div class="status__item">
-                    <span class="status__value">{{ stars }}</span>
-                    <span class="status__label">зірок</span>
-                    <span class="status__icon" aria-hidden="true">★</span>
-                </div>
-            </div>
-            {% endif %}
-        </header>
-
         <h1 class="section-title">Бібліотека Казок</h1>
 
         {% if stories %}
@@ -55,20 +32,27 @@
                         {% if s.content_type == 'pdf' and s.pdf_url %}
                         <a class="pill-btn pill-btn--read" href="{{ s.pdf_url }}" target="_blank" rel="noopener">📖
                             Читати</a>
-                        <a class="pill-btn pill-btn--download" href="{{ s.pdf_url }}" download>⬇ Завантажити</a>
                         {% else %}
                         <button class="pill-btn pill-btn--read" type="button" data-action="read">📖 Читати</button>
-                        {% if s.audio_url %}
-                        <a class="pill-btn pill-btn--download" href="{{ s.audio_url }}" download>⬇ Завантажити</a>
-                        {% else %}
-                        <button class="pill-btn pill-btn--download" type="button" disabled>⬇ Завантажити</button>
                         {% endif %}
+
+                        {% if s.content_type == 'text' %}
+                        <button class="pill-btn pill-btn--download" type="button" data-action="download-text">⬇
+                            Текст</button>
+                        {% endif %}
+
+                        {% if s.pdf_url %}
+                        <a class="pill-btn pill-btn--download" href="{{ s.pdf_url }}" download>⬇ PDF</a>
                         {% endif %}
 
                         {% if s.audio_url %}
+                        <a class="pill-btn pill-btn--download" href="{{ s.audio_url }}" download>⬇ Аудіо</a>
                         <button class="pill-btn pill-btn--listen" type="button" data-action="listen">🎧 Слухати</button>
+                        <button class="pill-btn pill-btn--listen" type="button" data-action="pause" disabled>⏸
+                            Пауза</button>
                         {% else %}
                         <button class="pill-btn pill-btn--listen" type="button" disabled>🎧 Слухати</button>
+                        <button class="pill-btn pill-btn--listen" type="button" disabled>⏸ Пауза</button>
                         {% endif %}
                     </div>
                 </div>

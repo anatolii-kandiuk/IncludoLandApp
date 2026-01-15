@@ -15,32 +15,6 @@
 <body>
     {% include 'includes/header.html' %}
     <main class="page profile">
-        <header class="topbar">
-            <a class="brand" href="/" aria-label="На головну">
-                <div class="brand__mark" aria-hidden="true">
-                    <svg viewBox="0 0 48 48" role="img" focusable="false">
-                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8v24c-8 0-12 4-16 8-4-4-8-8-16-8V12z" fill="#ffffff" />
-                        <path d="M8 12c8 0 12 4 16 8 4-4 8-8 16-8" fill="none" stroke="#0f7aa5" stroke-width="3"
-                            stroke-linecap="round" />
-                    </svg>
-                </div>
-                <div class="brand__text"><span class="brand__name">IncludoLand</span></div>
-            </a>
-
-            <div class="status" aria-label="Профіль">
-                <div class="status__item status__user">
-                    <span class="status__avatar" aria-hidden="true">👤</span>
-                    <span class="status__value">{{ username }}</span>
-                </div>
-                <div class="status__item">
-                    <span class="status__value">{{ stars }}</span>
-                    <span class="status__label">зірок</span>
-                    <span class="status__icon" aria-hidden="true">★</span>
-                </div>
-                <a class="status__item status__logout" href="{% url 'logout' %}" title="Вийти">Вийти</a>
-            </div>
-        </header>
-
         <div class="profile-grid">
             <section class="card card--wide">
                 <div class="card__header">
@@ -50,14 +24,14 @@
                 <div class="rewards">
                     <div class="badges">
                         {% for r in rewards %}
-                        <div class="badge badge--{{ r.tone }}">
+                        <div class="badge badge--{{ r.tone }} {% if not r.unlocked %}badge--locked{% endif %}">
                             <div class="badge__icon" aria-hidden="true">
                                 {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass'
                                 %}🧭{% else %}🎯{% endif %}
                             </div>
                             <div class="badge__text">
                                 <div class="badge__title">{{ r.title }}</div>
-                                <div class="badge__sub">{{ r.subtitle }}</div>
+                                <div class="badge__sub">{% if not r.unlocked %}🔒 {% endif %}{{ r.subtitle }}</div>
                             </div>
                         </div>
                         {% endfor %}
@@ -112,7 +86,7 @@
                 <div class="card__header">
                     <h2 class="card__title">Статистика успішності</h2>
                 </div>
-                <canvas id="lineChart" height="180" data-labels='{{ line_labels|safe }}'
+                <canvas id="lineChart" height="220" data-labels='{{ line_labels|safe }}'
                     data-datasets='{{ line_datasets|safe }}'></canvas>
             </section>
 
@@ -120,7 +94,7 @@
                 <div class="card__header">
                     <h2 class="card__title">Навички</h2>
                 </div>
-                <canvas id="radarChart" height="200" data-labels='{{ radar_labels|safe }}'
+                <canvas id="radarChart" height="240" data-labels='{{ radar_labels|safe }}'
                     data-values='{{ radar_values|safe }}'></canvas>
             </section>
         </div>

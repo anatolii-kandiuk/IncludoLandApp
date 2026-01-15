@@ -3,7 +3,7 @@ import json
 from django.shortcuts import render
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from accounts.models import SoundCard, Story
+from accounts.models import SoundCard, Story, WordPuzzleWord
 
 
 def _child_stars(request):
@@ -87,8 +87,34 @@ def game_attention(request):
 
 @ensure_csrf_cookie
 def game_words(request):
+    qs = WordPuzzleWord.objects.filter(is_active=True).only('word', 'hint', 'emoji', 'created_by')
+
+    # If specialist opens the game, show their own words.
+    if request.user.is_authenticated and hasattr(request.user, 'specialist_profile'):
+        qs = qs.filter(created_by=request.user)
+
+    # If child has assigned specialists, show words added by those specialists.
+    if request.user.is_authenticated and hasattr(request.user, 'child_profile'):
+        specialists = list(request.user.child_profile.specialists.select_related('user'))
+        if specialists:
+            qs = qs.filter(created_by__in=[s.user for s in specialists])
+
+    payload = []
+    for w in qs.order_by('-created_at')[:200]:
+        word = (w.word or '').strip()
+        if not word:
+            continue
+        payload.append(
+            {
+                'word': word,
+                'hint': w.hint or '',
+                'emoji': w.emoji or '🧩',
+            }
+        )
+
     context = {
         'stars': _child_stars(request),
+        'words_json': json.dumps(payload, ensure_ascii=False),
     }
     return render(request, 'games/words.html', context)
 

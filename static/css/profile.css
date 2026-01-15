@@ -4,16 +4,17 @@
 
 .profile-grid {
     display: grid;
-    grid-template-columns: 1.3fr 1fr;
-    gap: 18px;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 22px;
     align-items: start;
 }
 
 .card {
-    background: rgba(255, 255, 255, .72);
-    border-radius: 18px;
-    padding: 16px;
+    background: rgba(255, 255, 255, .88);
+    border-radius: 20px;
+    padding: 20px;
     box-shadow: var(--shadow);
+    border: 1px solid rgba(0, 0, 0, .08);
 }
 
 .card--wide {
@@ -30,15 +31,21 @@
 
 .card__title {
     margin: 0;
-    font-size: 18px;
-    font-weight: 900
+    font-size: 20px;
+    font-weight: 1000
 }
 
 .card__subtitle {
     margin: 14px 0 10px;
-    font-size: 14px;
-    font-weight: 900;
+    font-size: 15px;
+    font-weight: 1000;
     opacity: .9
+}
+
+.card__meta {
+    font-weight: 900;
+    opacity: .8;
+    margin: 2px 0 10px;
 }
 
 .status__user {
@@ -74,7 +81,7 @@
 
 .badge {
     border-radius: 14px;
-    padding: 10px;
+    padding: 12px;
     display: flex;
     gap: 10px;
     align-items: center;
@@ -82,13 +89,13 @@
 }
 
 .badge__icon {
-    width: 34px;
-    height: 34px;
+    width: 40px;
+    height: 40px;
     border-radius: 12px;
     display: grid;
     place-items: center;
     background: rgba(255, 255, 255, .25);
-    font-size: 18px
+    font-size: 20px
 }
 
 .badge__title {
@@ -98,7 +105,7 @@
 .badge__sub {
     opacity: .8;
     font-weight: 700;
-    font-size: 12px
+    font-size: 13px
 }
 
 .badge--red {
@@ -121,27 +128,42 @@
     color: #fff
 }
 
+.badge--blue {
+    background: linear-gradient(135deg, #2b97e5, #1e6fcb);
+    color: #fff
+}
+
+.badge--yellow {
+    background: linear-gradient(135deg, #ffc93b, #e1a400);
+    color: #fff
+}
+
+.badge--locked {
+    filter: grayscale(1);
+    opacity: .55;
+}
+
 .quick {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    width: 180px
+    width: 210px
 }
 
 .quick__btn {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 12px;
-    border-radius: 16px;
+    padding: 14px 14px;
+    border-radius: 18px;
     text-decoration: none;
     color: #fff;
-    font-weight: 900;
+    font-weight: 1000;
     box-shadow: var(--shadow);
 }
 
 .quick__icon {
-    font-size: 18px
+    font-size: 20px
 }
 
 .quick__btn--blue {
@@ -163,11 +185,11 @@
     justify-content: space-between;
     gap: 10px;
     font-weight: 900;
-    font-size: 13px
+    font-size: 14px
 }
 
 .progress-item__bar {
-    height: 10px;
+    height: 12px;
     background: rgba(0, 0, 0, .08);
     border-radius: 999px;
     overflow: hidden
