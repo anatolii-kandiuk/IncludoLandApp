@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import SoundCard, Story, WordPuzzleWord
+from .models import SoundCard, SpecialistStudentNote, Story, WordPuzzleWord
 
 
 class RegisterForm(UserCreationForm):
@@ -103,4 +103,21 @@ class WordPuzzleWordForm(forms.ModelForm):
         if len(value) > 24:
             raise forms.ValidationError('Слово надто довге (макс. 24 літери).')
 
+        return value
+
+
+class SpecialistStudentNoteForm(forms.ModelForm):
+    class Meta:
+        model = SpecialistStudentNote
+        fields = ('text',)
+        widgets = {
+            'text': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Додайте нотатку про учня...'}),
+        }
+
+    def clean_text(self):
+        value = (self.cleaned_data.get('text') or '').strip()
+        if not value:
+            raise forms.ValidationError('Введіть текст нотатки.')
+        if len(value) > 2000:
+            raise forms.ValidationError('Нотатка надто довга (макс. 2000 символів).')
         return value

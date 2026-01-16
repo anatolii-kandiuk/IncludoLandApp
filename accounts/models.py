@@ -177,3 +177,27 @@ class WordPuzzleWord(models.Model):
 
     def __str__(self) -> str:
         return f"WordPuzzleWord({self.word})"
+
+
+class SpecialistStudentNote(models.Model):
+    specialist = models.ForeignKey(
+        'SpecialistProfile',
+        on_delete=models.CASCADE,
+        related_name='student_notes',
+    )
+    student = models.ForeignKey(
+        'ChildProfile',
+        on_delete=models.CASCADE,
+        related_name='specialist_notes',
+    )
+
+    text = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self) -> str:
+        return f"SpecialistStudentNote({self.specialist.user.username} → {self.student.user.username})"

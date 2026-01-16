@@ -280,12 +280,17 @@ def child_profile(request):
     _sync_badges_for_user(request.user)
     rewards = _build_rewards_for_user(request.user)
 
+    rewards_unlocked = [r for r in rewards if r.get('unlocked')]
+    rewards_locked = [r for r in rewards if not r.get('unlocked')]
+
     stats = _build_child_stats_for_user(request.user)
 
     context = {
         'username': request.user.username,
         'stars': profile.stars,
         'rewards': rewards,
+        'rewards_unlocked': rewards_unlocked,
+        'rewards_locked': rewards_locked,
         'progress': stats['progress'],
         'line_labels': stats['line_labels'],
         'line_datasets': stats['line_datasets'],

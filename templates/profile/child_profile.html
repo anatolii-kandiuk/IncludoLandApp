@@ -22,8 +22,8 @@
                     <h2 class="card__title">Твої Нагороди</h2>
                 </div>
 
-                <div class="badges badges--dashboard">
-                    {% for r in rewards %}
+                <div class="badges badges--dashboard" aria-label="Досягнуті нагороди">
+                    {% for r in rewards_unlocked %}
                     <div class="badge badge--{{ r.tone }} {% if not r.unlocked %}badge--locked{% endif %}">
                         <div class="badge__icon" aria-hidden="true">
                             {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass'
@@ -36,6 +36,30 @@
                     </div>
                     {% endfor %}
                 </div>
+
+                {% if rewards_locked %}
+                <details class="rewards-more">
+                    <summary class="rewards-more__summary" aria-label="Показати не досягнуті нагороди">
+                        <span class="rewards-more__label">Не досягнуті нагороди</span>
+                        <span class="rewards-more__chev" aria-hidden="true">⌄</span>
+                    </summary>
+
+                    <div class="badges badges--dashboard badges--locked" aria-label="Не досягнуті нагороди">
+                        {% for r in rewards_locked %}
+                        <div class="badge badge--{{ r.tone }} badge--locked">
+                            <div class="badge__icon" aria-hidden="true">
+                                {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass'
+                                %}🧭{% else %}🎯{% endif %}
+                            </div>
+                            <div class="badge__text">
+                                <div class="badge__title">{{ r.title }}</div>
+                                <div class="badge__sub">🔒 {{ r.subtitle }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </details>
+                {% endif %}
             </section>
 
             <a class="dash-tile" href="{% url 'home' %}#games" aria-label="Перейти до ігор">
