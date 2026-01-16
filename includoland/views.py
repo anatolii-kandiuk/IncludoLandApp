@@ -4,7 +4,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from accounts.models import SoundCard, Story, WordPuzzleWord
+from accounts.models import SentenceExercise, SoundCard, Story, WordPuzzleWord
 
 
 def _child_stars(request):
@@ -116,6 +116,42 @@ def game_words(request):
         'words_json': json.dumps(payload, ensure_ascii=False),
     }
     return render(request, 'games/words.html', context)
+
+
+@ensure_csrf_cookie
+def game_sentences(request):
+    qs = SentenceExercise.objects.filter(is_active=True).only('id', 'prompt', 'sentence', 'emoji', 'created_by')
+
+    # If specialist opens the game, show their own exercises.
+    if request.user.is_authenticated and hasattr(request.user, 'specialist_profile'):
+        qs = qs.filter(created_by=request.user)
+
+    # If child has assigned specialists, show exercises added by those specialists.
+    if request.user.is_authenticated and hasattr(request.user, 'child_profile'):
+        specialists = list(request.user.child_profile.specialists.select_related('user'))
+        if specialists:
+            qs = qs.filter(created_by__in=[s.user for s in specialists])
+
+    payload = []
+    for ex in qs.order_by('-created_at')[:200]:
+        prompt = (ex.prompt or '').strip()
+        sentence = (ex.sentence or '').strip()
+        if not prompt or not sentence:
+            continue
+        payload.append(
+            {
+                'id': ex.id,
+                'prompt': prompt,
+                'sentence': sentence,
+                'emoji': ex.emoji or '🧩',
+            }
+        )
+
+    context = {
+        'stars': _child_stars(request),
+        'sentences_json': json.dumps(payload, ensure_ascii=False),
+    }
+    return render(request, 'games/sentences.html', context)
 
 
 def coming_soon(request, section: str):

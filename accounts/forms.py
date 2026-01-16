@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import SoundCard, SpecialistStudentNote, Story, WordPuzzleWord
+from .models import SentenceExercise, SoundCard, SpecialistStudentNote, Story, WordPuzzleWord
 
 
 class RegisterForm(UserCreationForm):
@@ -120,4 +120,37 @@ class SpecialistStudentNoteForm(forms.ModelForm):
             raise forms.ValidationError('Введіть текст нотатки.')
         if len(value) > 2000:
             raise forms.ValidationError('Нотатка надто довга (макс. 2000 символів).')
+        return value
+
+
+class SentenceExerciseForm(forms.ModelForm):
+    class Meta:
+        model = SentenceExercise
+        fields = ('prompt', 'sentence', 'emoji', 'is_active')
+        widgets = {
+            'prompt': forms.TextInput(attrs={'placeholder': 'Напр.: Склади речення про котика'}),
+            'sentence': forms.TextInput(attrs={'placeholder': 'Напр.: Кіт спить на дивані.'}),
+            'emoji': forms.TextInput(attrs={'placeholder': 'Емодзі (необовʼязково)'}),
+        }
+
+    def clean_prompt(self):
+        value = (self.cleaned_data.get('prompt') or '').strip()
+        if not value:
+            raise forms.ValidationError('Введіть підказку/тему.')
+        if len(value) > 140:
+            raise forms.ValidationError('Підказка надто довга (макс. 140 символів).')
+        return value
+
+    def clean_sentence(self):
+        value = (self.cleaned_data.get('sentence') or '').strip()
+        if not value:
+            raise forms.ValidationError('Введіть речення.')
+        if len(value) > 220:
+            raise forms.ValidationError('Речення надто довге (макс. 220 символів).')
+
+        # Require at least 2 words.
+        words = [w for w in value.replace(',', ' ').replace('.', ' ').replace('!', ' ').replace('?', ' ').split() if w]
+        if len(words) < 2:
+            raise forms.ValidationError('Речення має містити щонайменше 2 слова.')
+
         return value

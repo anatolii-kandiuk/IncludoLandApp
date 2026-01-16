@@ -13,8 +13,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.db.models import F
 
-from .forms import RegisterForm, SoundCardForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
-from .models import ChildProfile, GameResult, SpecialistProfile, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
+from .forms import RegisterForm, SentenceExerciseForm, SoundCardForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
+from .models import ChildProfile, GameResult, SentenceExercise, SpecialistProfile, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
 
 
 BADGE_DEFINITIONS = [
@@ -127,6 +127,7 @@ def _build_child_stats_for_user(user):
     memory_values = [r.score if r.game_type == GameResult.GameType.MEMORY else None for r in results]
     sound_values = [r.score if r.game_type == GameResult.GameType.SOUND else None for r in results]
     words_values = [r.score if r.game_type == GameResult.GameType.WORDS else None for r in results]
+    sentences_values = [r.score if r.game_type == GameResult.GameType.SENTENCES else None for r in results]
 
     def avg_score(game_type: str) -> int:
         values = [r.score for r in results if r.game_type == game_type]
@@ -138,6 +139,7 @@ def _build_child_stats_for_user(user):
     memory_avg = avg_score(GameResult.GameType.MEMORY)
     sound_avg = avg_score(GameResult.GameType.SOUND)
     words_avg = avg_score(GameResult.GameType.WORDS)
+    sentences_avg = avg_score(GameResult.GameType.SENTENCES)
 
     total_stories = Story.objects.filter(is_active=True).count()
     listened_unique = (
@@ -153,17 +155,19 @@ def _build_child_stats_for_user(user):
         {'label': "Памʼять", 'value': memory_avg},
         {'label': 'Звуки', 'value': sound_avg},
         {'label': 'Пазли слів', 'value': words_avg},
+        {'label': 'Побудова речень', 'value': sentences_avg},
         {'label': 'Казки (слухання)', 'value': stories_listen_pct},
     ]
 
-    radar_labels = ['Математика', "Памʼять", 'Звуки', 'Пазли слів', 'Казки']
-    radar_values = [math_avg, memory_avg, sound_avg, words_avg, stories_listen_pct]
+    radar_labels = ['Математика', "Памʼять", 'Звуки', 'Пазли слів', 'Речення', 'Казки']
+    radar_values = [math_avg, memory_avg, sound_avg, words_avg, sentences_avg, stories_listen_pct]
 
     line_datasets = [
         {'label': 'Математика', 'data': math_values, 'color': '#2b97e5'},
         {'label': "Памʼять", 'data': memory_values, 'color': '#19b3b9'},
         {'label': 'Звуки', 'data': sound_values, 'color': '#c28b00'},
         {'label': 'Пазли слів', 'data': words_values, 'color': '#7c3aed'},
+        {'label': 'Побудова речень', 'data': sentences_values, 'color': '#8b5cf6'},
     ]
 
     return {
@@ -181,6 +185,7 @@ def _build_child_stats_for_user(user):
             'memory': memory_avg,
             'sound': sound_avg,
             'words': words_avg,
+            'sentences': sentences_avg,
             'stories_listen': stories_listen_pct,
         },
     }
@@ -417,16 +422,18 @@ def specialist_profile(request):
             GameResult.GameType.MEMORY: '#19b3b9',
             GameResult.GameType.SOUND: '#c28b00',
             GameResult.GameType.WORDS: '#7c3aed',
+            GameResult.GameType.SENTENCES: '#8b5cf6',
         }
         game_labels = {
             GameResult.GameType.MATH: 'Математика',
             GameResult.GameType.MEMORY: "Памʼять",
             GameResult.GameType.SOUND: 'Звуки',
             GameResult.GameType.WORDS: 'Пазли слів',
+            GameResult.GameType.SENTENCES: 'Побудова речень',
         }
 
         if perf_game == 'all':
-            for gt in (GameResult.GameType.MATH, GameResult.GameType.MEMORY, GameResult.GameType.SOUND, GameResult.GameType.WORDS):
+            for gt in (GameResult.GameType.MATH, GameResult.GameType.MEMORY, GameResult.GameType.SOUND, GameResult.GameType.WORDS, GameResult.GameType.SENTENCES):
                 perf_datasets.append({'label': game_labels[gt], 'data': build_series(gt), 'color': game_palette[gt]})
         else:
             perf_datasets.append({'label': game_labels.get(perf_game, perf_game), 'data': build_series(perf_game), 'color': game_palette.get(perf_game, '#2b97e5')})
@@ -450,6 +457,47 @@ def specialist_profile(request):
         'perf_game_choices': list(GameResult.GameType.choices),
     }
     return render(request, 'profile/specialist_profile.html', context)
+
+
+@login_required
+def specialist_sentences(request):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    if request.method == 'POST':
+        form = SentenceExerciseForm(request.POST)
+        if form.is_valid():
+            item = form.save(commit=False)
+            item.created_by = request.user
+            item.save()
+            return redirect('specialist_sentences')
+    else:
+        form = SentenceExerciseForm(initial={'is_active': True})
+
+    exercises = list(
+        SentenceExercise.objects.filter(created_by=request.user)
+        .only('id', 'prompt', 'sentence', 'emoji', 'is_active', 'created_at')
+        .order_by('-created_at')
+    )
+
+    context = {
+        'username': request.user.username,
+        'coins': request.user.specialist_profile.coins,
+        'form': form,
+        'exercises': exercises,
+    }
+    return render(request, 'profile/specialist_sentences.html', context)
+
+
+@login_required
+@require_POST
+def specialist_sentence_delete(request, exercise_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    SentenceExercise.objects.filter(id=exercise_id, created_by=request.user).delete()
+    next_url = request.POST.get('next') or reverse('specialist_sentences')
+    return redirect(next_url)
 
 
 @login_required
@@ -923,6 +971,7 @@ def record_game_result(request):
         GameResult.GameType.MEMORY,
         GameResult.GameType.SOUND,
         GameResult.GameType.WORDS,
+        GameResult.GameType.SENTENCES,
     ):
         return JsonResponse({'ok': False, 'error': 'invalid_game_type'}, status=400)
 

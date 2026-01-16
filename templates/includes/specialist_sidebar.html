@@ -41,6 +41,11 @@
                 <span class="nav__icon" aria-hidden="true">🔤</span>
                 <span class="nav__label">Слова</span>
             </a>
+            <a class="nav__item{% if active == 'sentences' %} nav__item--active{% endif %}"
+                href="{% url 'specialist_sentences' %}">
+                <span class="nav__icon" aria-hidden="true">🧩</span>
+                <span class="nav__label">Речення</span>
+            </a>
         </div>
 
         <div class="nav__section" aria-label="Ігри">
@@ -48,6 +53,10 @@
             <a class="nav__item" href="{% url 'game_words' %}">
                 <span class="nav__icon" aria-hidden="true">🔤</span>
                 <span class="nav__label">Пазли слів</span>
+            </a>
+            <a class="nav__item" href="{% url 'game_sentences' %}">
+                <span class="nav__icon" aria-hidden="true">🧩</span>
+                <span class="nav__label">Побудова речень</span>
             </a>
             <a class="nav__item" href="{% url 'game_memory' %}">
                 <span class="nav__icon" aria-hidden="true">🧠</span>

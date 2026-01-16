@@ -1,0 +1,61 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Побудова речень — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sentences.css' %}">
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+    <main class="page page--game page--sentences">
+        <h1 class="game-title">ПОБУДОВА РЕЧЕНЬ</h1>
+
+        <section class="sentences" aria-label="Гра Побудова речень">
+            {% csrf_token %}
+            <div class="sentences-card" role="group" aria-label="Завдання"
+                data-sentences='{{ sentences_json|default:"[]"|safe }}'>
+                <div class="sentences-meta" aria-label="Прогрес">
+                    <div class="sentences-chip"><span>Рівень</span> <strong id="sent-round">0</strong>/<span
+                            id="sent-total">5</span></div>
+                    <div class="sentences-chip"><span>Час</span> <strong id="sent-time">0</strong>с</div>
+                </div>
+
+                <div class="sentences-prompt" aria-label="Підказка">
+                    <div class="sentences-hero" aria-hidden="true">
+                        <span class="sentences-emoji" id="sent-emoji">🧩</span>
+                    </div>
+                    <div class="sentences-hint">
+                        <div class="sentences-hint__title">Підказка</div>
+                        <div class="sentences-hint__text" id="sent-prompt">Натисни “Почати”</div>
+                    </div>
+                </div>
+
+                <div class="sentences-area" aria-label="Речення">
+                    <div class="sentences-area__title">Склади речення</div>
+                    <div class="sentences-picked" id="sent-picked" aria-label="Поле речення"></div>
+                </div>
+
+                <div class="sentences-bank" id="sent-bank" aria-label="Слова"></div>
+
+                <div class="sentences-actions" aria-label="Керування">
+                    <button class="sent-btn" id="sent-clear" type="button">Очистити</button>
+                    <button class="sent-btn sent-btn--primary" id="sent-check" type="button">Перевірити</button>
+                    <button class="sent-btn sent-btn--primary" id="sent-start" type="button">Почати</button>
+                    <a class="sent-btn sent-btn--ghost" href="{% url 'home' %}#games">Вийти</a>
+                </div>
+
+                <div class="sentences-msg" id="sent-msg" role="status" aria-live="polite">Перетягуй або натискай слова,
+                    щоб скласти речення.</div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'js/sentences.js' %}" defer></script>
+</body>
+
+</html>

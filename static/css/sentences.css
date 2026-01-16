@@ -1,0 +1,201 @@
+:root {
+    --card: rgba(255, 255, 255, .78);
+    --border: rgba(0, 0, 0, .08);
+    --green: #28a86e;
+    --red: #e85d5d;
+    --purple: #7c3aed;
+}
+
+.page--sentences {
+    padding-bottom: 28px;
+}
+
+.sentences {
+    display: grid;
+    place-items: center;
+    padding: 10px 14px 22px;
+}
+
+.sentences-card {
+    width: min(920px, 100%);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 16px;
+}
+
+.sentences-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.sentences-chip {
+    display: inline-flex;
+    gap: 8px;
+    align-items: baseline;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .75);
+    border: 1px solid var(--border);
+    font-weight: 900;
+}
+
+.sentences-prompt {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.sentences-hero {
+    height: 110px;
+    border-radius: 18px;
+    background: radial-gradient(120px 120px at 30% 30%, #fff9, transparent),
+        linear-gradient(135deg, rgba(124, 58, 237, .22), rgba(43, 151, 229, .14));
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+}
+
+.sentences-emoji {
+    font-size: 44px;
+    filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .08));
+}
+
+.sentences-hint__title {
+    font-weight: 1000;
+    margin-bottom: 4px;
+}
+
+.sentences-hint__text {
+    opacity: .85;
+    font-weight: 800;
+}
+
+.sentences-area {
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .65);
+    border: 1px dashed rgba(0, 0, 0, .14);
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.sentences-area__title {
+    font-weight: 1000;
+    opacity: .82;
+    margin-bottom: 8px;
+}
+
+.sentences-picked {
+    min-height: 68px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.sentences-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 10px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .55);
+    border: 1px solid var(--border);
+    min-height: 90px;
+    margin-bottom: 12px;
+}
+
+.sent-pill {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, rgba(124, 58, 237, .12), rgba(32, 183, 177, .10));
+    font-weight: 1000;
+    cursor: pointer;
+    user-select: none;
+    transition: transform .08s ease, filter .08s ease, opacity .12s ease;
+}
+
+.sent-pill:active {
+    transform: translateY(1px) scale(.99);
+}
+
+.sent-pill:hover {
+    filter: brightness(.98);
+}
+
+.sent-pill[disabled] {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.sentences-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.sent-btn {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, .78);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .06);
+    font-weight: 1000;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+}
+
+.sent-btn--primary {
+    border: 0;
+    color: #fff;
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+}
+
+.sent-btn--ghost {
+    background: transparent;
+}
+
+.sentences-msg {
+    text-align: center;
+    font-weight: 900;
+    opacity: .85;
+}
+
+.sentences-card[data-state="correct"] .sentences-msg {
+    color: var(--green);
+    opacity: 1;
+}
+
+.sentences-card[data-state="wrong"] .sentences-msg {
+    color: var(--red);
+    opacity: 1;
+}
+
+@media (max-width: 520px) {
+    .sentences-prompt {
+        grid-template-columns: 1fr;
+    }
+
+    .sentences-hero {
+        height: 90px;
+    }
+
+    .sent-pill {
+        padding: 9px 12px;
+    }
+}

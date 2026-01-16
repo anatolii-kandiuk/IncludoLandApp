@@ -36,6 +36,7 @@ class GameResult(models.Model):
         MEMORY = 'memory', 'Memory'
         SOUND = 'sound', 'Sound'
         WORDS = 'words', 'Words'
+        SENTENCES = 'sentences', 'Sentences'
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -177,6 +178,29 @@ class WordPuzzleWord(models.Model):
 
     def __str__(self) -> str:
         return f"WordPuzzleWord({self.word})"
+
+
+class SentenceExercise(models.Model):
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sentence_exercises',
+    )
+
+    prompt = models.CharField(max_length=140)
+    sentence = models.CharField(max_length=220)
+    emoji = models.CharField(max_length=8, blank=True)
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self) -> str:
+        return f"SentenceExercise({self.prompt})"
 
 
 class SpecialistStudentNote(models.Model):

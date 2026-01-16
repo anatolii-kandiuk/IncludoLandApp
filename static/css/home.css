@@ -214,6 +214,10 @@ body {
     background: linear-gradient(135deg, #ffc93b, #e1a400)
 }
 
+.tile--purple {
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9)
+}
+
 .helper {
     margin-top: 26px;
     display: flex;

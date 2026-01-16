@@ -1,0 +1,128 @@
+/* Specialist sentence exercises */
+
+.help {
+    margin-top: 10px;
+    opacity: .82;
+    font-weight: 800;
+}
+
+.inline-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+}
+
+.inline-check input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #7c3aed;
+}
+
+/* Badge styles (same as specialist_words.css, duplicated for isolation) */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 1000;
+    font-size: 12px;
+    border: 1px solid rgba(0, 0, 0, .08);
+    background: rgba(255, 255, 255, .85);
+    white-space: nowrap;
+}
+
+.badge--green {
+    background: rgba(40, 168, 110, .12);
+    color: #146a44;
+}
+
+.badge--locked {
+    background: rgba(15, 43, 58, .07);
+    color: rgba(15, 43, 58, .85);
+}
+
+.table {
+    width: 100%;
+    border-radius: 14px;
+    overflow: auto;
+    border: 1px solid rgba(0, 0, 0, .08);
+    background: rgba(255, 255, 255, .55);
+}
+
+.table__row {
+    display: grid;
+    grid-template-columns: 1.4fr 2.6fr .6fr .9fr 1fr;
+    align-items: center;
+    min-width: 980px;
+}
+
+.table__row--head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: rgba(255, 255, 255, .92);
+    border-bottom: 1px solid rgba(0, 0, 0, .08);
+}
+
+.table__row:not(.table__row--head) {
+    border-bottom: 1px solid rgba(0, 0, 0, .06);
+}
+
+.table__row:not(.table__row--head):nth-child(even) {
+    background: rgba(255, 255, 255, .45);
+}
+
+.table__cell {
+    padding: 12px 12px;
+    font-weight: 800;
+}
+
+.table__row--head .table__cell {
+    font-size: 12px;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    opacity: .8;
+}
+
+.table__cell--strong {
+    font-weight: 1000;
+    letter-spacing: .3px;
+}
+
+.table__cell--muted {
+    opacity: .75;
+}
+
+.table__actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.table__btn {
+    height: 34px;
+    border-radius: 12px;
+    padding: 0 12px;
+    border: 1px solid rgba(0, 0, 0, .10);
+    background: rgba(255, 255, 255, .85);
+    font-weight: 1000;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.table__btn:hover {
+    filter: brightness(.98);
+}
+
+.table__btn--danger {
+    border: 0;
+    background: linear-gradient(135deg, #ff6b6b, #e03a3a);
+    color: #fff;
+}
+
+.table__btn--danger:hover {
+    filter: brightness(.98);
+}
