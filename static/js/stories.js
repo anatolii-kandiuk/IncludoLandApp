@@ -54,11 +54,20 @@
         const modalContent = document.getElementById('story-modal-content');
         const audio = document.getElementById('story-audio');
 
+        const player = document.getElementById('audio-player');
+        const playerTitle = document.getElementById('audio-player-title');
+        const playerToggle = document.getElementById('audio-player-toggle');
+        const seek = document.getElementById('audio-seek');
+        const currentTimeEl = document.getElementById('audio-current');
+        const durationEl = document.getElementById('audio-duration');
+
         if (!audio) return;
 
         let currentStoryId = null;
         let startedAt = 0;
         let currentAudioHref = '';
+        let currentTitle = '';
+        let isSeeking = false;
 
         function normalizeUrl(url) {
             if (!url) return '';
@@ -101,6 +110,66 @@
                 // ignore
             }
             currentAudioHref = '';
+            currentTitle = '';
+
+            if (playerTitle) playerTitle.textContent = 'Аудіо';
+            if (seek) {
+                seek.value = '0';
+                seek.max = '0';
+            }
+            if (currentTimeEl) currentTimeEl.textContent = '0:00';
+            if (durationEl) durationEl.textContent = '0:00';
+
+            if (playerToggle) {
+                playerToggle.textContent = '▶';
+                playerToggle.setAttribute('aria-label', 'Відтворити');
+            }
+
+            if (player) player.classList.add('audio-player--hidden');
+        }
+
+        function formatTime(seconds) {
+            const total = Math.max(0, Math.floor(Number(seconds) || 0));
+            const m = Math.floor(total / 60);
+            const s = total % 60;
+            return `${m}:${String(s).padStart(2, '0')}`;
+        }
+
+        function showPlayer(title) {
+            if (!player) return;
+            player.classList.remove('audio-player--hidden');
+            if (playerTitle) playerTitle.textContent = title || 'Аудіо';
+        }
+
+        function syncPlayerToggle() {
+            if (!playerToggle) return;
+            if (audio.paused) {
+                playerToggle.textContent = '▶';
+                playerToggle.setAttribute('aria-label', 'Відтворити');
+            } else {
+                playerToggle.textContent = '⏸';
+                playerToggle.setAttribute('aria-label', 'Пауза');
+            }
+        }
+
+        function syncPlayerTime() {
+            if (!seek || !currentTimeEl || !durationEl) return;
+            const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+            const current = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+
+            durationEl.textContent = formatTime(duration);
+
+            if (!isSeeking) {
+                seek.max = String(duration || 0);
+                seek.value = String(current || 0);
+                currentTimeEl.textContent = formatTime(current);
+            }
+        }
+
+        function syncCurrentCardPlayingState(isPlaying) {
+            if (!currentStoryId) return;
+            const card = document.querySelector(`.story-card[data-story-id="${currentStoryId}"]`);
+            if (card) syncCardAudioButtons(card, isPlaying);
         }
 
         function syncCardAudioButtons(card, isPlaying) {
@@ -154,9 +223,13 @@
 
                     currentStoryId = storyId;
                     startedAt = Date.now();
+                    currentTitle = title;
                     currentAudioHref = normalizeUrl(audioUrl);
                     audio.src = currentAudioHref;
                     audio.play().catch(() => { /* ignore */ });
+
+                    showPlayer(title);
+                    syncPlayerToggle();
 
                     // enable pause button on this card
                     syncCardAudioButtons(card, true);
@@ -170,9 +243,12 @@
                         stopAudio();
                         currentStoryId = storyId;
                         startedAt = Date.now();
+                        currentTitle = title;
                         currentAudioHref = requestedHref;
                         audio.src = currentAudioHref;
                         audio.play().catch(() => { /* ignore */ });
+                        showPlayer(title);
+                        syncPlayerToggle();
                         syncCardAudioButtons(card, true);
                         return;
                     }
@@ -180,12 +256,75 @@
                     if (audio.paused) {
                         audio.play().catch(() => { /* ignore */ });
                         syncCardAudioButtons(card, true);
+                        syncPlayerToggle();
                     } else {
                         audio.pause();
                         syncCardAudioButtons(card, false);
+                        syncPlayerToggle();
                     }
                 }
             });
+        });
+
+        if (playerToggle) {
+            playerToggle.addEventListener('click', () => {
+                if (!currentAudioHref) return;
+                if (audio.paused) {
+                    audio.play().catch(() => { /* ignore */ });
+                } else {
+                    audio.pause();
+                }
+                syncPlayerToggle();
+            });
+        }
+
+        if (seek) {
+            const startSeeking = () => {
+                isSeeking = true;
+            };
+            const stopSeeking = () => {
+                isSeeking = false;
+                syncPlayerTime();
+            };
+
+            seek.addEventListener('mousedown', startSeeking);
+            seek.addEventListener('touchstart', startSeeking, { passive: true });
+            window.addEventListener('mouseup', stopSeeking);
+            window.addEventListener('touchend', stopSeeking);
+
+            seek.addEventListener('input', () => {
+                const value = Number(seek.value);
+                if (currentTimeEl) currentTimeEl.textContent = formatTime(value);
+                if (Number.isFinite(audio.duration) && audio.duration > 0) {
+                    audio.currentTime = value;
+                }
+            });
+        }
+
+        audio.addEventListener('loadedmetadata', () => {
+            showPlayer(currentTitle);
+            syncPlayerTime();
+            syncPlayerToggle();
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            syncPlayerTime();
+        });
+
+        audio.addEventListener('play', () => {
+            syncPlayerToggle();
+            syncCurrentCardPlayingState(true);
+        });
+
+        audio.addEventListener('pause', () => {
+            syncPlayerToggle();
+            if (audio.currentTime > 0) syncCurrentCardPlayingState(false);
+
+            // reset when user manually stops
+            if (audio.currentTime === 0) {
+                currentStoryId = null;
+                startedAt = 0;
+            }
         });
 
         audio.addEventListener('ended', async () => {
@@ -202,14 +341,8 @@
                     syncCardAudioButtons(card, false);
                 }
             });
-        });
 
-        audio.addEventListener('pause', () => {
-            // reset when user manually stops
-            if (audio.currentTime === 0) {
-                currentStoryId = null;
-                startedAt = 0;
-            }
+            stopAudio();
         });
     });
 })();

@@ -8,6 +8,7 @@
     <title>Профіль дитини — IncludoLand</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/child_profile.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
     <script src="{% static 'js/profile_charts.js' %}" defer></script>
 </head>
@@ -15,74 +16,69 @@
 <body>
     {% include 'includes/header.html' %}
     <main class="page profile">
-        <div class="profile-grid">
-            <section class="card card--wide">
+        <div class="child-dashboard">
+            <section class="card child-card child-card--rewards">
                 <div class="card__header">
                     <h2 class="card__title">Твої Нагороди</h2>
                 </div>
 
-                <div class="rewards">
-                    <div class="badges">
-                        {% for r in rewards %}
-                        <div class="badge badge--{{ r.tone }} {% if not r.unlocked %}badge--locked{% endif %}">
-                            <div class="badge__icon" aria-hidden="true">
-                                {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass'
-                                %}🧭{% else %}🎯{% endif %}
-                            </div>
-                            <div class="badge__text">
-                                <div class="badge__title">{{ r.title }}</div>
-                                <div class="badge__sub">{% if not r.unlocked %}🔒 {% endif %}{{ r.subtitle }}</div>
-                            </div>
+                <div class="badges badges--dashboard">
+                    {% for r in rewards %}
+                    <div class="badge badge--{{ r.tone }} {% if not r.unlocked %}badge--locked{% endif %}">
+                        <div class="badge__icon" aria-hidden="true">
+                            {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass'
+                            %}🧭{% else %}🎯{% endif %}
                         </div>
-                        {% endfor %}
+                        <div class="badge__text">
+                            <div class="badge__title">{{ r.title }}</div>
+                            <div class="badge__sub">{% if not r.unlocked %}🔒 {% endif %}{{ r.subtitle }}</div>
+                        </div>
                     </div>
+                    {% endfor %}
+                </div>
+            </section>
 
-                    <div class="quick">
-                        <a class="quick__btn quick__btn--blue" href="{% url 'stories' %}">
-                            <span class="quick__icon" aria-hidden="true">📘</span>
-                            <span>КАЗКИ</span>
-                        </a>
-                        <a class="quick__btn quick__btn--yellow" href="{% url 'rewards' %}">
-                            <span class="quick__icon" aria-hidden="true">🛡️</span>
-                            <span>НАГОРОДИ</span>
-                        </a>
+            <a class="dash-tile" href="{% url 'home' %}#games" aria-label="Перейти до ігор">
+                <div class="dash-tile__icon" aria-hidden="true">🎮</div>
+                <div class="dash-tile__label">ІГРИ</div>
+            </a>
+
+            <section class="card child-card child-card--progress">
+                <div class="card__header">
+                    <h2 class="card__title">Прогрес Завдань</h2>
+                </div>
+                <div class="card__meta">Слухань казок: {{ stories_listens_count }}</div>
+
+                <div class="progress-list">
+                    {% for p in progress %}
+                    <div class="progress-item">
+                        <div class="progress-item__row">
+                            <span class="progress-item__label">{{ p.label }}</span>
+                            <span class="progress-item__value">{{ p.value }}%</span>
+                        </div>
+                        <div class="progress-item__bar" role="progressbar" aria-valuenow="{{ p.value }}"
+                            aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-item__fill" style="width: {{ p.value }}%"></div>
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
 
-                <div class="progress-block">
-                    <h3 class="card__subtitle">Прогрес Завдань</h3>
-                    <div class="card__meta">Слухань казок: {{ stories_listens_count }}</div>
-                    <div class="progress-list">
-                        {% for p in progress %}
-                        <div class="progress-item">
-                            <div class="progress-item__row">
-                                <span class="progress-item__label">{{ p.label }}</span>
-                                <span class="progress-item__value">{{ p.value }}%</span>
-                            </div>
-                            <div class="progress-item__bar" role="progressbar" aria-valuenow="{{ p.value }}"
-                                aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-item__fill" style="width: {{ p.value }}%"></div>
-                            </div>
+                <div class="helper helper--inline" aria-label="Підказка">
+                    <div class="helper__owl" aria-hidden="true">
+                        <div class="owl">
+                            <div class="owl__face"></div>
+                            <div class="owl__eyes"><span></span><span></span></div>
+                            <div class="owl__beak"></div>
                         </div>
-                        {% endfor %}
                     </div>
-
-                    <div class="helper helper--inline" aria-label="Підказка">
-                        <div class="helper__owl" aria-hidden="true">
-                            <div class="owl">
-                                <div class="owl__face"></div>
-                                <div class="owl__eyes"><span></span><span></span></div>
-                                <div class="owl__beak"></div>
-                            </div>
-                        </div>
-                        <div class="helper__bubble">
-                            <div class="helper__text">Побільше так грати!</div>
-                        </div>
+                    <div class="helper__bubble">
+                        <div class="helper__text">Побільше так грати!</div>
                     </div>
                 </div>
             </section>
 
-            <section class="card">
+            <section class="card child-card child-card--perf">
                 <div class="card__header">
                     <h2 class="card__title">Статистика успішності</h2>
                 </div>
@@ -90,7 +86,7 @@
                     data-datasets='{{ line_datasets|safe }}'></canvas>
             </section>
 
-            <section class="card">
+            <section class="card child-card child-card--skills">
                 <div class="card__header">
                     <h2 class="card__title">Навички</h2>
                 </div>

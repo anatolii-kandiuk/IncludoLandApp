@@ -1,6 +1,7 @@
 import json
 
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from accounts.models import SoundCard, Story, WordPuzzleWord
@@ -19,10 +20,8 @@ def home(request):
 
 
 def games(request):
-    context = {
-        'stars': _child_stars(request),
-    }
-    return render(request, 'games.html', context)
+    # Games are shown on the home page now.
+    return redirect(f"{reverse('home')}#games")
 
 
 @ensure_csrf_cookie

@@ -1,0 +1,112 @@
+.child-dashboard {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: 22px;
+    align-items: start;
+}
+
+.child-card {
+    width: 100%;
+}
+
+.child-card--rewards {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.child-card--perf {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.child-card--progress {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+.child-card--skills {
+    grid-column: 1 / -1;
+    grid-row: 3;
+}
+
+.badges--dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.badges--dashboard .badge {
+    min-height: 74px;
+}
+
+.dash-tile {
+    grid-column: 2;
+    grid-row: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 160px;
+    border-radius: 22px;
+    text-decoration: none;
+
+    background: linear-gradient(135deg, #ff8a3d, #f14c6b);
+    color: #fff;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+
+    transform: translateY(0);
+    transition: transform .12s ease, filter .12s ease;
+}
+
+.dash-tile:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.02);
+}
+
+.dash-tile:active {
+    transform: translateY(0);
+}
+
+.dash-tile__icon {
+    font-size: 34px;
+    line-height: 1;
+    opacity: 0.95;
+}
+
+.dash-tile__label {
+    font-weight: 1000;
+    letter-spacing: 1px;
+    font-size: 28px;
+}
+
+@media (max-width: 980px) {
+    .child-dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .child-card--rewards,
+    .child-card--perf,
+    .child-card--progress,
+    .child-card--skills,
+    .dash-tile {
+        grid-column: auto;
+        grid-row: auto;
+    }
+
+    .dash-tile {
+        min-height: 140px;
+    }
+}
+
+@media (max-width: 520px) {
+    .dash-tile__label {
+        font-size: 24px;
+    }
+
+    .badges--dashboard {
+        grid-template-columns: 1fr;
+    }
+}

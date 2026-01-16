@@ -12,34 +12,68 @@
 <body>
     {% include 'includes/header.html' %}
     <main class="page">
-        <section class="menu" aria-label="Головне меню">
-            <a class="tile tile--green" href="{% url 'games' %}">
+        <h1 class="section-title" id="games">Ігри</h1>
+        <section class="menu menu--compact menu--big" aria-label="Ігри">
+            <a class="tile tile--green" href="{% url 'game_words' %}">
                 <div class="tile__icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" role="img" focusable="false">
                         <path
-                            d="M7.5 9h9c1.6 0 2.9 1.3 2.9 2.9v2.6c0 1.1-.7 2.1-1.8 2.5l-1.5.5c-.7.2-1.4-.1-1.8-.7l-1-1.4c-.2-.3-.5-.4-.8-.4h-1.1c-.3 0-.6.1-.8.4l-1 1.4c-.4.6-1.1.9-1.8.7l-1.5-.5c-1.1-.4-1.8-1.4-1.8-2.5v-2.6C4.6 10.3 5.9 9 7.5 9z"
+                            d="M5 7.5A2.5 2.5 0 0 1 7.5 5h9A2.5 2.5 0 0 1 19 7.5v9A2.5 2.5 0 0 1 16.5 19h-9A2.5 2.5 0 0 1 5 16.5v-9z"
                             fill="#ffffff" />
-                        <path
-                            d="M8.2 12.3h1.1v-1.1c0-.4.3-.7.7-.7s.7.3.7.7v1.1h1.1c.4 0 .7.3.7.7s-.3.7-.7.7h-1.1v1.1c0 .4-.3.7-.7.7s-.7-.3-.7-.7v-1.1H8.2c-.4 0-.7-.3-.7-.7s.3-.7.7-.7z"
-                            fill="#1c8f60" />
-                        <circle cx="15.9" cy="12.6" r="0.9" fill="#1c8f60" />
-                        <circle cx="17.9" cy="13.8" r="0.9" fill="#1c8f60" />
+                        <path d="M9.3 11.2h.9c.6 0 1-.4 1-1s-.4-1-1-1H9.3v2z" fill="#1c8f60" />
+                        <path d="M12.2 9.2h2.5" stroke="#1c8f60" stroke-width="1.6" stroke-linecap="round" />
+                        <path d="M12.2 12h2.5" stroke="#1c8f60" stroke-width="1.6" stroke-linecap="round" />
+                        <path d="M8.5 14.5h7" stroke="#1c8f60" stroke-width="1.6" stroke-linecap="round" />
                     </svg>
                 </div>
-                <div class="tile__label">ГРАТИ</div>
+                <div class="tile__label">ПАЗЛИ СЛІВ</div>
             </a>
 
-            <a class="tile tile--blue" href="{% url 'stories' %}">
+            <a class="tile tile--blue" href="{% url 'game_memory' %}">
                 <div class="tile__icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" role="img" focusable="false">
-                        <path d="M6 4.5h10.5c1.1 0 2 .9 2 2V18c0 .6-.5 1-1 1H8c-1.1 0-2-.9-2-2V4.5z" fill="#ffffff" />
-                        <path d="M6 17.2c.5-.4 1.2-.7 2-.7h10.5" fill="none" stroke="#1b79c5" stroke-width="1.8"
-                            stroke-linecap="round" />
-                        <path d="M9 7.5h6.5" stroke="#1b79c5" stroke-width="1.6" stroke-linecap="round" />
-                        <path d="M9 10h5.5" stroke="#1b79c5" stroke-width="1.6" stroke-linecap="round" />
+                        <path
+                            d="M9.5 4.5c1.2 0 2.2 1 2.2 2.2v.1h1.6v-.1c0-1.2 1-2.2 2.2-2.2s2.2 1 2.2 2.2v9.1c0 2-1.6 3.7-3.7 3.7H9.3c-2 0-3.7-1.6-3.7-3.7V6.7c0-1.2 1-2.2 2.2-2.2h1.7z"
+                            fill="#ffffff" />
+                        <path d="M9 12.2c.7-.7 1.5-1.1 2.4-1.1 1 0 1.9.5 2.6 1.4.6-.9 1.5-1.4 2.5-1.4" fill="none"
+                            stroke="#1b79c5" stroke-width="1.7" stroke-linecap="round" />
+                        <path d="M10.2 9.6h0" stroke="#1b79c5" stroke-width="3" stroke-linecap="round" />
+                        <path d="M16 9.6h0" stroke="#1b79c5" stroke-width="3" stroke-linecap="round" />
                     </svg>
                 </div>
-                <div class="tile__label">КАЗКИ</div>
+                <div class="tile__label">ПАМʼЯТЬ</div>
+            </a>
+
+            <a class="tile tile--teal" href="{% url 'game_attention' %}">
+                <div class="tile__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <circle cx="12" cy="12" r="8" fill="#ffffff" />
+                        <circle cx="12" cy="12" r="4" fill="none" stroke="#0a8b89" stroke-width="2" />
+                        <circle cx="12" cy="12" r="1.3" fill="#0a8b89" />
+                        <path d="M12 4v2.2" stroke="#0a8b89" stroke-width="2" stroke-linecap="round" />
+                        <path d="M12 17.8V20" stroke="#0a8b89" stroke-width="2" stroke-linecap="round" />
+                        <path d="M4 12h2.2" stroke="#0a8b89" stroke-width="2" stroke-linecap="round" />
+                        <path d="M17.8 12H20" stroke="#0a8b89" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="tile__label">УВАГА</div>
+            </a>
+
+            <a class="tile tile--yellow" href="{% url 'game_math' %}">
+                <div class="tile__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path
+                            d="M7 5.5h10A2.5 2.5 0 0 1 19.5 8v10A2.5 2.5 0 0 1 17 20.5H7A2.5 2.5 0 0 1 4.5 18V8A2.5 2.5 0 0 1 7 5.5z"
+                            fill="#ffffff" />
+                        <path d="M8 9h8" stroke="#c28700" stroke-width="1.8" stroke-linecap="round" />
+                        <path d="M9 13h2" stroke="#c28700" stroke-width="1.8" stroke-linecap="round" />
+                        <path d="M13 13h2" stroke="#c28700" stroke-width="1.8" stroke-linecap="round" />
+                        <path d="M9 16h2" stroke="#c28700" stroke-width="1.8" stroke-linecap="round" />
+                        <path d="M13 15l2 2" stroke="#c28700" stroke-width="1.8" stroke-linecap="round" />
+                        <path d="M15 15l-2 2" stroke="#c28700" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="tile__label">МАТЕМАТИКА</div>
             </a>
 
             <a class="tile tile--teal" href="{% url 'sounds' %}">
@@ -55,6 +89,22 @@
                     </svg>
                 </div>
                 <div class="tile__label">ЗВУКИ</div>
+            </a>
+        </section>
+
+        <h2 class="section-title">Інше</h2>
+        <section class="menu menu--compact menu--big" aria-label="Інше">
+            <a class="tile tile--blue" href="{% url 'stories' %}">
+                <div class="tile__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path d="M6 4.5h10.5c1.1 0 2 .9 2 2V18c0 .6-.5 1-1 1H8c-1.1 0-2-.9-2-2V4.5z" fill="#ffffff" />
+                        <path d="M6 17.2c.5-.4 1.2-.7 2-.7h10.5" fill="none" stroke="#1b79c5" stroke-width="1.8"
+                            stroke-linecap="round" />
+                        <path d="M9 7.5h6.5" stroke="#1b79c5" stroke-width="1.6" stroke-linecap="round" />
+                        <path d="M9 10h5.5" stroke="#1b79c5" stroke-width="1.6" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="tile__label">КАЗКИ</div>
             </a>
 
             <a class="tile tile--yellow" href="{% url 'rewards' %}">
