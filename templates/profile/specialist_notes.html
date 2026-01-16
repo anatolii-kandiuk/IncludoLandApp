@@ -1,0 +1,84 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Нотатки — Профіль спеціаліста</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+</head>
+
+<body>
+    <div class="shell">
+        {% include 'includes/specialist_sidebar.html' with active='profile' show_helper=False %}
+
+        <main class="main">
+            <header class="top">
+                <div class="top__left">
+                    <a class="pill-back" href="{% url 'specialist_profile' %}">← Назад</a>
+                </div>
+                <div class="top__right">
+                    <div class="chip chip--user">
+                        <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
+                        <span class="chip__text">{{ username }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="page-title">
+                    <h1 class="page-title__h">Нотатки: {{ student.user.username }}</h1>
+                </div>
+
+                <div class="grid grid--single">
+                    <section class="card card--full">
+                        <div class="card__head">
+                            <h2 class="card__title">Додати нотатку</h2>
+                        </div>
+
+                        <form class="note-form" method="post" action="{% url 'specialist_student_notes' student.id %}">
+                            {% csrf_token %}
+                            <div class="note-form__field">
+                                {{ form.text }}
+                                {% if form.text.errors %}
+                                <div class="note-form__error">{{ form.text.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <button class="student-row__btn" type="submit">Зберегти</button>
+                        </form>
+                    </section>
+
+                    <section class="card card--full">
+                        <div class="card__head">
+                            <h2 class="card__title">Мої нотатки</h2>
+                        </div>
+
+                        {% if notes %}
+                        <div class="note-list" aria-label="Список нотаток">
+                            {% for n in notes %}
+                            <div class="note">
+                                <div class="note__top">
+                                    <div class="note__date">{{ n.created_at|date:"d.m.Y H:i" }}</div>
+                                    <form action="{% url 'specialist_student_note_delete' n.id %}" method="post">
+                                        {% csrf_token %}
+                                        <button class="student-row__btn student-row__btn--danger"
+                                            type="submit">Видалити</button>
+                                    </form>
+                                </div>
+                                <div class="note__text">{{ n.text|linebreaksbr }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="student-search__empty">Поки що немає нотаток.</div>
+                        {% endif %}
+                    </section>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

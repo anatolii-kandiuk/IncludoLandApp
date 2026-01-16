@@ -13,8 +13,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.db.models import F
 
-from .forms import RegisterForm, SoundCardForm, StoryForm, WordPuzzleWordForm
-from .models import ChildProfile, GameResult, SpecialistProfile, SoundCard, Story, StoryListen, UserBadge, WordPuzzleWord
+from .forms import RegisterForm, SoundCardForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
+from .models import ChildProfile, GameResult, SpecialistProfile, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
 
 
 BADGE_DEFINITIONS = [
@@ -343,6 +343,19 @@ def specialist_profile(request):
             }
         )
 
+    student_cards = []
+    for s in my_students[:50]:
+        stats = _build_child_stats_for_user(s.user)
+        student_cards.append(
+            {
+                'id': s.id,
+                'name': s.user.username,
+                'subtitle': 'Зосередженість: Памʼять',
+                'progress': stats['avg']['memory'],
+                'stars': s.stars,
+            }
+        )
+
     activity_labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']
     activity_yellow = [20, 45, 30, 80, 55, 70, 90]
     activity_teal = [10, 25, 60, 50, 75, 40, 65]
@@ -423,6 +436,7 @@ def specialist_profile(request):
         'coins': specialist.coins,
         'attention_students': attention_students,
         'my_students': my_students,
+        'student_cards': student_cards,
         'q': q,
         'search_results': search_results,
         'activity_labels': json.dumps(activity_labels, ensure_ascii=False),
@@ -494,6 +508,58 @@ def specialist_student_stats(request, child_profile_id: int):
         'radar_values': stats['radar_values'],
     }
     return render(request, 'profile/student_stats.html', context)
+
+
+@login_required
+def specialist_student_notes(request, child_profile_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    specialist = request.user.specialist_profile
+    child = specialist.students.select_related('user').filter(id=child_profile_id).first()
+    if not child:
+        return redirect('specialist_profile')
+
+    if request.method == 'POST':
+        form = SpecialistStudentNoteForm(request.POST)
+        if form.is_valid():
+            note = form.save(commit=False)
+            note.specialist = specialist
+            note.student = child
+            note.save()
+            return redirect('specialist_student_notes', child_profile_id=child.id)
+    else:
+        form = SpecialistStudentNoteForm()
+
+    notes = list(
+        SpecialistStudentNote.objects.filter(specialist=specialist, student=child)
+        .only('id', 'text', 'created_at')
+        .order_by('-created_at')
+    )
+
+    context = {
+        'username': request.user.username,
+        'student': child,
+        'form': form,
+        'notes': notes,
+    }
+    return render(request, 'profile/specialist_notes.html', context)
+
+
+@login_required
+@require_POST
+def specialist_student_note_delete(request, note_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    specialist = request.user.specialist_profile
+    note = SpecialistStudentNote.objects.filter(id=note_id, specialist=specialist).only('id', 'student_id').first()
+    if not note:
+        return redirect('specialist_profile')
+
+    child_id = note.student_id
+    note.delete()
+    return redirect('specialist_student_notes', child_profile_id=child_id)
 
 
 @login_required
