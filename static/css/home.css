@@ -132,7 +132,6 @@ body {
     letter-spacing: .6px;
 }
 
-/* Bigger home buttons for games */
 .menu--big .tile {
     padding: 30px 28px;
     min-height: 132px;
@@ -211,7 +210,9 @@ body {
 }
 
 .tile--yellow {
-    background: linear-gradient(135deg, #ffc93b, #e1a400)
+    background:
+        radial-gradient(800px 260px at 25% 20%, rgba(255, 255, 255, 0.28), transparent 60%),
+        linear-gradient(135deg, #f3d27a, #d9a93a)
 }
 
 .tile--purple {
