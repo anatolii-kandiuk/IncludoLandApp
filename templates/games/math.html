@@ -15,29 +15,42 @@
     <main class="page page--game">
         <h1 class="game-title">МАТЕМАТИКА: Розв’яжи приклад</h1>
 
-        <section class="math">
-            <div class="math-card math-card--play" aria-label="Гра Математика">
+        <section class="math" aria-label="Гра Математика">
+            {% csrf_token %}
+
+            <div class="math-card math-card--play" aria-label="Приклад">
                 <div class="math-progress" aria-label="Прогрес">
                     <div class="math-progress__bar"><span id="math-progress-fill" style="width: 0%"></span></div>
                     <div class="math-progress__text"><span id="math-step">0</span>/<span id="math-total">10</span></div>
                 </div>
 
-                <div class="math-question" aria-label="Питання">
-                    <div class="math-expression" id="math-expression">Натисни “Почати”,<br>щоб зіграти</div>
-                    <div class="math-hint" id="math-msg" role="status" aria-live="polite">
-                        Легкий: 0–9 • Середній: 10–100 • Складний: × та ÷
-                    </div>
+                <div class="math-row" aria-label="Питання та відповідь">
+                    <div class="math-expression" id="math-expression">4 + 7 = ?</div>
+
                     <div class="math-inputrow">
                         <input class="math-input" id="math-answer" type="number" inputmode="numeric" autocomplete="off"
-                            placeholder="Відповідь" disabled>
+                            placeholder="" disabled aria-label="Відповідь">
                         <button class="math-btn math-btn--check" id="math-submit" type="button"
                             disabled>Перевірити</button>
                     </div>
                 </div>
 
-                <div class="math-pillrow" aria-label="Налаштування">
-                    <button class="math-pillbtn" id="math-level-pill" type="button">Рівень: Легко</button>
+                <div class="math-msg" id="math-msg" role="status" aria-live="polite">Натисни “Почати”, щоб зіграти.
+                </div>
+
+                <!-- Hidden elements used by JS (keep ids stable) -->
+                <div class="sr-only" aria-hidden="true">
+                    <span id="math-best">0</span>
+                    <span id="math-time">0</span>
+                </div>
+            </div>
+
+            <div class="math-controls" aria-label="Налаштування">
+                <div class="math-pillrow">
+                    <button class="math-pillbtn math-pillbtn--active" id="math-level-pill" type="button">Рівень:
+                        Легко</button>
                     <button class="math-pillbtn" id="math-op-pill" type="button">Операція: Мікс</button>
+
                     <select id="math-level" class="sr-only" aria-label="Рівень">
                         <option value="easy">Легко</option>
                         <option value="medium">Середньо</option>
@@ -52,15 +65,12 @@
                     </select>
                 </div>
 
-                <button class="math-btn math-btn--primary math-btn--start" id="math-start" type="button">Почати</button>
-
-                <div class="math-meta" aria-label="Статистика гри">
-                    <div class="math-pill">Рекорд: <strong id="math-best">0</strong>/10</div>
-                    <div class="math-pill">Час: <strong id="math-time">0</strong>с</div>
-                </div>
+                <button class="math-start" id="math-start" type="button">Почати</button>
             </div>
         </section>
     </main>
+
+    <a class="math-exit" href="{% url 'home' %}#games" aria-label="Вийти">×</a>
 
     <script src="{% static 'js/math.js' %}" defer></script>
 </body>

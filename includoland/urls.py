@@ -19,6 +19,7 @@ urlpatterns = [
     path('games/math/', game_math, name='game_math'),
     path('stories/', stories_library, name='stories'),
     path('sounds/', game_sounds, name='sounds'),
+    path('soon/<str:section>/', coming_soon, name='coming_soon'),
     # /rewards/ handled by accounts.urls (auth-gated)
 ]
 

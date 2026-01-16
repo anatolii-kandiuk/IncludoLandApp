@@ -16,6 +16,7 @@
         answer: document.getElementById('math-answer'),
         submit: document.getElementById('math-submit'),
         msg: document.getElementById('math-msg'),
+        levelDots: Array.from(document.querySelectorAll('.hud__dots span[data-level]')),
     };
 
     if (!els.start) return;
@@ -96,7 +97,18 @@
     function updateHud() {
         els.step.textContent = String(state.step);
         const pct = state.step === 0 ? 0 : Math.round((state.step / TOTAL) * 100);
-        els.progressFill.style.width = `${pct}%`;
+        if (els.progressFill && els.progressFill.style) {
+            els.progressFill.style.width = `${pct}%`;
+        }
+    }
+
+    function syncLevelDots() {
+        if (!els.levelDots || !els.levelDots.length) return;
+        const current = els.level?.value;
+        els.levelDots.forEach((dot) => {
+            const match = dot.dataset.level === current;
+            dot.classList.toggle('is-active', Boolean(match));
+        });
     }
 
     function syncPills() {
@@ -107,6 +119,7 @@
         if (els.opPill) {
             els.opPill.textContent = `Операція: ${OP_LABEL[els.op.value] || 'Мікс'}`;
         }
+        syncLevelDots();
     }
 
     function cycleSelect(selectEl, order) {
