@@ -1,0 +1,41 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Запрошення для спеціаліста — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+    <main class="page">
+        <section class="auth-card">
+            <h1 class="auth-title">Реєстрація спеціаліста</h1>
+            <p class="auth-subtitle">Реєстрація спеціаліста доступна лише за запрошенням.</p>
+
+            {% if error %}
+            <div class="auth-error">{{ error }}</div>
+            {% endif %}
+
+            <form class="auth-form" method="get" action="{% url 'register_specialist' %}">
+                <input type="hidden" name="next" value="{{ next }}">
+
+                <label class="auth-label" for="invite">Код запрошення</label>
+                <input class="auth-input" type="text" name="invite" id="invite" placeholder="Вставте код або посилання"
+                    autocomplete="off" />
+
+                <button class="auth-btn auth-btn--primary" type="submit">Продовжити</button>
+            </form>
+
+            <div class="auth-footer">
+                <a href="{% url 'register' %}?next={{ next|urlencode }}">← Назад до вибору</a>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

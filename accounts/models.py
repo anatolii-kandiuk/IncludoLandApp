@@ -1,5 +1,8 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
+
+import uuid
 
 
 class ChildProfile(models.Model):
@@ -28,6 +31,43 @@ class SpecialistProfile(models.Model):
 
     def __str__(self) -> str:
         return f"SpecialistProfile({self.user.username})"
+
+
+class SpecialistInvite(models.Model):
+    email = models.EmailField()
+    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_specialist_invites',
+    )
+    used_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='used_specialist_invites',
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self) -> str:
+        return f"SpecialistInvite({self.email}, {self.token})"
+
+    def is_valid(self) -> bool:
+        if self.used_at:
+            return False
+        if self.expires_at and self.expires_at <= timezone.now():
+            return False
+        return True
 
 
 class GameResult(models.Model):

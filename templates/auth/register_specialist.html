@@ -17,12 +17,18 @@
             <h1 class="auth-title">Реєстрація (Спеціаліст)</h1>
 
             {% if form.errors %}
-            <div class="auth-error">Перевірте дані: логін може бути зайнятий або паролі не співпадають.</div>
+            <div class="auth-error">Перевірте дані: логін може бути зайнятий, email може бути неправильним або паролі не
+                співпадають.</div>
             {% endif %}
 
             <form class="auth-form" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ next }}">
+                <input type="hidden" name="invite" value="{{ invite }}">
+
+                <label class="auth-label" for="id_email">Email</label>
+                <input class="auth-input" type="email" name="email" id="id_email" autocomplete="email" required
+                    value="{{ invite_email|default:'' }}">
 
                 <label class="auth-label" for="id_username">Логін</label>
                 <input class="auth-input" type="text" name="username" id="id_username" maxlength="150"
