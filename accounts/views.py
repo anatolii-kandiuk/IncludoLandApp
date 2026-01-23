@@ -891,6 +891,13 @@ def specialist_print(request):
         return redirect('child_profile')
 
     context = {
+        'layout': 'specialist',
+        'hub_url_name': 'specialist_print',
+        'math_url_name': 'specialist_print_math',
+        'sentences_url_name': 'specialist_print_sentences',
+        'words_url_name': 'specialist_print_words',
+        'attention_url_name': 'specialist_print_attention',
+        'memory_url_name': 'specialist_print_memory',
         'username': request.user.username,
         'coins': request.user.specialist_profile.coins,
     }
@@ -909,6 +916,9 @@ def specialist_print_math(request):
     items = _generate_math_items(rng, level=level, op_mode=op, total=10)
 
     context = {
+        'layout': 'specialist',
+        'hub_url_name': 'specialist_print',
+        'self_url_name': 'specialist_print_math',
         'title': 'Математика',
         'username': request.user.username,
         'coins': request.user.specialist_profile.coins,
@@ -928,6 +938,9 @@ def specialist_print_sentences(request):
     items = _generate_sentences_items_for_user(rng, request.user, total=10)
 
     context = {
+        'layout': 'specialist',
+        'hub_url_name': 'specialist_print',
+        'self_url_name': 'specialist_print_sentences',
         'title': 'Побудова речень',
         'username': request.user.username,
         'coins': request.user.specialist_profile.coins,
@@ -945,6 +958,9 @@ def specialist_print_words(request):
     items = _generate_words_items_for_user(rng, request.user, total=10)
 
     context = {
+        'layout': 'specialist',
+        'hub_url_name': 'specialist_print',
+        'self_url_name': 'specialist_print_words',
         'title': 'Пазли слів',
         'username': request.user.username,
         'coins': request.user.specialist_profile.coins,
@@ -962,6 +978,9 @@ def specialist_print_attention(request):
     items = _generate_attention_items(rng, total=10)
 
     context = {
+        'layout': 'specialist',
+        'hub_url_name': 'specialist_print',
+        'self_url_name': 'specialist_print_attention',
         'title': 'Увага',
         'username': request.user.username,
         'coins': request.user.specialist_profile.coins,
@@ -979,9 +998,129 @@ def specialist_print_memory(request):
     items = _generate_memory_items(rng, total=10)
 
     context = {
+        'layout': 'specialist',
+        'hub_url_name': 'specialist_print',
+        'self_url_name': 'specialist_print_memory',
         'title': "Памʼять",
         'username': request.user.username,
         'coins': request.user.specialist_profile.coins,
+        'items': items,
+    }
+    return render(request, 'print/memory.html', context)
+
+
+@login_required
+def print_hub(request):
+    # Public print hub for any authenticated user (kids too).
+    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None)
+    context = {
+        'layout': 'public',
+        'hub_url_name': 'print_hub',
+        'math_url_name': 'print_math',
+        'sentences_url_name': 'print_sentences',
+        'words_url_name': 'print_words',
+        'attention_url_name': 'print_attention',
+        'memory_url_name': 'print_memory',
+        'stars': stars,
+        'username': request.user.username,
+    }
+    return render(request, 'print/hub.html', context)
+
+
+@login_required
+def print_math(request):
+    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None)
+
+    rng = random.Random()
+    level = _parse_choice(request, 'level', {'easy', 'medium', 'hard'}, 'easy')
+    op = _parse_choice(request, 'op', {'mix', 'add', 'sub', 'mul', 'div'}, 'mix')
+    items = _generate_math_items(rng, level=level, op_mode=op, total=10)
+
+    context = {
+        'layout': 'public',
+        'hub_url_name': 'print_hub',
+        'self_url_name': 'print_math',
+        'stars': stars,
+        'title': 'Математика',
+        'username': request.user.username,
+        'level': level,
+        'op': op,
+        'items': items,
+    }
+    return render(request, 'print/math.html', context)
+
+
+@login_required
+def print_sentences(request):
+    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None)
+
+    rng = random.Random()
+    items = _generate_sentences_items_for_user(rng, request.user, total=10)
+
+    context = {
+        'layout': 'public',
+        'hub_url_name': 'print_hub',
+        'self_url_name': 'print_sentences',
+        'stars': stars,
+        'title': 'Побудова речень',
+        'username': request.user.username,
+        'items': items,
+    }
+    return render(request, 'print/sentences.html', context)
+
+
+@login_required
+def print_words(request):
+    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None)
+
+    rng = random.Random()
+    items = _generate_words_items_for_user(rng, request.user, total=10)
+
+    context = {
+        'layout': 'public',
+        'hub_url_name': 'print_hub',
+        'self_url_name': 'print_words',
+        'stars': stars,
+        'title': 'Пазли слів',
+        'username': request.user.username,
+        'items': items,
+    }
+    return render(request, 'print/words.html', context)
+
+
+@login_required
+def print_attention(request):
+    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None)
+
+    rng = random.Random()
+    items = _generate_attention_items(rng, total=10)
+
+    context = {
+        'layout': 'public',
+        'hub_url_name': 'print_hub',
+        'self_url_name': 'print_attention',
+        'stars': stars,
+        'title': 'Увага',
+        'username': request.user.username,
+        'items': items,
+    }
+    return render(request, 'print/attention.html', context)
+
+
+@login_required
+def print_memory(request):
+    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None)
+
+    rng = random.Random()
+    items = _generate_memory_items(rng, total=10)
+
+    context = {
+        'layout': 'public',
+        'hub_url_name': 'print_hub',
+        'self_url_name': 'print_memory',
+        'stars': stars,
+        'title': "Памʼять",
+        'username': request.user.username,
         'items': items,
     }
     return render(request, 'print/memory.html', context)

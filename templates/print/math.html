@@ -14,7 +14,9 @@
 
 <body>
     <div class="shell">
+        {% if layout == 'specialist' %}
         {% include 'includes/specialist_sidebar.html' with active='print' show_helper=False %}
+        {% endif %}
 
         <main class="main" data-print-page="worksheet">
             <header class="top no-print">
@@ -29,25 +31,25 @@
 
             <section class="content">
                 <div class="print-toolbar no-print">
-                    <a class="print-btn print-btn--ghost" href="{% url 'specialist_print' %}">← Назад</a>
+                    <a class="print-btn print-btn--ghost" href="{% url hub_url_name %}">← Назад</a>
 
-                    <form class="print-filters" method="get" action="{% url 'specialist_print_math' %}">
+                    <form class="print-filters" method="get" action="{% url self_url_name %}">
                         <label class="print-label">
                             Рівень
                             <select name="level" class="print-select">
-                                <option value="easy" {% if level == 'easy' %}selected{% endif %}>Легко</option>
-                                <option value="medium" {% if level == 'medium' %}selected{% endif %}>Середньо</option>
-                                <option value="hard" {% if level == 'hard' %}selected{% endif %}>Складно</option>
+                                <option value="easy" {% if level=='easy' %}selected{% endif %}>Легко</option>
+                                <option value="medium" {% if level=='medium' %}selected{% endif %}>Середньо</option>
+                                <option value="hard" {% if level=='hard' %}selected{% endif %}>Складно</option>
                             </select>
                         </label>
                         <label class="print-label">
                             Операція
                             <select name="op" class="print-select">
-                                <option value="mix" {% if op == 'mix' %}selected{% endif %}>Мікс</option>
-                                <option value="add" {% if op == 'add' %}selected{% endif %}>+</option>
-                                <option value="sub" {% if op == 'sub' %}selected{% endif %}>−</option>
-                                <option value="mul" {% if op == 'mul' %}selected{% endif %}>×</option>
-                                <option value="div" {% if op == 'div' %}selected{% endif %}>÷</option>
+                                <option value="mix" {% if op=='mix' %}selected{% endif %}>Мікс</option>
+                                <option value="add" {% if op=='add' %}selected{% endif %}>+</option>
+                                <option value="sub" {% if op=='sub' %}selected{% endif %}>−</option>
+                                <option value="mul" {% if op=='mul' %}selected{% endif %}>×</option>
+                                <option value="div" {% if op=='div' %}selected{% endif %}>÷</option>
                             </select>
                         </label>
                         <button class="print-btn" type="submit">Застосувати</button>

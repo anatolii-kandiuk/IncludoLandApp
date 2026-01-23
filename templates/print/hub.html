@@ -14,7 +14,9 @@
 
 <body>
     <div class="shell">
+        {% if layout == 'specialist' %}
         {% include 'includes/specialist_sidebar.html' with active='print' show_helper=False %}
+        {% endif %}
 
         <main class="main" data-print-page="hub">
             <header class="top no-print">
@@ -38,27 +40,27 @@
                     </div>
 
                     <div class="print-grid" aria-label="Доступні сторінки для друку">
-                        <a class="print-tile" href="{% url 'specialist_print_math' %}">
+                        <a class="print-tile" href="{% url math_url_name %}">
                             <div class="print-tile__icon" aria-hidden="true">➗</div>
                             <div class="print-tile__title">Математика</div>
                             <div class="print-tile__sub">10 прикладів на сторінку</div>
                         </a>
-                        <a class="print-tile" href="{% url 'specialist_print_sentences' %}">
+                        <a class="print-tile" href="{% url sentences_url_name %}">
                             <div class="print-tile__icon" aria-hidden="true">🧩</div>
                             <div class="print-tile__title">Речення</div>
                             <div class="print-tile__sub">10 завдань на сторінку</div>
                         </a>
-                        <a class="print-tile" href="{% url 'specialist_print_words' %}">
+                        <a class="print-tile" href="{% url words_url_name %}">
                             <div class="print-tile__icon" aria-hidden="true">🔤</div>
                             <div class="print-tile__title">Слова</div>
                             <div class="print-tile__sub">10 завдань на сторінку</div>
                         </a>
-                        <a class="print-tile" href="{% url 'specialist_print_attention' %}">
+                        <a class="print-tile" href="{% url attention_url_name %}">
                             <div class="print-tile__icon" aria-hidden="true">🎯</div>
                             <div class="print-tile__title">Увага</div>
                             <div class="print-tile__sub">10 завдань на сторінку</div>
                         </a>
-                        <a class="print-tile" href="{% url 'specialist_print_memory' %}">
+                        <a class="print-tile" href="{% url memory_url_name %}">
                             <div class="print-tile__icon" aria-hidden="true">🧠</div>
                             <div class="print-tile__title">Памʼять</div>
                             <div class="print-tile__sub">10 завдань на сторінку</div>

@@ -34,6 +34,14 @@ urlpatterns = [
     path('specialist/print/attention/', views.specialist_print_attention, name='specialist_print_attention'),
     path('specialist/print/memory/', views.specialist_print_memory, name='specialist_print_memory'),
 
+    # Public print (available for all authenticated users)
+    path('print/', views.print_hub, name='print_hub'),
+    path('print/math/', views.print_math, name='print_math'),
+    path('print/sentences/', views.print_sentences, name='print_sentences'),
+    path('print/words/', views.print_words, name='print_words'),
+    path('print/attention/', views.print_attention, name='print_attention'),
+    path('print/memory/', views.print_memory, name='print_memory'),
+
     path('specialist/students/add/', views.specialist_add_student, name='specialist_add_student'),
     path('specialist/students/<int:child_profile_id>/', views.specialist_student_stats, name='specialist_student_stats'),
     path('specialist/students/<int:child_profile_id>/notes/', views.specialist_student_notes, name='specialist_student_notes'),

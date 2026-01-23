@@ -14,7 +14,9 @@
 
 <body>
     <div class="shell">
+        {% if layout == 'specialist' %}
         {% include 'includes/specialist_sidebar.html' with active='print' show_helper=False %}
+        {% endif %}
 
         <main class="main" data-print-page="worksheet">
             <header class="top no-print">
@@ -29,7 +31,7 @@
 
             <section class="content">
                 <div class="print-toolbar no-print">
-                    <a class="print-btn print-btn--ghost" href="{% url 'specialist_print' %}">← Назад</a>
+                    <a class="print-btn print-btn--ghost" href="{% url hub_url_name %}">← Назад</a>
                     <a class="print-btn print-btn--ghost" href="?">Оновити</a>
 
                     <label class="print-toggle">
