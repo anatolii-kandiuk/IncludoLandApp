@@ -61,8 +61,8 @@
 
 .print-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
 }
 
 .print-tile {
@@ -70,18 +70,19 @@
     border: 1px solid var(--print-border);
     background: #ffffff;
     border-radius: 16px;
-    padding: 14px;
+    padding: 18px;
     text-decoration: none;
     color: inherit;
 }
 
 .print-tile__icon {
-    font-size: 24px;
+    font-size: 30px;
 }
 
 .print-tile__title {
     margin-top: 8px;
     font-weight: 900;
+    font-size: 15px;
 }
 
 .print-tile__sub {
@@ -92,6 +93,17 @@
 .print-note {
     margin-top: 14px;
     color: var(--print-muted);
+}
+
+/* Public (no specialist sidebar) layout fixes */
+.shell.shell--public {
+    grid-template-columns: 1fr;
+}
+
+.shell.shell--public .main {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
 }
 
 .sheet {

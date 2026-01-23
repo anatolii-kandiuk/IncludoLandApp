@@ -13,7 +13,13 @@
 </head>
 
 <body>
-    <div class="shell">
+    {% if layout != 'specialist' %}
+    <div class="no-print">
+        {% include 'includes/header.html' %}
+    </div>
+    {% endif %}
+
+    <div class="shell {% if layout != 'specialist' %}shell--public{% endif %}">
         {% if layout == 'specialist' %}
         {% include 'includes/specialist_sidebar.html' with active='print' show_helper=False %}
         {% endif %}
