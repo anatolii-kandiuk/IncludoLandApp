@@ -511,15 +511,6 @@ def _require_specialist(request):
 UKR_ALPHABET = 'АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ'
 
 
-def _parse_seed(request):
-    raw = request.GET.get('seed')
-    try:
-        seed = int(raw)
-    except (TypeError, ValueError):
-        seed = random.randint(1, 1_000_000_000)
-    return random.Random(seed), seed
-
-
 def _parse_choice(request, name: str, allowed: set, default: str) -> str:
     value = (request.GET.get(name) or '').strip()
     return value if value in allowed else default
@@ -777,22 +768,50 @@ def _generate_attention_items(rng: random.Random, total: int = 10):
 
 
 def _generate_memory_items(rng: random.Random, total: int = 10):
-    icons = ['☀️', '🌙', '⭐', '❤️', '🍃', '🎵']
-    items = []
-    for idx in range(total):
-        left_icons = rng.sample(icons, k=4)
-        right_icons = list(left_icons)
-        tags = ['A', 'B', 'C', 'D']
+    # Printable Memory (educational): match emoji to the correct word.
+    # Left column: emoji, Right column: shuffled words.
+    bank = [
+        {'id': 'sun', 'label': 'Сонце', 'ico': '☀️'},
+        {'id': 'moon', 'label': 'Місяць', 'ico': '🌙'},
+        {'id': 'star', 'label': 'Зірка', 'ico': '⭐'},
+        {'id': 'heart', 'label': 'Серце', 'ico': '❤️'},
+        {'id': 'leaf', 'label': 'Листок', 'ico': '🍃'},
+        {'id': 'music', 'label': 'Нота', 'ico': '🎵'},
+        {'id': 'cat', 'label': 'Кіт', 'ico': '🐱'},
+        {'id': 'dog', 'label': 'Пес', 'ico': '🐶'},
+        {'id': 'fish', 'label': 'Рибка', 'ico': '🐟'},
+        {'id': 'car', 'label': 'Машина', 'ico': '🚗'},
+        {'id': 'apple', 'label': 'Яблуко', 'ico': '🍎'},
+        {'id': 'pear', 'label': 'Груша', 'ico': '🍐'},
+        {'id': 'banana', 'label': 'Банан', 'ico': '🍌'},
+        {'id': 'book', 'label': 'Книга', 'ico': '📖'},
+        {'id': 'ball', 'label': 'М’яч', 'ico': '⚽'},
+        {'id': 'flower', 'label': 'Квітка', 'ico': '🌸'},
+        {'id': 'tree', 'label': 'Дерево', 'ico': '🌳'},
+        {'id': 'snow', 'label': 'Сніг', 'ico': '❄️'},
+        {'id': 'rain', 'label': 'Дощ', 'ico': '🌧️'},
+        {'id': 'cake', 'label': 'Торт', 'ico': '🎂'},
+    ]
 
-        rng.shuffle(right_icons)
-        items.append(
-            {
-                'n': idx + 1,
-                'left': [{'tag': tags[i], 'ico': left_icons[i]} for i in range(4)],
-                'right': [{'tag': str(i + 1), 'ico': right_icons[i]} for i in range(4)],
-            }
-        )
-    return items
+    total = max(4, min(int(total), 10))
+    if len(bank) >= total:
+        chosen = rng.sample(bank, k=total)
+    else:
+        chosen = [rng.choice(bank) for _ in range(total)]
+
+    left_tags = [str(i) for i in range(1, total + 1)]
+    right_tags = list('ABCDEFGHIJ')[:total]
+
+    left = []
+    for idx, it in enumerate(chosen):
+        left.append({'tag': left_tags[idx], 'ico': it['ico'], 'label': it['label'], 'id': it['id']})
+
+    right = [dict(x) for x in left]
+    rng.shuffle(right)
+    for idx, it in enumerate(right):
+        it['tag'] = right_tags[idx]
+
+    return [{'n': 1, 'left': left, 'right': right}]
 
 
 @login_required
@@ -812,7 +831,7 @@ def specialist_print_math(request):
     if not _require_specialist(request):
         return redirect('child_profile')
 
-    rng, seed = _parse_seed(request)
+    rng = random.Random()
     level = _parse_choice(request, 'level', {'easy', 'medium', 'hard'}, 'easy')
     op = _parse_choice(request, 'op', {'mix', 'add', 'sub', 'mul', 'div'}, 'mix')
 
@@ -822,8 +841,6 @@ def specialist_print_math(request):
         'title': 'Математика',
         'username': request.user.username,
         'coins': request.user.specialist_profile.coins,
-        'seed': seed,
-        'next_seed': seed + 1,
         'level': level,
         'op': op,
         'items': items,
@@ -836,15 +853,13 @@ def specialist_print_sentences(request):
     if not _require_specialist(request):
         return redirect('child_profile')
 
-    rng, seed = _parse_seed(request)
+    rng = random.Random()
     items = _generate_sentences_items_for_user(rng, request.user, total=10)
 
     context = {
         'title': 'Побудова речень',
         'username': request.user.username,
         'coins': request.user.specialist_profile.coins,
-        'seed': seed,
-        'next_seed': seed + 1,
         'items': items,
     }
     return render(request, 'print/sentences.html', context)
@@ -855,15 +870,13 @@ def specialist_print_words(request):
     if not _require_specialist(request):
         return redirect('child_profile')
 
-    rng, seed = _parse_seed(request)
+    rng = random.Random()
     items = _generate_words_items_for_user(rng, request.user, total=10)
 
     context = {
         'title': 'Пазли слів',
         'username': request.user.username,
         'coins': request.user.specialist_profile.coins,
-        'seed': seed,
-        'next_seed': seed + 1,
         'items': items,
     }
     return render(request, 'print/words.html', context)
@@ -874,15 +887,13 @@ def specialist_print_attention(request):
     if not _require_specialist(request):
         return redirect('child_profile')
 
-    rng, seed = _parse_seed(request)
+    rng = random.Random()
     items = _generate_attention_items(rng, total=10)
 
     context = {
         'title': 'Увага',
         'username': request.user.username,
         'coins': request.user.specialist_profile.coins,
-        'seed': seed,
-        'next_seed': seed + 1,
         'items': items,
     }
     return render(request, 'print/attention.html', context)
@@ -893,15 +904,13 @@ def specialist_print_memory(request):
     if not _require_specialist(request):
         return redirect('child_profile')
 
-    rng, seed = _parse_seed(request)
+    rng = random.Random()
     items = _generate_memory_items(rng, total=10)
 
     context = {
         'title': "Памʼять",
         'username': request.user.username,
         'coins': request.user.specialist_profile.coins,
-        'seed': seed,
-        'next_seed': seed + 1,
         'items': items,
     }
     return render(request, 'print/memory.html', context)

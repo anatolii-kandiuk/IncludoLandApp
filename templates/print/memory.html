@@ -30,7 +30,7 @@
             <section class="content">
                 <div class="print-toolbar no-print">
                     <a class="print-btn print-btn--ghost" href="{% url 'specialist_print' %}">← Назад</a>
-                    <a class="print-btn print-btn--ghost" href="?seed={{ next_seed }}">Оновити</a>
+                    <a class="print-btn print-btn--ghost" href="?">Оновити</a>
 
                     <label class="print-toggle">
                         <input id="braille-toggle" type="checkbox" />
@@ -42,33 +42,32 @@
 
                 <section class="sheet" aria-label="Аркуш завдань">
                     <div class="sheet__head">
-                        <div class="sheet__title">{{ title }}</div>
+                        <div class="sheet__title" data-braille>{{ title }}</div>
                         <div class="sheet__meta">
-                            <div>Зʼєднай однакові значки лініями.</div>
+                            <div data-braille>Зʼєднай емодзі з відповідним словом.</div>
                         </div>
                     </div>
 
-                    <ol class="mem-list" aria-label="Завдання">
-                        {% for it in items %}
-                        <li class="mem-item">
-                            <div class="mem-pair">
-                                <div class="mem-col" aria-label="Ліва колонка">
-                                    {% for row in it.left %}
-                                    <div class="mem-row"><span class="mem-tag">{{ row.tag }}</span>
-                                        <span class="mem-ico">{{ row.ico }}</span>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                <div class="mem-col" aria-label="Права колонка">
-                                    {% for row in it.right %}
-                                    <div class="mem-row"><span class="mem-tag">{{ row.tag }}</span> <span
-                                            class="mem-ico">{{ row.ico }}</span></div>
-                                    {% endfor %}
-                                </div>
+                    {% for it in items %}
+                    <div class="mem-pair" aria-label="Завдання на зʼєднання">
+                        <div>
+                            {% for l in it.left %}
+                            <div class="mem-row" aria-label="Ліва колонка">
+                                <span class="mem-tag" aria-hidden="true">{{ l.tag }}</span>
+                                <span class="mem-ico" aria-hidden="true">{{ l.ico }}</span>
                             </div>
-                        </li>
-                        {% endfor %}
-                    </ol>
+                            {% endfor %}
+                        </div>
+                        <div>
+                            {% for r in it.right %}
+                            <div class="mem-row" aria-label="Права колонка">
+                                <span class="mem-tag" aria-hidden="true">{{ r.tag }}</span>
+                                <span data-braille>{{ r.label }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
                 </section>
             </section>
         </main>

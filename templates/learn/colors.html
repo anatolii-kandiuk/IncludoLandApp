@@ -1,0 +1,60 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Кольори — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/learn.css' %}">
+    <script src="{% static 'js/print.js' %}" defer></script>
+    <script src="{% static 'js/learn_colors.js' %}" defer></script>
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+
+    <main class="learn-page" id="colors-root">
+        {{ colors|json_script:"colors-data" }}
+
+        <div class="learn-head">
+            <h1 class="learn-title" data-braille>Кольори</h1>
+            <div class="learn-toolbar">
+                <label class="learn-toggle">
+                    <input id="braille-toggle" type="checkbox" />
+                    <span data-braille>Брайль</span>
+                </label>
+                <a class="learn-btn" href="{% url 'learn_colors_print' %}" data-braille>Друк (A4)</a>
+            </div>
+        </div>
+
+        <section class="learn-card">
+            <div class="flip" aria-label="Перегляд кольорів">
+                <button class="learn-btn" type="button" id="color-prev" aria-label="Попередній">←</button>
+                <div class="flip-main">
+                    <div class="color-swatch" id="color-swatch" aria-hidden="true" {% if colors %}
+                        style="background: {{ colors.0.hex }}" {% endif %}></div>
+                    <div class="flip-sub" id="color-name" data-braille
+                        style="margin-top:10px;font-size:24px;font-weight:1000;">{% if colors %}{{ colors.0.name }}{% endif %}</div>
+                    <div class="flip-sub" id="color-sub" data-braille>{% if colors %}Колір 1 з {{ colors|length }}{% endif %}</div>
+                </div>
+                <button class="learn-btn" type="button" id="color-next" aria-label="Наступний">→</button>
+            </div>
+        </section>
+
+        <section class="learn-card" aria-label="Усі кольори">
+            <div class="grid" aria-label="Кольори">
+                {% for c in colors %}
+                <div class="grid-item">
+                    <div class="color-swatch" style="background:{{ c.hex }}"></div>
+                    <div class="grid-item__small" data-braille style="margin-top:8px;font-size:14px;font-weight:1000;">
+                        {{ c.name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

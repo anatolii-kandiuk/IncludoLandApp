@@ -1,0 +1,50 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Кольори — Друк — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <link rel="stylesheet" href="{% static 'css/learn_print.css' %}">
+    <script src="{% static 'js/print.js' %}" defer></script>
+</head>
+
+<body>
+    <main class="lp-page">
+        <div class="lp-toolbar no-print">
+            <a class="print-btn print-btn--ghost" href="{% url 'learn_colors' %}">← Назад</a>
+            <label class="print-toggle">
+                <input id="braille-toggle" type="checkbox" />
+                <span data-braille>Брайль</span>
+            </label>
+            <button class="print-btn" type="button" id="print-now" data-braille>Друкувати</button>
+        </div>
+
+        <h1 class="lp-title" data-braille>Кольори (A4)</h1>
+        <p class="lp-sub" data-braille>Підпиши колір і розфарбуй приклад.</p>
+
+        <section class="lp-grid lp-grid--colors" aria-label="Кольори">
+            {% for c in colors %}
+            <div class="lp-card">
+                <div class="lp-color-row">
+                    <div class="lp-swatch" style="background-color: {{ c.hex }};"></div>
+                    <div>
+                        <div class="lp-color-name" data-braille>{{ c.name }}</div>
+                        <div class="lp-sub" style="margin:4px 0 0;" data-braille>{{ c.hex }}</div>
+                    </div>
+                </div>
+                <div class="lp-trace" aria-hidden="true">
+                    <div class="lp-line"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+
+        <p class="lp-sub" style="margin-top:12px" data-braille>Порада: якщо принтер не друкує фон, увімкни “Print
+            background graphics”.</p>
+    </main>
+</body>
+
+</html>

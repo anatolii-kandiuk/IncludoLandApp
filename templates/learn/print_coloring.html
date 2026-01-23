@@ -1,0 +1,56 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Розмальовка — Друк — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <link rel="stylesheet" href="{% static 'css/learn_print.css' %}">
+    <script src="{% static 'js/print.js' %}" defer></script>
+    <style>
+        @media print {
+            .lp-coloring {
+                page-break-after: always;
+            }
+
+            .lp-coloring:last-child {
+                page-break-after: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="lp-page">
+        <div class="lp-toolbar no-print">
+            <a class="print-btn print-btn--ghost" href="{% url 'learn_coloring' %}">← Назад</a>
+            <label class="print-toggle">
+                <input id="braille-toggle" type="checkbox" />
+                <span data-braille>Брайль</span>
+            </label>
+            <button class="print-btn" type="button" id="print-now" data-braille>Друкувати</button>
+        </div>
+
+        <h1 class="lp-title" data-braille>Розмальовка (A4)</h1>
+        <p class="lp-sub" data-braille>Підказка: спочатку вибери потрібні кольори.</p>
+
+        {% for p in pages %}
+        <section class="lp-coloring" aria-label="Розмальовка">
+            <h2 data-braille>{{ p.title }}</h2>
+            <div class="lp-hints" aria-label="Підказки кольорів">
+                {% for h in p.hints %}
+                <span class="lp-hint" data-braille>
+                    <span class="lp-hint-dot" aria-hidden="true" style="background: {{ h.hex }}"></span>
+                    {{ h.name }}
+                </span>
+                {% endfor %}
+            </div>
+            <div style="margin-top:10px">{{ p.svg|safe }}</div>
+        </section>
+        {% endfor %}
+    </main>
+</body>
+
+</html>

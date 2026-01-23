@@ -2,17 +2,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('print-now');
     const toggle = document.getElementById('braille-toggle');
 
-    const BRAILLE_PREFIX = '⠈';
-    const map = {
+    // Ukrainian Braille mapping (per Wikipedia table).
+    // Note: Ґ is reported as ⠻ in older sources; Wikipedia lists ⠻.
+    const CAPITAL_SIGN = '⠨';
+    const NUMBER_SIGN = '⠼';
+
+    const letterMap = {
         'А': '⠁',
         'Б': '⠃',
         'В': '⠺',
         'Г': '⠛',
+        'Ґ': '⠻',
         'Д': '⠙',
         'Е': '⠑',
+        'Є': '⠜',
         'Ж': '⠚',
         'З': '⠵',
         'И': '⠊',
+        'І': '⠽',
+        'Ї': '⠹',
         'Й': '⠯',
         'К': '⠅',
         'Л': '⠇',
@@ -33,26 +41,74 @@ document.addEventListener('DOMContentLoaded', () => {
         'Ь': '⠾',
         'Ю': '⠳',
         'Я': '⠫',
-
-        // Ukrainian-specific letters (approximated as base+prefix)
-        'І': BRAILLE_PREFIX + '⠊',
-        'Ї': BRAILLE_PREFIX + BRAILLE_PREFIX + '⠊',
-        'Є': BRAILLE_PREFIX + '⠑',
-        'Ґ': BRAILLE_PREFIX + '⠛',
     };
+
+    // Digits are a–j with number sign.
+    const digitMap = {
+        '1': '⠁',
+        '2': '⠃',
+        '3': '⠉',
+        '4': '⠙',
+        '5': '⠑',
+        '6': '⠋',
+        '7': '⠛',
+        '8': '⠓',
+        '9': '⠊',
+        '0': '⠚',
+    };
+
+    const punctMap = {
+        ',': '⠂',
+        '.': '⠲',
+        '?': '⠢',
+        '!': '⠖',
+        ';': '⠆',
+        ':': '⠒',
+        '-': '⠤',
+        '’': '⠄',
+        "'": '⠄',
+    };
+
+    function isUpper(ch) {
+        return ch && ch === ch.toUpperCase() && ch !== ch.toLowerCase();
+    }
 
     function toBraille(text) {
         const s = String(text || '');
         let out = '';
+        let inNumber = false;
+
         for (let i = 0; i < s.length; i += 1) {
             const ch = s[i];
-            const up = ch.toUpperCase();
-            if (Object.prototype.hasOwnProperty.call(map, up)) {
-                out += map[up];
-            } else {
-                out += ch;
+
+            if (digitMap[ch]) {
+                if (!inNumber) {
+                    out += NUMBER_SIGN;
+                    inNumber = true;
+                }
+                out += digitMap[ch];
+                continue;
             }
+
+            // Break number mode on non-digit
+            inNumber = false;
+
+            if (punctMap[ch]) {
+                out += punctMap[ch];
+                continue;
+            }
+
+            const up = ch.toUpperCase();
+            if (Object.prototype.hasOwnProperty.call(letterMap, up)) {
+                if (isUpper(ch)) out += CAPITAL_SIGN;
+                out += letterMap[up];
+                continue;
+            }
+
+            // preserve spaces and other symbols
+            out += ch;
         }
+
         return out;
     }
 

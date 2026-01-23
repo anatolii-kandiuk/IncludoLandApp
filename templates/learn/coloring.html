@@ -1,0 +1,50 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Розмальовка — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/learn.css' %}">
+    <script src="{% static 'js/print.js' %}" defer></script>
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+
+    <main class="learn-page">
+        <div class="learn-head">
+            <h1 class="learn-title" data-braille>Розмальовка</h1>
+            <div class="learn-toolbar">
+                <label class="learn-toggle">
+                    <input id="braille-toggle" type="checkbox" />
+                    <span data-braille>Брайль</span>
+                </label>
+                <a class="learn-btn" href="{% url 'learn_coloring_print' %}" data-braille>Друк (A4)</a>
+            </div>
+        </div>
+
+        <section class="learn-card" aria-label="Розмальовки">
+            <div class="coloring-grid">
+                {% for p in pages %}
+                <div class="coloring-card">
+                    <h2 class="coloring-title" data-braille>{{ p.title }}</h2>
+                    <div class="coloring-svg">{{ p.svg|safe }}</div>
+                    <div class="hints" aria-label="Підказки кольорів">
+                        {% for h in p.hints %}
+                        <span class="hint" data-braille>
+                            <span class="hint-dot" aria-hidden="true" style="background: {{ h.hex }}"></span>
+                            {{ h.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

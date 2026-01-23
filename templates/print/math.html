@@ -50,12 +50,10 @@
                                 <option value="div" {% if op == 'div' %}selected{% endif %}>÷</option>
                             </select>
                         </label>
-                        <input type="hidden" name="seed" value="{{ seed }}" />
                         <button class="print-btn" type="submit">Застосувати</button>
                     </form>
 
-                    <a class="print-btn print-btn--ghost"
-                        href="?level={{ level }}&op={{ op }}&seed={{ next_seed }}">Оновити</a>
+                    <a class="print-btn print-btn--ghost" href="?level={{ level }}&op={{ op }}">Оновити</a>
 
                     <label class="print-toggle">
                         <input id="braille-toggle" type="checkbox" />
@@ -67,17 +65,17 @@
 
                 <section class="sheet" aria-label="Аркуш завдань">
                     <div class="sheet__head">
-                        <div class="sheet__title">{{ title }}</div>
+                        <div class="sheet__title" data-braille>{{ title }}</div>
                         <div class="sheet__meta">
-                            <div>Дата: ____ / ____ / ______</div>
-                            <div>Імʼя: __________________________</div>
+                            <div data-braille>Дата: ____ / ____ / ______</div>
+                            <div data-braille>Імʼя: __________________________</div>
                         </div>
                     </div>
 
                     <ol class="math-list" aria-label="Приклади">
                         {% for it in items %}
                         <li class="math-item">
-                            <span class="math-exp">{{ it.text }}</span>
+                            <span class="math-exp" data-braille>{{ it.text }}</span>
                             <span class="math-blank"></span>
                         </li>
                         {% endfor %}

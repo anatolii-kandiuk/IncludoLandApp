@@ -1,0 +1,58 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Цифри — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/learn.css' %}">
+    <script src="{% static 'js/print.js' %}" defer></script>
+    <script src="{% static 'js/learn_numbers.js' %}" defer></script>
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+
+    <main class="learn-page" id="numbers-root">
+        {{ numbers|json_script:"numbers-data" }}
+
+        <div class="learn-head">
+            <h1 class="learn-title" data-braille>Цифри 0–10</h1>
+            <div class="learn-toolbar">
+                <label class="learn-toggle">
+                    <input id="braille-toggle" type="checkbox" />
+                    <span data-braille>Брайль</span>
+                </label>
+                <a class="learn-btn" href="{% url 'learn_numbers_print' %}" data-braille>Друк (A4)</a>
+            </div>
+        </div>
+
+        <section class="learn-card">
+            <div class="flip" aria-label="Перегляд цифр">
+                <button class="learn-btn" type="button" id="num-prev" aria-label="Попередня">←</button>
+                <div class="flip-main">
+                    <div class="flip-big" id="num-big" data-braille
+                        data-n="{% if numbers %}{{ numbers.0.n }}{% endif %}">{% if numbers %}{{ numbers.0.n }}{% endif %}</div>
+                    <div class="num-dots" id="num-dots" aria-hidden="true"></div>
+                    <div class="flip-sub" id="num-sub" data-braille>{% if numbers %}Цифра 1 з {{ numbers|length }}{% endif %}</div>
+                </div>
+                <button class="learn-btn" type="button" id="num-next" aria-label="Наступна">→</button>
+            </div>
+        </section>
+
+        <section class="learn-card" aria-label="Усі цифри">
+            <div class="grid" aria-label="Цифри">
+                {% for n in numbers %}
+                <div class="grid-item" data-n="{{ n.n }}">
+                    <div class="grid-item__big" data-braille>{{ n.n }}</div>
+                    <div class="num-dots" aria-hidden="true"></div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

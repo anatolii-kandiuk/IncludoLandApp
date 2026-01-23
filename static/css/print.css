@@ -99,7 +99,7 @@
     color: var(--print-ink);
     border: 1px solid var(--print-border);
     border-radius: 16px;
-    padding: 18px;
+    padding: 10px;
 }
 
 .sheet__head {
@@ -136,7 +136,7 @@
     display: flex;
     align-items: flex-end;
     gap: 12px;
-    margin: 10px 0;
+    margin: 6px 0;
 }
 
 .math-exp {
@@ -245,7 +245,36 @@
 }
 
 .mem-ico {
-    font-size: 20px;
+    font-size: 16px;
+}
+
+/* Memory cut-out cards */
+.mem-cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.mem-card {
+    border: 2px dashed var(--print-border);
+    border-radius: 14px;
+    padding: 10px;
+    text-align: center;
+    min-height: 90px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+}
+
+.mem-card__ico {
+    font-size: 30px;
+    line-height: 1;
+}
+
+.mem-card__label {
+    font-weight: 900;
+    font-size: 13px;
 }
 
 .print-small {
@@ -273,7 +302,7 @@ body.is-braille [data-braille] {
 
     @page {
         size: A4;
-        margin: 10mm;
+        margin: 8mm;
     }
 
     .no-print,
@@ -298,6 +327,77 @@ body.is-braille [data-braille] {
     .sheet {
         border: none;
         padding: 0;
+    }
+
+    /* Make everything denser to fit one A4 */
+    body {
+        font-size: 12px;
+        line-height: 1.2;
+    }
+
+    .sheet__title {
+        font-size: 16px;
+    }
+
+    .sheet__head {
+        margin-bottom: 8px;
+    }
+
+    .math-item {
+        margin: 6px 0;
+    }
+
+    .math-exp {
+        font-size: 14px;
+    }
+
+    .math-blank {
+        height: 14px;
+    }
+
+    .word-chip {
+        padding: 4px 6px;
+        margin: 3px 4px 0 0;
+        font-size: 12px;
+    }
+
+    .blank-box {
+        width: 14px;
+        height: 18px;
+        margin: 4px 4px 0 0;
+    }
+
+    .words-hint,
+    .sent-prompt {
+        margin-bottom: 5px;
+        font-size: 12px;
+    }
+
+    .line {
+        height: 14px;
+        margin-top: 6px;
+    }
+
+    .att-pair {
+        gap: 6px;
+        margin: 6px 0;
+    }
+
+    .att-box {
+        padding: 6px;
+    }
+
+    .mem-cards {
+        gap: 6px;
+    }
+
+    .mem-card {
+        padding: 8px;
+        min-height: 76px;
+    }
+
+    .mem-card__ico {
+        font-size: 26px;
     }
 
     .sheet__head {

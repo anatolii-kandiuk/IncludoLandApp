@@ -30,7 +30,7 @@
             <section class="content">
                 <div class="print-toolbar no-print">
                     <a class="print-btn print-btn--ghost" href="{% url 'specialist_print' %}">← Назад</a>
-                    <a class="print-btn print-btn--ghost" href="?seed={{ next_seed }}">Оновити</a>
+                    <a class="print-btn print-btn--ghost" href="?">Оновити</a>
 
                     <label class="print-toggle">
                         <input id="braille-toggle" type="checkbox" />
@@ -42,10 +42,10 @@
 
                 <section class="sheet" aria-label="Аркуш завдань">
                     <div class="sheet__head">
-                        <div class="sheet__title">{{ title }}</div>
+                        <div class="sheet__title" data-braille>{{ title }}</div>
                         <div class="sheet__meta">
-                            <div>Дата: ____ / ____ / ______</div>
-                            <div>Імʼя: __________________________</div>
+                            <div data-braille>Дата: ____ / ____ / ______</div>
+                            <div data-braille>Імʼя: __________________________</div>
                         </div>
                     </div>
 
