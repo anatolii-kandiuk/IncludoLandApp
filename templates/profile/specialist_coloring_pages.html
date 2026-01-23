@@ -1,0 +1,127 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Розмальовки — Профіль спеціаліста</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+</head>
+
+<body>
+    <div class="shell">
+        {% include 'includes/specialist_sidebar.html' with active='coloring' %}
+
+        <main class="main">
+            <header class="top">
+                <div class="top__left"></div>
+                <div class="top__right">
+                    <div class="chip chip--user">
+                        <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
+                        <span class="chip__text">{{ username }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="page-title">
+                    <h1 class="page-title__h">Розмальовки</h1>
+                    <div class="page-title__sub">Завантажуйте PDF або зображення (PNG/JPG)</div>
+                </div>
+
+                <div class="grid">
+                    <section class="card">
+                        <div class="card__head">
+                            <h2 class="card__title">Додати розмальовку</h2>
+                        </div>
+
+                        <form class="s-form" method="post" enctype="multipart/form-data"
+                            action="{% url 'specialist_coloring_pages' %}">
+                            {% csrf_token %}
+
+                            <div class="field">
+                                <label class="label" for="id_title">Назва</label>
+                                <input class="input" id="id_title" name="title" type="text" maxlength="120" required
+                                    value="{{ form.title.value|default:'' }}" placeholder="Назва розмальовки">
+                                {% if form.title.errors %}
+                                <div class="error">{{ form.title.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="field">
+                                <label class="label" for="id_file">Файл</label>
+                                <input class="input input--file" id="id_file" name="file" type="file" required
+                                    accept="application/pdf,image/png,image/jpeg">
+                                <div class="hint">Підтримуються PDF, PNG, JPG/JPEG (до 12MB).</div>
+                                {% if form.file.errors %}
+                                <div class="error">{{ form.file.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="field">
+                                <label class="check">
+                                    <input class="check__box" type="checkbox" name="is_active" 
+                                    {% if form.is_active.value %}checked{% endif %}>
+                                    <span class="check__label">Активна (доступна дітям)</span>
+                                </label>
+                                {% if form.is_active.errors %}
+                                <div class="error">{{ form.is_active.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+
+                            {% if form.non_field_errors %}
+                            <div class="error">{{ form.non_field_errors|striptags }}</div>
+                            {% endif %}
+
+                            <button class="student__btn" type="submit">Завантажити</button>
+                        </form>
+                    </section>
+
+                    <section class="card">
+                        <div class="card__head">
+                            <h2 class="card__title">Мої файли</h2>
+                        </div>
+
+                        {% if pages %}
+                        <div class="files" aria-label="Список розмальовок">
+                            {% for p in pages %}
+                            <div class="file-row">
+                                <div class="file-row__meta">
+                                    <div class="file-row__title">{{ p.title }}</div>
+                                    <div class="file-row__sub">
+                                        {% if p.file_type == 'pdf' %}PDF{% else %}Зображення{% endif %} · {% if p.is_active %}Активна{% else %}Вимкнена{% endif %}
+                                    </div>
+                                    {% if p.file_url %}
+                                    <div class="file-row__preview">
+                                        {% if p.file_type == 'image' %}
+                                        <img class="file-row__img" src="{{ p.file_url }}" alt="{{ p.title|escape }}">
+                                        {% else %}
+                                        <a class="student__btn student__btn--ghost" href="{{ p.file_url }}"
+                                            target="_blank" rel="noopener">Відкрити PDF</a>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <form method="post" action="{% url 'specialist_coloring_page_delete' p.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{% url 'specialist_coloring_pages' %}">
+                                    <button class="student__btn student__btn--danger" type="submit"
+                                        onclick="return confirm('Видалити «{{ p.title|escapejs }}»?');">🗑</button>
+                                </form>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="student-search__empty">Поки що немає завантажених розмальовок.</div>
+                        {% endif %}
+                    </section>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

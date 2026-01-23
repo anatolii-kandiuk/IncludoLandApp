@@ -24,6 +24,9 @@ urlpatterns = [
     path('specialist/sentences/', views.specialist_sentences, name='specialist_sentences'),
     path('specialist/sentences/<int:exercise_id>/delete/', views.specialist_sentence_delete, name='specialist_sentence_delete'),
 
+    path('specialist/coloring/', views.specialist_coloring_pages, name='specialist_coloring_pages'),
+    path('specialist/coloring/<int:page_id>/delete/', views.specialist_coloring_page_delete, name='specialist_coloring_page_delete'),
+
     path('specialist/print/', views.specialist_print, name='specialist_print'),
     path('specialist/print/math/', views.specialist_print_math, name='specialist_print_math'),
     path('specialist/print/sentences/', views.specialist_print_sentences, name='specialist_print_sentences'),

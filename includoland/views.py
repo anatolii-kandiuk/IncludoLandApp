@@ -4,12 +4,40 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from accounts.models import SentenceExercise, SoundCard, Story, WordPuzzleWord
+from accounts.models import ColoringPage, SentenceExercise, SoundCard, Story, WordPuzzleWord
 
 
 def _child_stars(request):
     profile = getattr(request.user, 'child_profile', None)
     return getattr(profile, 'stars', None)
+
+
+def _active_coloring_uploads():
+    uploads = (
+        ColoringPage.objects.filter(is_active=True)
+        .only('id', 'title', 'file', 'file_type', 'created_at')
+        .order_by('-created_at')
+    )
+
+    out = []
+    for p in uploads:
+        url = ''
+        try:
+            if p.file and p.file.storage.exists(p.file.name):
+                url = p.file.url
+        except Exception:
+            url = ''
+        if not url:
+            continue
+        out.append(
+            {
+                'id': p.id,
+                'title': p.title,
+                'file_url': url,
+                'file_type': p.file_type,
+            }
+        )
+    return out
 
 
 def home(request):
@@ -361,6 +389,7 @@ def learn_coloring(request):
     context = {
         'stars': _child_stars(request),
         'pages': pages,
+        'uploaded_pages': _active_coloring_uploads(),
     }
     return render(request, 'learn/coloring.html', context)
 
@@ -417,6 +446,7 @@ def learn_coloring_print(request):
     context = {
         'stars': _child_stars(request),
         'pages': pages,
+        'uploaded_pages': _active_coloring_uploads(),
     }
     return render(request, 'learn/print_coloring.html', context)
 

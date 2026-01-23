@@ -8,6 +8,8 @@
     <title>Нотатки — Профіль спеціаліста</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+    <script src="{% static 'js/profile_charts.js' %}" defer></script>
 </head>
 
 <body>
@@ -33,6 +35,64 @@
                 </div>
 
                 <div class="grid grid--single">
+                    <section class="card card--full">
+                        <div class="card__head">
+                            <h2 class="card__title">Статистика</h2>
+                            <div class="card__meta">Всього спроб (ігри): {{ results_count }} · Слухань казок: {{
+                                stories_listens_count }}</div>
+                        </div>
+
+                        <div class="student-focus" aria-label="Зона уваги">
+                            <div class="student-focus__row">
+                                <div class="student-focus__label">Зосередженість: <strong>{{ focus_label }}</strong>
+                                </div>
+                                <div class="student-focus__value">{{ focus_value }}%</div>
+                            </div>
+                            <div class="student__bar" role="progressbar" aria-valuenow="{{ focus_severity }}"
+                                aria-valuemin="0" aria-valuemax="100">
+                                <div class="student__fill" style="width: {{ focus_severity }}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="profile-grid" style="margin-top: 16px;">
+                            <section class="card card--wide">
+                                <div class="card__header">
+                                    <h3 class="card__title">Прогрес завдань</h3>
+                                </div>
+                                <div class="progress-list">
+                                    {% for p in progress %}
+                                    <div class="progress-item">
+                                        <div class="progress-item__row">
+                                            <span class="progress-item__label">{{ p.label }}</span>
+                                            <span class="progress-item__value">{{ p.value }}%</span>
+                                        </div>
+                                        <div class="progress-item__bar" role="progressbar" aria-valuenow="{{ p.value }}"
+                                            aria-valuemin="0" aria-valuemax="100">
+                                            <div class="progress-item__fill" style="width: {{ p.value }}%"></div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </section>
+
+                            <section class="card">
+                                <div class="card__header">
+                                    <h3 class="card__title">Статистика успішності</h3>
+                                </div>
+                                <canvas id="lineChart" height="180" data-labels='{{ line_labels|safe }}'
+                                    data-datasets='{{ line_datasets|safe }}'></canvas>
+                            </section>
+
+                            <section class="card">
+                                <div class="card__header">
+                                    <h3 class="card__title">Навички</h3>
+                                </div>
+                                <canvas id="radarChart" height="200" data-labels='{{ radar_labels|safe }}'
+                                    data-values='{{ radar_values|safe }}'></canvas>
+                            </section>
+                        </div>
+                    </section>
+
                     <section class="card card--full">
                         <div class="card__head">
                             <h2 class="card__title">Додати нотатку</h2>

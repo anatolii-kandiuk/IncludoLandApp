@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import SentenceExercise, SoundCard, SpecialistStudentNote, Story, WordPuzzleWord
+from .models import ColoringPage, SentenceExercise, SoundCard, SpecialistStudentNote, Story, WordPuzzleWord
 
 
 class RegisterForm(UserCreationForm):
@@ -163,3 +163,40 @@ class SentenceExerciseForm(forms.ModelForm):
             raise forms.ValidationError('Речення має містити щонайменше 2 слова.')
 
         return value
+
+
+class ColoringPageForm(forms.ModelForm):
+    class Meta:
+        model = ColoringPage
+        fields = ('title', 'file', 'is_active')
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'Назва розмальовки'}),
+        }
+
+    def clean_file(self):
+        f = self.cleaned_data.get('file')
+        if not f:
+            raise forms.ValidationError('Оберіть файл.')
+
+        name = (getattr(f, 'name', '') or '').lower()
+        allowed = ('.pdf', '.png', '.jpg', '.jpeg')
+        if not any(name.endswith(ext) for ext in allowed):
+            raise forms.ValidationError('Підтримуються лише PDF, PNG, JPG/JPEG.')
+
+        size = getattr(f, 'size', 0) or 0
+        if size > 12 * 1024 * 1024:
+            raise forms.ValidationError('Файл завеликий (макс. 12 MB).')
+
+        return f
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        name = (getattr(instance.file, 'name', '') or '').lower()
+        if name.endswith('.pdf'):
+            instance.file_type = ColoringPage.FileType.PDF
+        else:
+            instance.file_type = ColoringPage.FileType.IMAGE
+
+        if commit:
+            instance.save()
+        return instance

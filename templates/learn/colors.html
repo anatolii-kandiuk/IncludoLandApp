@@ -33,7 +33,7 @@
             <div class="flip" aria-label="Перегляд кольорів">
                 <button class="learn-btn" type="button" id="color-prev" aria-label="Попередній">←</button>
                 <div class="flip-main">
-                    <div class="color-swatch" id="color-swatch" aria-hidden="true" {% if colors %}
+                    <div class="color-swatch color-swatch--main" id="color-swatch" aria-hidden="true" {% if colors %}
                         style="background: {{ colors.0.hex }}" {% endif %}></div>
                     <div class="flip-sub" id="color-name" data-braille
                         style="margin-top:10px;font-size:24px;font-weight:1000;">{% if colors %}{{ colors.0.name }}{% endif %}</div>

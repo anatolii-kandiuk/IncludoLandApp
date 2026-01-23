@@ -50,6 +50,20 @@
             <div style="margin-top:10px">{{ p.svg|safe }}</div>
         </section>
         {% endfor %}
+
+        {% for p in uploaded_pages %}
+        <section class="lp-coloring" aria-label="Розмальовка">
+            <h2 data-braille>{{ p.title }}</h2>
+            {% if p.file_type == 'image' %}
+            <div style="margin-top:10px">
+                <img src="{{ p.file_url }}" alt="{{ p.title|escape }}"
+                    style="width:100%;max-height:760px;object-fit:contain;border:1px solid rgba(0,0,0,.12);border-radius:12px">
+            </div>
+            {% else %}
+            <p data-braille>PDF файл: <a href="{{ p.file_url }}" target="_blank" rel="noopener">Відкрити</a></p>
+            {% endif %}
+        </section>
+        {% endfor %}
     </main>
 </body>
 

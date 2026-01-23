@@ -16,8 +16,8 @@ from django.db.models import F
 
 import random
 
-from .forms import RegisterForm, SpecialistRegisterForm, SentenceExerciseForm, SoundCardForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
-from .models import ChildProfile, GameResult, SentenceExercise, SpecialistInvite, SpecialistProfile, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
+from .forms import RegisterForm, SpecialistRegisterForm, ColoringPageForm, SentenceExerciseForm, SoundCardForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
+from .models import ChildProfile, ColoringPage, GameResult, SentenceExercise, SpecialistInvite, SpecialistProfile, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
 
 
 BADGE_DEFINITIONS = [
@@ -394,27 +394,42 @@ def specialist_profile(request):
             .order_by('user__username')[:20]
         )
 
+    def _focus_from_stats(stats_dict: dict):
+        avg = stats_dict.get('avg') or {}
+        candidates = [
+            ('Математика', int(avg.get('math') or 0)),
+            ("Памʼять", int(avg.get('memory') or 0)),
+            ('Звуки', int(avg.get('sound') or 0)),
+            ('Пазли слів', int(avg.get('words') or 0)),
+            ('Побудова речень', int(avg.get('sentences') or 0)),
+        ]
+        label, value = min(candidates, key=lambda x: x[1])
+        severity = max(0, min(100, 100 - int(value)))
+        return label, int(value), severity
+
     attention_students = []
     for s in my_students[:6]:
         stats = _build_child_stats_for_user(s.user)
+        focus_label, _focus_value, focus_severity = _focus_from_stats(stats)
         attention_students.append(
             {
                 'id': s.id,
                 'name': s.user.username,
-                'subtitle': 'Зосередженість: Памʼять',
-                'progress': stats['avg']['memory'],
+                'subtitle': f'Зосередженість: {focus_label}',
+                'progress': focus_severity,
             }
         )
 
     student_cards = []
     for s in my_students[:50]:
         stats = _build_child_stats_for_user(s.user)
+        focus_label, _focus_value, focus_severity = _focus_from_stats(stats)
         student_cards.append(
             {
                 'id': s.id,
                 'name': s.user.username,
-                'subtitle': 'Зосередженість: Памʼять',
-                'progress': stats['avg']['memory'],
+                'subtitle': f'Зосередженість: {focus_label}',
+                'progress': focus_severity,
                 'stars': s.stars,
             }
         )
@@ -1015,19 +1030,8 @@ def specialist_student_stats(request, child_profile_id: int):
     if not child:
         return redirect('specialist_profile')
 
-    stats = _build_child_stats_for_user(child.user)
-    context = {
-        'student_username': child.user.username,
-        'student_stars': child.stars,
-        'results_count': stats['results_count'],
-        'stories_listens_count': stats['stories_listens_count'],
-        'progress': stats['progress'],
-        'line_labels': stats['line_labels'],
-        'line_datasets': stats['line_datasets'],
-        'radar_labels': stats['radar_labels'],
-        'radar_values': stats['radar_values'],
-    }
-    return render(request, 'profile/student_stats.html', context)
+    # "Рекомендації" прибрано: статистика доступна у "Нотатки".
+    return redirect('specialist_student_notes', child_profile_id=child.id)
 
 
 @login_required
@@ -1057,11 +1061,34 @@ def specialist_student_notes(request, child_profile_id: int):
         .order_by('-created_at')
     )
 
+    stats = _build_child_stats_for_user(child.user)
+    avg = stats.get('avg') or {}
+    focus_candidates = [
+        ('Математика', int(avg.get('math') or 0)),
+        ("Памʼять", int(avg.get('memory') or 0)),
+        ('Звуки', int(avg.get('sound') or 0)),
+        ('Пазли слів', int(avg.get('words') or 0)),
+        ('Побудова речень', int(avg.get('sentences') or 0)),
+    ]
+    focus_label, focus_value = min(focus_candidates, key=lambda x: x[1])
+    focus_severity = max(0, min(100, 100 - int(focus_value)))
+
     context = {
         'username': request.user.username,
         'student': child,
         'form': form,
         'notes': notes,
+        'stats': stats,
+        'focus_label': focus_label,
+        'focus_value': int(focus_value),
+        'focus_severity': int(focus_severity),
+        'results_count': stats['results_count'],
+        'stories_listens_count': stats['stories_listens_count'],
+        'progress': stats['progress'],
+        'line_labels': stats['line_labels'],
+        'line_datasets': stats['line_datasets'],
+        'radar_labels': stats['radar_labels'],
+        'radar_values': stats['radar_values'],
     }
     return render(request, 'profile/specialist_notes.html', context)
 
@@ -1080,6 +1107,65 @@ def specialist_student_note_delete(request, note_id: int):
     child_id = note.student_id
     note.delete()
     return redirect('specialist_student_notes', child_profile_id=child_id)
+
+
+@login_required
+def specialist_coloring_pages(request):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    if request.method == 'POST':
+        form = ColoringPageForm(request.POST, request.FILES)
+        if form.is_valid():
+            page = form.save(commit=False)
+            page.created_by = request.user
+            page.save()
+            return redirect('specialist_coloring_pages')
+    else:
+        form = ColoringPageForm(initial={'is_active': True})
+
+    pages = list(
+        ColoringPage.objects.filter(created_by=request.user)
+        .only('id', 'title', 'file', 'file_type', 'is_active', 'created_at')
+        .order_by('-created_at')
+    )
+
+    safe_pages = []
+    for p in pages:
+        url = ''
+        try:
+            if p.file and p.file.storage.exists(p.file.name):
+                url = p.file.url
+        except Exception:
+            url = ''
+        safe_pages.append(
+            {
+                'id': p.id,
+                'title': p.title,
+                'file_url': url,
+                'file_type': p.file_type,
+                'is_active': p.is_active,
+                'created_at': p.created_at,
+            }
+        )
+
+    context = {
+        'username': request.user.username,
+        'form': form,
+        'pages': safe_pages,
+    }
+    return render(request, 'profile/specialist_coloring_pages.html', context)
+
+
+@login_required
+@require_POST
+def specialist_coloring_page_delete(request, page_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    ColoringPage.objects.filter(id=page_id, created_by=request.user).delete()
+    next_url = request.POST.get('next') or reverse('specialist_coloring_pages')
+    return redirect(next_url)
 
 
 @login_required

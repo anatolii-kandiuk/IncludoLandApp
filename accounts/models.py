@@ -265,3 +265,29 @@ class SpecialistStudentNote(models.Model):
 
     def __str__(self) -> str:
         return f"SpecialistStudentNote({self.specialist.user.username} → {self.student.user.username})"
+
+
+class ColoringPage(models.Model):
+    class FileType(models.TextChoices):
+        IMAGE = 'image', 'Image'
+        PDF = 'pdf', 'PDF'
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='coloring_pages',
+    )
+
+    title = models.CharField(max_length=120)
+    file = models.FileField(upload_to='coloring/pages/')
+    file_type = models.CharField(max_length=8, choices=FileType.choices, default=FileType.IMAGE)
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self) -> str:
+        return f"ColoringPage({self.title})"

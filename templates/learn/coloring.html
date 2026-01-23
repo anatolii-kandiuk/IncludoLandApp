@@ -44,6 +44,25 @@
                 {% endfor %}
             </div>
         </section>
+
+        {% if uploaded_pages %}
+        <section class="learn-card" aria-label="Додаткові розмальовки">
+            <h2 class="coloring-title" data-braille style="margin:0 0 10px;">Додаткові розмальовки</h2>
+            <div class="coloring-grid">
+                {% for p in uploaded_pages %}
+                <div class="coloring-card">
+                    <h3 class="coloring-title" data-braille>{{ p.title }}</h3>
+                    {% if p.file_type == 'image' %}
+                    <img class="coloring-img" src="{{ p.file_url }}" alt="{{ p.title|escape }}">
+                    {% else %}
+                    <a class="learn-btn" href="{{ p.file_url }}" target="_blank" rel="noopener" data-braille>Відкрити
+                        PDF</a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
     </main>
 </body>
 

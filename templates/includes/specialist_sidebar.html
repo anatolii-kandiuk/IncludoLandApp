@@ -41,6 +41,11 @@
                 <span class="nav__icon" aria-hidden="true">🔊</span>
                 <span class="nav__label">Звуки</span>
             </a>
+            <a class="nav__item{% if active == 'coloring' %} nav__item--active{% endif %}"
+                href="{% url 'specialist_coloring_pages' %}">
+                <span class="nav__icon" aria-hidden="true">🎨</span>
+                <span class="nav__label">Розмальовки</span>
+            </a>
             <a class="nav__item{% if active == 'words' %} nav__item--active{% endif %}"
                 href="{% url 'specialist_words' %}">
                 <span class="nav__icon" aria-hidden="true">🔤</span>

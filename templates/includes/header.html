@@ -25,16 +25,29 @@
 
             <nav class="pill-nav" aria-label="Навігація">
                 {% if user.is_authenticated %}
+                <button class="pill pill--ghost" type="button" id="nav-back" aria-label="Назад">
+                    <span class="pill__ico" aria-hidden="true">←</span>
+                    <span>Назад</span>
+                </button>
                 <span class="pill pill--user" aria-label="Користувач">
                     <span class="pill__ico" aria-hidden="true">👤</span>
                     <span>{{ user.username }}</span>
                 </span>
-                {% if user.specialistprofile %}
+                {% if user.specialist_profile %}
                 <a class="pill" href="{% url 'specialist_profile' %}">
                     <span class="pill__ico" aria-hidden="true">📈</span>
                     <span>Панель</span>
                 </a>
+                <a class="pill" href="{% url 'specialist_print' %}">
+                    <span class="pill__ico" aria-hidden="true">🖨️</span>
+                    <span>Друк</span>
+                </a>
                 {% else %}
+                <button class="pill" type="button" id="timer-pill" aria-controls="timer-popover" aria-expanded="false"
+                    title="Таймер">
+                    <span class="pill__ico" aria-hidden="true">⏱</span>
+                    <span id="timer-pill-time">25:00</span>
+                </button>
                 <a class="pill" href="{% url 'child_profile' %}">
                     <span class="pill__ico" aria-hidden="true">📊</span>
                     <span>Профіль</span>
@@ -67,6 +80,126 @@
         padding: 24px 24px 0;
         position: relative;
         z-index: 60;
+    }
+
+    .pill--ghost {
+        background: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+    }
+
+    .timer-popover {
+        position: fixed;
+        top: 78px;
+        right: 24px;
+        z-index: 200;
+        width: min(340px, calc(100vw - 32px));
+        background: rgba(255, 255, 255, .94);
+        border: 1px solid rgba(15, 43, 58, 0.14);
+        border-radius: 18px;
+        box-shadow: 0 18px 52px rgba(0, 0, 0, .16);
+        padding: 12px;
+        backdrop-filter: blur(6px);
+    }
+
+    .timer-popover__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .timer-popover__title {
+        font-weight: 1000;
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .timer-popover__time {
+        font-variant-numeric: tabular-nums;
+        font-weight: 1000;
+        font-size: 40px;
+        text-align: center;
+        padding: 12px 10px;
+        border-radius: 16px;
+        background: rgba(243, 248, 251, 0.92);
+        border: 1px solid rgba(15, 43, 58, 0.10);
+        margin: 8px 0 10px;
+    }
+
+    .timer-popover__meta {
+        text-align: center;
+        opacity: .8;
+        font-weight: 800;
+        font-size: 13px;
+        margin-top: -4px;
+    }
+
+    .timer-popover__actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 12px;
+        flex-wrap: wrap;
+    }
+
+    .timer-btn {
+        border: 1px solid rgba(15, 43, 58, 0.12);
+        background: #f3f8fb;
+        border-radius: 14px;
+        padding: 10px 12px;
+        font-weight: 900;
+        cursor: pointer;
+        min-width: 96px;
+    }
+
+    .timer-btn--primary {
+        background: linear-gradient(135deg, #3cc38a, #28a86e);
+        border: 0;
+        color: #fff;
+    }
+
+    .timer-btn--danger {
+        background: linear-gradient(135deg, #ff6b6b, #e93a3a);
+        border: 0;
+        color: #fff;
+    }
+
+    .timer-toast {
+        position: fixed;
+        right: 24px;
+        top: 78px;
+        z-index: 210;
+        width: min(360px, calc(100vw - 32px));
+        background: rgba(255, 255, 255, .96);
+        border: 1px solid rgba(15, 43, 58, 0.14);
+        border-radius: 18px;
+        box-shadow: 0 18px 52px rgba(0, 0, 0, .16);
+        padding: 12px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .timer-toast__text {
+        font-weight: 900;
+    }
+
+    .timer-toast__sub {
+        opacity: .75;
+        font-weight: 800;
+        font-size: 12px;
+        margin-top: 2px;
+    }
+
+    @media (max-width: 520px) {
+
+        .timer-popover,
+        .timer-toast {
+            right: 16px;
+            top: 66px;
+        }
     }
 
     .site-header__inner {
@@ -131,3 +264,45 @@
         }
     }
 </style>
+
+{% if user.is_authenticated and not user.specialist_profile %}
+<div class="timer-popover" id="timer-popover" hidden>
+    <div class="timer-popover__top">
+        <h2 class="timer-popover__title">Таймер</h2>
+        <button class="pill pill--ghost" type="button" id="timer-close" aria-label="Закрити">✕</button>
+    </div>
+
+    <div class="timer-popover__time" id="timer-time">25:00</div>
+    <div class="timer-popover__meta" id="timer-mode">Робота</div>
+
+    <div class="timer-popover__actions">
+        <button class="timer-btn timer-btn--primary" type="button" id="timer-start">Старт</button>
+        <button class="timer-btn" type="button" id="timer-pause">Пауза</button>
+        <button class="timer-btn timer-btn--danger" type="button" id="timer-reset">Скинути</button>
+    </div>
+</div>
+
+<div class="timer-toast" id="timer-toast" hidden role="status" aria-live="polite">
+    <div>
+        <div class="timer-toast__text" id="timer-toast-text">Пора відпочити</div>
+        <div class="timer-toast__sub">Натисни на таймер у навбарі.</div>
+    </div>
+    <button class="pill pill--ghost" type="button" id="timer-toast-close" aria-label="Закрити">✕</button>
+</div>
+
+<script src="{% static 'js/pomodoro.js' %}" defer></script>
+{% endif %}
+
+<script>
+    (function () {
+        const btn = document.getElementById('nav-back');
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+            if (window.history.length > 1) {
+                window.history.back();
+                return;
+            }
+            window.location.href = '/';
+        });
+    })();
+</script>
