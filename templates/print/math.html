@@ -1,0 +1,91 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{{ title }} — Друк — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <script src="{% static 'js/print.js' %}" defer></script>
+</head>
+
+<body>
+    <div class="shell">
+        {% include 'includes/specialist_sidebar.html' with active='print' show_helper=False %}
+
+        <main class="main" data-print-page="worksheet">
+            <header class="top no-print">
+                <div class="top__left"></div>
+                <div class="top__right">
+                    <div class="chip chip--user">
+                        <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
+                        <span class="chip__text">{{ username }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="print-toolbar no-print">
+                    <a class="print-btn print-btn--ghost" href="{% url 'specialist_print' %}">← Назад</a>
+
+                    <form class="print-filters" method="get" action="{% url 'specialist_print_math' %}">
+                        <label class="print-label">
+                            Рівень
+                            <select name="level" class="print-select">
+                                <option value="easy" {% if level == 'easy' %}selected{% endif %}>Легко</option>
+                                <option value="medium" {% if level == 'medium' %}selected{% endif %}>Середньо</option>
+                                <option value="hard" {% if level == 'hard' %}selected{% endif %}>Складно</option>
+                            </select>
+                        </label>
+                        <label class="print-label">
+                            Операція
+                            <select name="op" class="print-select">
+                                <option value="mix" {% if op == 'mix' %}selected{% endif %}>Мікс</option>
+                                <option value="add" {% if op == 'add' %}selected{% endif %}>+</option>
+                                <option value="sub" {% if op == 'sub' %}selected{% endif %}>−</option>
+                                <option value="mul" {% if op == 'mul' %}selected{% endif %}>×</option>
+                                <option value="div" {% if op == 'div' %}selected{% endif %}>÷</option>
+                            </select>
+                        </label>
+                        <input type="hidden" name="seed" value="{{ seed }}" />
+                        <button class="print-btn" type="submit">Застосувати</button>
+                    </form>
+
+                    <a class="print-btn print-btn--ghost"
+                        href="?level={{ level }}&op={{ op }}&seed={{ next_seed }}">Оновити</a>
+
+                    <label class="print-toggle">
+                        <input id="braille-toggle" type="checkbox" />
+                        <span>Брайль</span>
+                    </label>
+
+                    <button class="print-btn" type="button" id="print-now">Друкувати</button>
+                </div>
+
+                <section class="sheet" aria-label="Аркуш завдань">
+                    <div class="sheet__head">
+                        <div class="sheet__title">{{ title }}</div>
+                        <div class="sheet__meta">
+                            <div>Дата: ____ / ____ / ______</div>
+                            <div>Імʼя: __________________________</div>
+                        </div>
+                    </div>
+
+                    <ol class="math-list" aria-label="Приклади">
+                        {% for it in items %}
+                        <li class="math-item">
+                            <span class="math-exp">{{ it.text }}</span>
+                            <span class="math-blank"></span>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                </section>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

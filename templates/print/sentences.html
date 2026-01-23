@@ -1,0 +1,79 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{{ title }} — Друк — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <script src="{% static 'js/print.js' %}" defer></script>
+</head>
+
+<body>
+    <div class="shell">
+        {% include 'includes/specialist_sidebar.html' with active='print' show_helper=False %}
+
+        <main class="main" data-print-page="worksheet">
+            <header class="top no-print">
+                <div class="top__left"></div>
+                <div class="top__right">
+                    <div class="chip chip--user">
+                        <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
+                        <span class="chip__text">{{ username }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="print-toolbar no-print">
+                    <a class="print-btn print-btn--ghost" href="{% url 'specialist_print' %}">← Назад</a>
+                    <a class="print-btn print-btn--ghost" href="?seed={{ next_seed }}">Оновити</a>
+
+                    <label class="print-toggle">
+                        <input id="braille-toggle" type="checkbox" />
+                        <span>Брайль</span>
+                    </label>
+
+                    <button class="print-btn" type="button" id="print-now">Друкувати</button>
+                </div>
+
+                <section class="sheet" aria-label="Аркуш завдань">
+                    <div class="sheet__head">
+                        <div class="sheet__title">{{ title }}</div>
+                        <div class="sheet__meta">
+                            <div>Дата: ____ / ____ / ______</div>
+                            <div>Імʼя: __________________________</div>
+                        </div>
+                    </div>
+
+                    <ol class="sent-list" aria-label="Завдання">
+                        {% for it in items %}
+                        <li class="sent-item">
+                            <div class="sent-row">
+                                <div class="sent-emoji" aria-hidden="true">{{ it.emoji }}</div>
+                                <div class="sent-body">
+                                    <div class="sent-prompt" data-braille>{{ it.prompt }}</div>
+                                    <div class="sent-bank" aria-label="Слова">
+                                        {% for t in it.tokens %}
+                                        <span class="word-chip" data-braille>{{ t }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="sent-answer" aria-label="Місце для речення">
+                                        <div class="line"></div>
+                                        <div class="line"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                </section>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

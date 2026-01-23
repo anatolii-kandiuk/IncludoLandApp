@@ -1,0 +1,67 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{{ title }} — Друк — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <script src="{% static 'js/print.js' %}" defer></script>
+</head>
+
+<body>
+    <div class="shell">
+        {% include 'includes/specialist_sidebar.html' with active='print' show_helper=False %}
+
+        <main class="main" data-print-page="worksheet">
+            <header class="top no-print">
+                <div class="top__left"></div>
+                <div class="top__right">
+                    <div class="chip chip--user">
+                        <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
+                        <span class="chip__text">{{ username }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="print-toolbar no-print">
+                    <a class="print-btn print-btn--ghost" href="{% url 'specialist_print' %}">← Назад</a>
+                    <a class="print-btn print-btn--ghost" href="?seed={{ next_seed }}">Оновити</a>
+
+                    <label class="print-toggle">
+                        <input id="braille-toggle" type="checkbox" />
+                        <span>Брайль</span>
+                    </label>
+
+                    <button class="print-btn" type="button" id="print-now">Друкувати</button>
+                </div>
+
+                <section class="sheet" aria-label="Аркуш завдань">
+                    <div class="sheet__head">
+                        <div class="sheet__title">{{ title }}</div>
+                        <div class="sheet__meta">
+                            <div>Знайди 5 відмінностей у кожному завданні.</div>
+                        </div>
+                    </div>
+
+                    <ol class="att-list" aria-label="Завдання">
+                        {% for it in items %}
+                        <li class="att-item">
+                            <div class="att-pair">
+                                <div class="att-box">{{ it.left_svg|safe }}</div>
+                                <div class="att-box">{{ it.right_svg|safe }}</div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                </section>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

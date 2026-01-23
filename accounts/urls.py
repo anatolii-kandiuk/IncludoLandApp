@@ -24,6 +24,13 @@ urlpatterns = [
     path('specialist/sentences/', views.specialist_sentences, name='specialist_sentences'),
     path('specialist/sentences/<int:exercise_id>/delete/', views.specialist_sentence_delete, name='specialist_sentence_delete'),
 
+    path('specialist/print/', views.specialist_print, name='specialist_print'),
+    path('specialist/print/math/', views.specialist_print_math, name='specialist_print_math'),
+    path('specialist/print/sentences/', views.specialist_print_sentences, name='specialist_print_sentences'),
+    path('specialist/print/words/', views.specialist_print_words, name='specialist_print_words'),
+    path('specialist/print/attention/', views.specialist_print_attention, name='specialist_print_attention'),
+    path('specialist/print/memory/', views.specialist_print_memory, name='specialist_print_memory'),
+
     path('specialist/students/add/', views.specialist_add_student, name='specialist_add_student'),
     path('specialist/students/<int:child_profile_id>/', views.specialist_student_stats, name='specialist_student_stats'),
     path('specialist/students/<int:child_profile_id>/notes/', views.specialist_student_notes, name='specialist_student_notes'),

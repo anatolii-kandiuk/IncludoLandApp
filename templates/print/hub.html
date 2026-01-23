@@ -1,0 +1,77 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Друк завдань — IncludoLand</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <script src="{% static 'js/print.js' %}" defer></script>
+</head>
+
+<body>
+    <div class="shell">
+        {% include 'includes/specialist_sidebar.html' with active='print' show_helper=False %}
+
+        <main class="main" data-print-page="hub">
+            <header class="top no-print">
+                <div class="top__left"></div>
+                <div class="top__right">
+                    <div class="chip chip--user">
+                        <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
+                        <span class="chip__text">{{ username }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="page-title">
+                    <h1 class="page-title__h">Друк завдань</h1>
+                </div>
+
+                <section class="card card--full">
+                    <div class="card__head">
+                        <h2 class="card__title">Оберіть тип завдань</h2>
+                    </div>
+
+                    <div class="print-grid" aria-label="Доступні сторінки для друку">
+                        <a class="print-tile" href="{% url 'specialist_print_math' %}">
+                            <div class="print-tile__icon" aria-hidden="true">➗</div>
+                            <div class="print-tile__title">Математика</div>
+                            <div class="print-tile__sub">10 прикладів на сторінку</div>
+                        </a>
+                        <a class="print-tile" href="{% url 'specialist_print_sentences' %}">
+                            <div class="print-tile__icon" aria-hidden="true">🧩</div>
+                            <div class="print-tile__title">Речення</div>
+                            <div class="print-tile__sub">10 завдань на сторінку</div>
+                        </a>
+                        <a class="print-tile" href="{% url 'specialist_print_words' %}">
+                            <div class="print-tile__icon" aria-hidden="true">🔤</div>
+                            <div class="print-tile__title">Слова</div>
+                            <div class="print-tile__sub">10 завдань на сторінку</div>
+                        </a>
+                        <a class="print-tile" href="{% url 'specialist_print_attention' %}">
+                            <div class="print-tile__icon" aria-hidden="true">🎯</div>
+                            <div class="print-tile__title">Увага</div>
+                            <div class="print-tile__sub">10 завдань на сторінку</div>
+                        </a>
+                        <a class="print-tile" href="{% url 'specialist_print_memory' %}">
+                            <div class="print-tile__icon" aria-hidden="true">🧠</div>
+                            <div class="print-tile__title">Памʼять</div>
+                            <div class="print-tile__sub">10 завдань на сторінку</div>
+                        </a>
+                    </div>
+
+                    <div class="print-note">
+                        <div><strong>Порада:</strong> на сторінках друку є перемикач «Брайль» перед друком.</div>
+                    </div>
+                </section>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

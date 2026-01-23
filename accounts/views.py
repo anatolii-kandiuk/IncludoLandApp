@@ -13,6 +13,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.db.models import F
 
+import random
+
 from .forms import RegisterForm, SentenceExerciseForm, SoundCardForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
 from .models import ChildProfile, GameResult, SentenceExercise, SpecialistProfile, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
 
@@ -498,6 +500,411 @@ def specialist_sentence_delete(request, exercise_id: int):
     SentenceExercise.objects.filter(id=exercise_id, created_by=request.user).delete()
     next_url = request.POST.get('next') or reverse('specialist_sentences')
     return redirect(next_url)
+
+
+def _require_specialist(request):
+    if not hasattr(request.user, 'specialist_profile'):
+        return False
+    return True
+
+
+UKR_ALPHABET = 'АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ'
+
+
+def _parse_seed(request):
+    raw = request.GET.get('seed')
+    try:
+        seed = int(raw)
+    except (TypeError, ValueError):
+        seed = random.randint(1, 1_000_000_000)
+    return random.Random(seed), seed
+
+
+def _parse_choice(request, name: str, allowed: set, default: str) -> str:
+    value = (request.GET.get(name) or '').strip()
+    return value if value in allowed else default
+
+
+def _shuffle_with_rng(rng: random.Random, items: list):
+    a = list(items)
+    rng.shuffle(a)
+    return a
+
+
+def _math_allowed_ops_for_level(level: str) -> set:
+    if level == 'hard':
+        return {'mul', 'div'}
+    return {'add', 'sub'}
+
+
+def _math_op_symbol(op: str) -> str:
+    if op == 'add':
+        return '+'
+    if op == 'sub':
+        return '−'
+    if op == 'mul':
+        return '×'
+    if op == 'div':
+        return '÷'
+    return '?'
+
+
+def _math_rand_int(rng: random.Random, min_v: int, max_v: int) -> int:
+    return rng.randint(min_v, max_v)
+
+
+def _generate_math_items(rng: random.Random, level: str, op_mode: str, total: int = 10):
+    allowed_set = _math_allowed_ops_for_level(level)
+
+    def pick(arr):
+        return arr[_math_rand_int(rng, 0, len(arr) - 1)]
+
+    items = []
+    for i in range(total):
+        if op_mode == 'mix':
+            op = pick(sorted(list(allowed_set)))
+        else:
+            op = op_mode if op_mode in allowed_set else pick(sorted(list(allowed_set)))
+
+        if level == 'easy':
+            a = _math_rand_int(rng, 0, 9)
+            b = _math_rand_int(rng, 0, 9)
+            if op == 'sub' and b > a:
+                a, b = b, a
+        elif level == 'medium':
+            a = _math_rand_int(rng, 10, 100)
+            b = _math_rand_int(rng, 10, 100)
+            if op == 'sub' and b > a:
+                a, b = b, a
+        else:
+            # hard
+            if op == 'div':
+                divisor = _math_rand_int(rng, 2, 12)
+                quotient = _math_rand_int(rng, 2, 12)
+                a = divisor * quotient
+                b = divisor
+            else:
+                a = _math_rand_int(rng, 2, 12)
+                b = _math_rand_int(rng, 2, 12)
+
+        items.append(
+            {
+                'n': i + 1,
+                'a': a,
+                'b': b,
+                'op': op,
+                'text': f"{a} {_math_op_symbol(op)} {b} =",
+            }
+        )
+
+    return items
+
+
+def _normalize_word(text: str) -> str:
+    return (text or '').strip().replace(' ', '').upper()
+
+
+def _generate_word_letter_bank(rng: random.Random, word: str) -> list:
+    base = list(word)
+    extra_count = min(2, max(0, 8 - len(base)))
+    extra = []
+    while len(extra) < extra_count:
+        ch = UKR_ALPHABET[_math_rand_int(rng, 0, len(UKR_ALPHABET) - 1)]
+        if ch not in base and ch not in extra:
+            extra.append(ch)
+    letters = base + extra
+    rng.shuffle(letters)
+    return letters
+
+
+def _generate_words_items_for_user(rng: random.Random, user, total: int = 10):
+    qs = (
+        WordPuzzleWord.objects.filter(is_active=True, created_by=user)
+        .only('word', 'hint', 'emoji')
+        .order_by('-created_at')
+    )
+    pool = [
+        {
+            'word': _normalize_word(w.word),
+            'hint': (w.hint or '').strip(),
+            'emoji': (w.emoji or '').strip() or '🧩',
+        }
+        for w in qs
+        if _normalize_word(w.word)
+    ]
+    if not pool:
+        pool = [
+            { 'word': 'КІТ', 'hint': 'Домашній улюбленець, який муркоче', 'emoji': '🐱' },
+            { 'word': 'ЛІС', 'hint': 'Багато дерев, можна почути пташок', 'emoji': '🌲' },
+            { 'word': 'ДОЩ', 'hint': 'Капає з неба, потрібна парасоля', 'emoji': '🌧️' },
+            { 'word': 'СОНЦЕ', 'hint': 'Світить вдень і гріє', 'emoji': '☀️' },
+            { 'word': 'РИБА', 'hint': 'Плаває у воді', 'emoji': '🐟' },
+            { 'word': 'КВІТКА', 'hint': 'Росте на клумбі і пахне', 'emoji': '🌸' },
+            { 'word': 'МОРЕ', 'hint': 'Солона вода і хвилі', 'emoji': '🌊' },
+            { 'word': 'ПТАХ', 'hint': 'Має крила і літає', 'emoji': '🐦' },
+            { 'word': 'ВІТЕР', 'hint': 'Невидимий, але рухає листя', 'emoji': '💨' },
+            { 'word': 'СНІГ', 'hint': 'Білий, падає взимку', 'emoji': '❄️' },
+        ]
+
+    # Prefer unique items if possible.
+    rng.shuffle(pool)
+    picked = pool[:total]
+    while len(picked) < total:
+        picked.append(rng.choice(pool))
+
+    items = []
+    for idx, it in enumerate(picked, start=1):
+        word = it['word']
+        items.append(
+            {
+                'n': idx,
+                'emoji': it.get('emoji') or '🧩',
+                'hint': it.get('hint') or '',
+                'word_len': len(word),
+                'blanks': [''] * len(word),
+                'letters': _generate_word_letter_bank(rng, word),
+            }
+        )
+    return items
+
+
+def _tokenize_sentence(sentence: str) -> list:
+    return [t.strip() for t in (sentence or '').split() if t.strip()]
+
+
+def _generate_sentences_items_for_user(rng: random.Random, user, total: int = 10):
+    qs = (
+        SentenceExercise.objects.filter(is_active=True, created_by=user)
+        .only('prompt', 'sentence', 'emoji')
+        .order_by('-created_at')
+    )
+    pool = [
+        {
+            'prompt': (ex.prompt or '').strip(),
+            'sentence': (ex.sentence or '').strip(),
+            'emoji': (ex.emoji or '').strip() or '🧩',
+        }
+        for ex in qs
+        if (ex.prompt or '').strip() and (ex.sentence or '').strip()
+    ]
+    if not pool:
+        pool = [
+            { 'prompt': 'Склади речення про котика', 'sentence': 'Кіт спить на дивані.', 'emoji': '🐱' },
+            { 'prompt': 'Склади речення про сонце', 'sentence': 'Сонце світить у небі.', 'emoji': '☀️' },
+            { 'prompt': 'Склади речення про дощ', 'sentence': 'Дощ капає з хмар.', 'emoji': '🌧️' },
+            { 'prompt': 'Склади речення про маму', 'sentence': 'Мама читає мені казку.', 'emoji': '📖' },
+            { 'prompt': 'Склади речення про ліс', 'sentence': 'У лісі співають пташки.', 'emoji': '🌲' },
+        ]
+
+    rng.shuffle(pool)
+    picked = pool[:total]
+    while len(picked) < total:
+        picked.append(rng.choice(pool))
+
+    items = []
+    for idx, it in enumerate(picked, start=1):
+        tokens = _tokenize_sentence(it['sentence'])
+        bank = _shuffle_with_rng(rng, tokens)
+        items.append(
+            {
+                'n': idx,
+                'emoji': it.get('emoji') or '🧩',
+                'prompt': it.get('prompt') or '',
+                'tokens': bank,
+            }
+        )
+    return items
+
+
+def _svg_for_attention_task(shapes: list) -> str:
+    parts = [
+        '<svg class="att-svg" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Зображення">',
+        '<rect x="0" y="0" width="200" height="120" rx="10" fill="#f7f7fb" stroke="#d6d6e7"/>'
+    ]
+    for s in shapes:
+        t = s['type']
+        x = s['x']
+        y = s['y']
+        color = s['color']
+        if t == 'circle':
+            parts.append(f'<circle cx="{x}" cy="{y}" r="12" fill="{color}" />')
+        elif t == 'rect':
+            parts.append(f'<rect x="{x-12}" y="{y-12}" width="24" height="24" rx="5" fill="{color}" />')
+        else:
+            # triangle
+            parts.append(f'<path d="M {x} {y-14} L {x-14} {y+12} L {x+14} {y+12} Z" fill="{color}" />')
+    parts.append('</svg>')
+    return ''.join(parts)
+
+
+def _generate_attention_items(rng: random.Random, total: int = 10):
+    palette = ['#ff6b6b', '#ffd166', '#06d6a0', '#118ab2', '#9b5de5', '#f15bb5']
+    types = ['circle', 'rect', 'tri']
+    grid = [
+        (40, 30), (80, 30), (120, 30), (160, 30),
+        (40, 80), (80, 80), (120, 80), (160, 80),
+    ]
+
+    items = []
+    for idx in range(total):
+        base = []
+        for (x, y) in grid:
+            base.append(
+                {
+                    'type': rng.choice(types),
+                    'x': x,
+                    'y': y,
+                    'color': rng.choice(palette),
+                }
+            )
+
+        right = [dict(s) for s in base]
+        diff_idx = _shuffle_with_rng(rng, list(range(len(right))))[:5]
+        for j in diff_idx:
+            old = right[j]
+            # Change color to a different palette color.
+            new_color = rng.choice([c for c in palette if c != old['color']])
+            right[j] = {**old, 'color': new_color}
+
+        items.append(
+            {
+                'n': idx + 1,
+                'left_svg': _svg_for_attention_task(base),
+                'right_svg': _svg_for_attention_task(right),
+            }
+        )
+    return items
+
+
+def _generate_memory_items(rng: random.Random, total: int = 10):
+    icons = ['☀️', '🌙', '⭐', '❤️', '🍃', '🎵']
+    items = []
+    for idx in range(total):
+        left_icons = rng.sample(icons, k=4)
+        right_icons = list(left_icons)
+        tags = ['A', 'B', 'C', 'D']
+
+        rng.shuffle(right_icons)
+        items.append(
+            {
+                'n': idx + 1,
+                'left': [{'tag': tags[i], 'ico': left_icons[i]} for i in range(4)],
+                'right': [{'tag': str(i + 1), 'ico': right_icons[i]} for i in range(4)],
+            }
+        )
+    return items
+
+
+@login_required
+def specialist_print(request):
+    if not _require_specialist(request):
+        return redirect('child_profile')
+
+    context = {
+        'username': request.user.username,
+        'coins': request.user.specialist_profile.coins,
+    }
+    return render(request, 'print/hub.html', context)
+
+
+@login_required
+def specialist_print_math(request):
+    if not _require_specialist(request):
+        return redirect('child_profile')
+
+    rng, seed = _parse_seed(request)
+    level = _parse_choice(request, 'level', {'easy', 'medium', 'hard'}, 'easy')
+    op = _parse_choice(request, 'op', {'mix', 'add', 'sub', 'mul', 'div'}, 'mix')
+
+    items = _generate_math_items(rng, level=level, op_mode=op, total=10)
+
+    context = {
+        'title': 'Математика',
+        'username': request.user.username,
+        'coins': request.user.specialist_profile.coins,
+        'seed': seed,
+        'next_seed': seed + 1,
+        'level': level,
+        'op': op,
+        'items': items,
+    }
+    return render(request, 'print/math.html', context)
+
+
+@login_required
+def specialist_print_sentences(request):
+    if not _require_specialist(request):
+        return redirect('child_profile')
+
+    rng, seed = _parse_seed(request)
+    items = _generate_sentences_items_for_user(rng, request.user, total=10)
+
+    context = {
+        'title': 'Побудова речень',
+        'username': request.user.username,
+        'coins': request.user.specialist_profile.coins,
+        'seed': seed,
+        'next_seed': seed + 1,
+        'items': items,
+    }
+    return render(request, 'print/sentences.html', context)
+
+
+@login_required
+def specialist_print_words(request):
+    if not _require_specialist(request):
+        return redirect('child_profile')
+
+    rng, seed = _parse_seed(request)
+    items = _generate_words_items_for_user(rng, request.user, total=10)
+
+    context = {
+        'title': 'Пазли слів',
+        'username': request.user.username,
+        'coins': request.user.specialist_profile.coins,
+        'seed': seed,
+        'next_seed': seed + 1,
+        'items': items,
+    }
+    return render(request, 'print/words.html', context)
+
+
+@login_required
+def specialist_print_attention(request):
+    if not _require_specialist(request):
+        return redirect('child_profile')
+
+    rng, seed = _parse_seed(request)
+    items = _generate_attention_items(rng, total=10)
+
+    context = {
+        'title': 'Увага',
+        'username': request.user.username,
+        'coins': request.user.specialist_profile.coins,
+        'seed': seed,
+        'next_seed': seed + 1,
+        'items': items,
+    }
+    return render(request, 'print/attention.html', context)
+
+
+@login_required
+def specialist_print_memory(request):
+    if not _require_specialist(request):
+        return redirect('child_profile')
+
+    rng, seed = _parse_seed(request)
+    items = _generate_memory_items(rng, total=10)
+
+    context = {
+        'title': "Памʼять",
+        'username': request.user.username,
+        'coins': request.user.specialist_profile.coins,
+        'seed': seed,
+        'next_seed': seed + 1,
+        'items': items,
+    }
+    return render(request, 'print/memory.html', context)
 
 
 @login_required

@@ -18,6 +18,11 @@
                 <span class="nav__icon" aria-hidden="true">🏠</span>
                 <span class="nav__label">Мої Учні</span>
             </a>
+            <a class="nav__item{% if active == 'print' %} nav__item--active{% endif %}"
+                href="{% url 'specialist_print' %}">
+                <span class="nav__icon" aria-hidden="true">🖨️</span>
+                <span class="nav__label">Друк завдань</span>
+            </a>
             <a class="nav__item" href="{% url 'home' %}">
                 <span class="nav__icon" aria-hidden="true">🤖</span>
                 <span class="nav__label">ML-Аналітика</span>
