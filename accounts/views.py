@@ -62,6 +62,55 @@ BADGE_DEFINITIONS = [
         'tone': 'blue',
         'icon': 'book',
     },
+    {
+        'code': 'sentences_5',
+        'title': 'Будівничий речень',
+        'subtitle': '5 ігор з реченнями',
+        'tone': 'purple',
+        'icon': 'book',
+    },
+    {
+        'code': 'math_20',
+        'title': 'Супер математик',
+        'subtitle': '20 ігор з математики',
+        'tone': 'orange',
+        'icon': 'calc',
+    },
+    {
+        'code': 'memory_20',
+        'title': 'Мега памʼять',
+        'subtitle': '20 ігор на памʼять',
+        'tone': 'teal',
+        'icon': 'compass',
+    },
+    {
+        'code': 'words_20',
+        'title': 'Майстер слів',
+        'subtitle': '20 ігор зі словами',
+        'tone': 'green',
+        'icon': 'book',
+    },
+    {
+        'code': 'sound_20',
+        'title': 'Майстер звуків',
+        'subtitle': '20 ігор зі звуками',
+        'tone': 'yellow',
+        'icon': 'target',
+    },
+    {
+        'code': 'stories_10',
+        'title': 'Книжковий герой',
+        'subtitle': 'Прослухав 10 різних казок',
+        'tone': 'blue',
+        'icon': 'book',
+    },
+    {
+        'code': 'all_games_25',
+        'title': 'Чемпіон',
+        'subtitle': '25 зіграних ігор',
+        'tone': 'red',
+        'icon': 'target',
+    },
 ]
 
 
@@ -80,15 +129,28 @@ def _sync_badges_for_user(user) -> None:
     total_results = GameResult.objects.filter(user=user).count()
     if total_results >= 1:
         _award_badge(user, 'first_game')
+    if total_results >= 25:
+        _award_badge(user, 'all_games_25')
 
     if GameResult.objects.filter(user=user, game_type=GameResult.GameType.MATH).count() >= 5:
         _award_badge(user, 'math_5')
+    if GameResult.objects.filter(user=user, game_type=GameResult.GameType.MATH).count() >= 20:
+        _award_badge(user, 'math_20')
     if GameResult.objects.filter(user=user, game_type=GameResult.GameType.MEMORY).count() >= 5:
         _award_badge(user, 'memory_5')
+    if GameResult.objects.filter(user=user, game_type=GameResult.GameType.MEMORY).count() >= 20:
+        _award_badge(user, 'memory_20')
     if GameResult.objects.filter(user=user, game_type=GameResult.GameType.WORDS).count() >= 5:
         _award_badge(user, 'words_5')
+    if GameResult.objects.filter(user=user, game_type=GameResult.GameType.WORDS).count() >= 20:
+        _award_badge(user, 'words_20')
     if GameResult.objects.filter(user=user, game_type=GameResult.GameType.SOUND).count() >= 5:
         _award_badge(user, 'sound_5')
+    if GameResult.objects.filter(user=user, game_type=GameResult.GameType.SOUND).count() >= 20:
+        _award_badge(user, 'sound_20')
+
+    if GameResult.objects.filter(user=user, game_type=GameResult.GameType.SENTENCES).count() >= 5:
+        _award_badge(user, 'sentences_5')
 
     listened_unique = (
         StoryListen.objects.filter(user=user)
@@ -98,6 +160,8 @@ def _sync_badges_for_user(user) -> None:
     )
     if listened_unique >= 3:
         _award_badge(user, 'stories_3')
+    if listened_unique >= 10:
+        _award_badge(user, 'stories_10')
 
 
 def _build_rewards_for_user(user):

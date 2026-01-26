@@ -95,7 +95,8 @@
     display: grid;
     place-items: center;
     background: rgba(255, 255, 255, .25);
-    font-size: 20px
+    font-size: 20px;
+    line-height: 1;
 }
 
 .badge__title {
@@ -135,6 +136,11 @@
 
 .badge--yellow {
     background: linear-gradient(135deg, #ffc93b, #e1a400);
+    color: #fff
+}
+
+.badge--purple {
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
     color: #fff
 }
 

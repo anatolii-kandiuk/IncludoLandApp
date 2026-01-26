@@ -100,6 +100,12 @@
 
         function showToast(message) {
             if (!toast || !toastText) return;
+
+            // If some logic triggers the same toast repeatedly, don't keep extending it forever.
+            if (!toast.hidden && toastText.textContent === message && toastTimeoutId) {
+                return;
+            }
+
             toastText.textContent = message;
             toast.hidden = false;
             if (toastTimeoutId) window.clearTimeout(toastTimeoutId);

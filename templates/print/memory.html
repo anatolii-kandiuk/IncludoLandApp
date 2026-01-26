@@ -28,10 +28,12 @@
             <header class="top no-print">
                 <div class="top__left"></div>
                 <div class="top__right">
+                    {% if layout == 'specialist' %}
                     <div class="chip chip--user">
                         <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
                         <span class="chip__text">{{ username }}</span>
                     </div>
+                    {% endif %}
                 </div>
             </header>
 

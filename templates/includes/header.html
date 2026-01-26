@@ -25,14 +25,17 @@
 
             <nav class="pill-nav" aria-label="Навігація">
                 {% if user.is_authenticated %}
-                <button class="pill pill--ghost" type="button" id="nav-back" aria-label="Назад">
-                    <span class="pill__ico" aria-hidden="true">←</span>
-                    <span>Назад</span>
-                </button>
-                <span class="pill pill--user" aria-label="Користувач">
+                {% if user.specialist_profile %}
+                <a class="pill pill--user" href="{% url 'specialist_profile' %}" aria-label="Профіль">
                     <span class="pill__ico" aria-hidden="true">👤</span>
                     <span>{{ user.username }}</span>
-                </span>
+                </a>
+                {% else %}
+                <a class="pill pill--user" href="{% url 'child_profile' %}" aria-label="Профіль">
+                    <span class="pill__ico" aria-hidden="true">👤</span>
+                    <span>{{ user.username }}</span>
+                </a>
+                {% endif %}
                 {% if user.specialist_profile %}
                 <a class="pill" href="{% url 'specialist_profile' %}">
                     <span class="pill__ico" aria-hidden="true">📈</span>
@@ -51,10 +54,6 @@
                 <a class="pill" href="{% url 'print_hub' %}">
                     <span class="pill__ico" aria-hidden="true">🖨️</span>
                     <span>Друк</span>
-                </a>
-                <a class="pill" href="{% url 'child_profile' %}">
-                    <span class="pill__ico" aria-hidden="true">📊</span>
-                    <span>Профіль</span>
                 </a>
                 {% endif %}
                 <a class="pill" href="{% url 'logout' %}">
@@ -201,6 +200,11 @@
         margin-top: 2px;
     }
 
+    .timer-popover[hidden],
+    .timer-toast[hidden] {
+        display: none !important;
+    }
+
     @media (max-width: 520px) {
 
         .timer-popover,
@@ -300,17 +304,3 @@
 
 <script src="{% static 'js/pomodoro.js' %}" defer></script>
 {% endif %}
-
-<script>
-    (function () {
-        const btn = document.getElementById('nav-back');
-        if (!btn) return;
-        btn.addEventListener('click', () => {
-            if (window.history.length > 1) {
-                window.history.back();
-                return;
-            }
-            window.location.href = '/';
-        });
-    })();
-</script>

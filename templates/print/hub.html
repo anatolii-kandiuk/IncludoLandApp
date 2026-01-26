@@ -28,14 +28,21 @@
             <header class="top no-print">
                 <div class="top__left"></div>
                 <div class="top__right">
+                    {% if layout == 'specialist' %}
                     <div class="chip chip--user">
                         <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
                         <span class="chip__text">{{ username }}</span>
                     </div>
+                    {% endif %}
                 </div>
             </header>
 
             <section class="content">
+                {% if layout != 'specialist' %}
+                <div class="print-toolbar no-print">
+                    <a class="print-btn print-btn--ghost" href="{% url 'home' %}#games">← Назад</a>
+                </div>
+                {% endif %}
                 <div class="page-title">
                     <h1 class="page-title__h">Друк завдань</h1>
                 </div>
