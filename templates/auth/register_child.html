@@ -40,7 +40,8 @@
             </form>
 
             <div class="auth-footer">
-                <a href="{% url 'register' %}?next={{ next|urlencode }}">← Назад до вибору</a>
+                <span>Вже є акаунт?</span>
+                <a href="{% url 'login' %}?next={{ next|urlencode }}">Увійти</a>
             </div>
         </section>
     </main>

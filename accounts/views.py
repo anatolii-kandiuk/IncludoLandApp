@@ -1,6 +1,5 @@
 import json
 from datetime import timedelta
-from typing import Optional
 
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
@@ -16,8 +15,8 @@ from django.db.models import F
 
 import random
 
-from .forms import RegisterForm, SpecialistRegisterForm, ColoringPageForm, SentenceExerciseForm, SoundCardForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
-from .models import ChildProfile, ColoringPage, GameResult, SentenceExercise, SpecialistInvite, SpecialistProfile, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
+from .forms import RegisterForm, ColoringPageForm, SentenceExerciseForm, SoundCardForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
+from .models import ChildProfile, ColoringPage, GameResult, SentenceExercise, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
 
 
 BADGE_DEFINITIONS = [
@@ -214,104 +213,28 @@ def rewards_entry(request):
     return render(request, 'auth/auth_required.html', {'next': request.get_full_path()})
 
 
-def register_choice(request):
+def _handle_child_register(request):
     if request.user.is_authenticated:
-        # Prefer specialist dashboard if specialist profile exists.
         if hasattr(request.user, 'specialist_profile'):
             return redirect('specialist_profile')
         return redirect('child_profile')
 
-    return render(request, 'auth/register_choice.html', {'next': request.GET.get('next', '')})
-
-
-def _get_specialist_invite_from_request(request):
-    token = (request.GET.get('invite') or request.POST.get('invite') or '').strip()
-    if not token:
-        return None
-    try:
-        return SpecialistInvite.objects.filter(token=token).first()
-    except Exception:
-        return None
-
-
-def _handle_register(request, *, kind: str, invite: Optional[SpecialistInvite] = None):
-    if request.user.is_authenticated:
-        if kind == 'specialist':
-            return redirect('specialist_profile')
-        return redirect('child_profile')
-
     if request.method == 'POST':
-        form = SpecialistRegisterForm(request.POST) if kind == 'specialist' else RegisterForm(request.POST)
+        form = RegisterForm(request.POST)
         if form.is_valid():
-            if kind == 'specialist':
-                if not invite or not invite.is_valid():
-                    return render(
-                        request,
-                        'auth/specialist_invite_required.html',
-                        {
-                            'next': request.POST.get('next') or request.GET.get('next', ''),
-                            'error': 'Потрібне дійсне запрошення для реєстрації спеціаліста.',
-                        },
-                    )
-
-                email = (form.cleaned_data.get('email') or '').strip().lower()
-                if invite.email and email != invite.email.strip().lower():
-                    form.add_error('email', 'Email не співпадає з запрошенням.')
-                    template = 'auth/register_specialist.html'
-                    return render(
-                        request,
-                        template,
-                        {
-                            'form': form,
-                            'next': request.POST.get('next') or request.GET.get('next', ''),
-                            'invite': str(invite.token),
-                            'invite_email': invite.email,
-                        },
-                    )
-
             user = form.save()
-            if kind == 'specialist':
-                # Persist email for specialists.
-                user.email = (form.cleaned_data.get('email') or '').strip()
-                user.save(update_fields=['email'])
-                SpecialistProfile.objects.get_or_create(user=user, defaults={'coins': 5320})
-
-                invite.used_at = timezone.now()
-                invite.used_by = user
-                invite.save(update_fields=['used_at', 'used_by'])
-                redirect_default = reverse('specialist_profile')
-            else:
-                ChildProfile.objects.get_or_create(user=user, defaults={'stars': 0})
-                redirect_default = reverse('child_profile')
-
+            ChildProfile.objects.get_or_create(user=user, defaults={'stars': 0})
             login(request, user)
             next_url = request.POST.get('next') or request.GET.get('next')
-            return redirect(next_url or redirect_default)
+            return redirect(next_url or reverse('child_profile'))
     else:
-        form = SpecialistRegisterForm() if kind == 'specialist' else RegisterForm()
+        form = RegisterForm()
 
-    template = 'auth/register_child.html' if kind == 'child' else 'auth/register_specialist.html'
-    extra = {}
-    if kind == 'specialist' and invite:
-        extra = {'invite': str(invite.token), 'invite_email': invite.email}
-    return render(request, template, {'form': form, 'next': request.GET.get('next', ''), **extra})
+    return render(request, 'auth/register_child.html', {'form': form, 'next': request.GET.get('next', '')})
 
 
 def register_child(request):
-    return _handle_register(request, kind='child')
-
-
-def register_specialist(request):
-    invite = _get_specialist_invite_from_request(request)
-    if not invite or not invite.is_valid():
-        return render(
-            request,
-            'auth/specialist_invite_required.html',
-            {
-                'next': request.GET.get('next', ''),
-            },
-        )
-    return _handle_register(request, kind='specialist', invite=invite)
+    return _handle_child_register(request)
 
 
 class RoleAwareLoginView(LoginView):

@@ -13,15 +13,6 @@ class RegisterForm(UserCreationForm):
         fields = ('username', 'password1', 'password2')
 
 
-class SpecialistRegisterForm(UserCreationForm):
-    username = forms.CharField(label='Логін', max_length=150)
-    email = forms.EmailField(label='Email')
-
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'password1', 'password2')
-
-
 class SoundCardForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

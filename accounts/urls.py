@@ -50,7 +50,7 @@ urlpatterns = [
 
     path('login/', views.RoleAwareLoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('register/', views.register_choice, name='register'),
+    # Registration (child only). Keep the legacy /register/ route.
+    path('register/', views.register_child, name='register'),
     path('register/child/', views.register_child, name='register_child'),
-    path('register/specialist/', views.register_specialist, name='register_specialist'),
 ]

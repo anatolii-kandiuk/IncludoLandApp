@@ -20,8 +20,6 @@
             <div class="auth-actions">
                 <a class="auth-btn auth-btn--primary" href="{% url 'login' %}?next={{ next|urlencode }}">Увійти</a>
                 <a class="auth-btn" href="{% url 'register_child' %}?next={{ next|urlencode }}">Реєстрація дитини</a>
-                <a class="auth-btn" href="{% url 'register_specialist' %}?next={{ next|urlencode }}">Реєстрація
-                    спеціаліста</a>
             </div>
         </section>
     </main>
