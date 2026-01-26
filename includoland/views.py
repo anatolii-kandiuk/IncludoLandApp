@@ -1,10 +1,15 @@
 import json
+import random
 
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from accounts.models import ColoringPage, SentenceExercise, SoundCard, Story, WordPuzzleWord
+
+# Reuse the existing attention task generator used for printable worksheets.
+from accounts.views import _generate_attention_items
 
 
 def _child_stars(request):
@@ -106,8 +111,47 @@ def game_sounds(request):
 
 @ensure_csrf_cookie
 def game_attention(request):
+    def _safe_int(value: str, default: int) -> int:
+        try:
+            return int(value)
+        except Exception:
+            return default
+
+    level = _safe_int(request.GET.get('level') or '1', 1)
+    level = max(1, min(level, 999))
+
+    # Difficulty scaling: every 3 completed levels adds more shapes.
+    base_shapes = 8
+    step = 2
+    shapes_count = base_shapes + step * ((level - 1) // 3)
+    shapes_count = max(8, min(shapes_count, 20))
+
+    rng = random.Random()
+    task = _generate_attention_items(rng, total=1, shapes_count=shapes_count, diffs_count=5)[0]
+    targets = task.get('targets') or []
+    diffs = task.get('diffs') or []
+
+    if (request.GET.get('json') or '').strip() == '1':
+        return JsonResponse(
+            {
+                'level': level,
+                'shapes_count': shapes_count,
+                'diff_total': 5,
+                'left_svg': task.get('left_svg') or '',
+                'right_svg': task.get('right_svg') or '',
+                'targets': targets,
+                'diffs': diffs,
+            }
+        )
+
     context = {
         'stars': _child_stars(request),
+        'left_svg': task.get('left_svg') or '',
+        'right_svg': task.get('right_svg') or '',
+        'targets_json': json.dumps(targets, ensure_ascii=False),
+        'diff_total': 5,
+        'level': level,
+        'shapes_count': shapes_count,
     }
     return render(request, 'games/attention.html', context)
 

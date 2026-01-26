@@ -15,6 +15,14 @@
     {% include 'includes/header.html' %}
 
     <main class="learn-page">
+        <div class="page-nav" aria-label="Навігація">
+            <div class="pill-nav">
+                <a class="pill pill--ghost" href="{% url 'home' %}#games" aria-label="Назад">
+                    <span class="pill__ico" aria-hidden="true">←</span>
+                    <span>Назад</span>
+                </a>
+            </div>
+        </div>
         <div class="learn-head">
             <h1 class="learn-title" data-braille>Розмальовка</h1>
             <div class="learn-toolbar">

@@ -27,6 +27,16 @@ body {
     padding: 28px 24px 40px;
 }
 
+.page-nav {
+    display: flex;
+    justify-content: flex-start;
+    margin: 0 0 14px;
+}
+
+.page-nav .pill-nav {
+    display: inline-flex;
+}
+
 .topbar {
     display: flex;
     align-items: center;

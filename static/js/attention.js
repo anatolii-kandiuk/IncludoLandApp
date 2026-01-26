@@ -1,13 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const BG_URL = 'https://cdn.pixabay.com/photo/2017/02/20/18/03/children-2088770_1280.png';
-    const spots = [
-        { id: 'balloon', x: 78, y: 20 },
-        { id: 'bench', x: 53, y: 54 },
-        { id: 'dog', x: 48, y: 70 },
-        { id: 'shoe', x: 63, y: 78 },
-        { id: 'grass', x: 32, y: 60 },
-    ];
-
     const leftCard = document.getElementById('left-card');
     const rightCard = document.getElementById('right-card');
     const hotspots = document.getElementById('hotspots');
@@ -15,16 +6,49 @@ document.addEventListener('DOMContentLoaded', () => {
     const dotsEl = document.getElementById('dots');
     const progressText = document.getElementById('progress-text');
     const helperMsg = document.getElementById('helper-msg');
+    const dataEl = document.getElementById('attention-data');
+    const leftScene = leftCard ? leftCard.querySelector('.scene') : null;
+    const rightScene = rightCard ? rightCard.querySelector('.scene') : null;
 
-    if (!leftCard || !rightCard || !hotspots || !overlay || !dotsEl) return;
+    const refreshBtn = document.getElementById('att-refresh');
+    const nextBtn = document.getElementById('att-next');
+    const levelEl = document.getElementById('att-level');
+    const shapesEl = document.getElementById('att-shapes');
+    const missesEl = document.getElementById('att-misses');
 
-    leftCard.style.backgroundImage = `url(${BG_URL})`;
-    rightCard.style.backgroundImage = `url(${BG_URL})`;
+    if (!leftCard || !rightCard || !hotspots || !overlay || !dotsEl || !progressText || !helperMsg || !dataEl || !leftScene || !rightScene) return;
+
+    let data;
+    try {
+        data = JSON.parse(dataEl.textContent || '{}');
+    } catch (e) {
+        // Bad payload should not break the page.
+        data = {};
+    }
+
+    const initialTargets = Array.isArray(data.targets) ? data.targets : [];
+    const total = Number.isFinite(data.total) ? data.total : 5;
+    const storageKey = 'attention_level';
+    let level = Number.parseInt(window.localStorage.getItem(storageKey) || String(data.level || 1), 10);
+    if (!Number.isFinite(level) || level < 1) level = 1;
+
+    if (!initialTargets.length) {
+        helperMsg.textContent = 'Немає даних для гри. Оновіть сторінку.';
+        progressText.textContent = '0/0';
+        return;
+    }
 
     const state = {
         found: new Set(),
-        total: spots.length,
+        total,
+        misses: 0,
     };
+
+    const MAX_MISSES = 3;
+
+    let targets = initialTargets;
+    let targetById = new Map();
+    let diffMarkById = new Map();
 
     const updateProgress = () => {
         progressText.textContent = `${state.found.size}/${state.total}`;
@@ -37,11 +61,62 @@ document.addEventListener('DOMContentLoaded', () => {
         helperMsg.textContent = text;
     };
 
+    const updateMisses = () => {
+        if (!missesEl) return;
+        missesEl.textContent = `${state.misses}/${MAX_MISSES}`;
+    };
+
+    const percent = (value, max) => `${(value * 100) / max}%`;
+
+    const showMiss = (clientX, clientY) => {
+        const rect = rightCard.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+
+        const x = ((clientX - rect.left) / rect.width) * 100;
+        const y = ((clientY - rect.top) / rect.height) * 100;
+        if (x < 0 || x > 100 || y < 0 || y > 100) return;
+
+        const miss = document.createElement('span');
+        miss.className = 'miss-mark';
+        miss.style.left = `${x}%`;
+        miss.style.top = `${y}%`;
+        overlay.appendChild(miss);
+        window.setTimeout(() => {
+            miss.remove();
+        }, 550);
+    };
+
+    const onMiss = () => {
+        if (state.misses >= MAX_MISSES) return;
+        state.misses += 1;
+        updateMisses();
+
+        if (state.misses < MAX_MISSES) return;
+
+        // Go back one difficulty step (levels are grouped by 3).
+        const downgradedLevel = Math.max(1, level - 3);
+        if (downgradedLevel === level) {
+            setMessage('3 промахи — спробуй ще раз на цьому рівні.');
+        } else {
+            level = downgradedLevel;
+            window.localStorage.setItem(storageKey, String(level));
+            if (levelEl) levelEl.textContent = String(level);
+            setMessage('3 промахи — повертаємось на легший рівень.');
+        }
+
+        // Small delay so the child can read the message.
+        window.setTimeout(() => {
+            loadLevel(level);
+        }, 500);
+    };
+
     const onFound = (id) => {
         state.found.add(id);
         updateProgress();
         if (state.found.size === state.total) {
-            setMessage('Молодець! Усі відмінності знайдено.');
+            setMessage('Молодець! Рівень пройдено. Натисни «Наступний рівень».');
+            rightCard.classList.add('is-complete');
+            if (nextBtn) nextBtn.hidden = false;
         } else {
             setMessage('Є ще відмінності, шукай далі!');
         }
@@ -56,35 +131,150 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const renderSpots = () => {
+    const applyMeta = (payload) => {
+        if (levelEl) levelEl.textContent = String(payload.level || level);
+        if (shapesEl) shapesEl.textContent = String(payload.shapes_count || '');
+    };
+
+    const resetLevelState = () => {
+        state.found = new Set();
+        state.misses = 0;
+        rightCard.classList.remove('is-complete');
+        if (nextBtn) nextBtn.hidden = true;
+        updateProgress();
+        updateMisses();
+    };
+
+    const renderTargets = () => {
         hotspots.innerHTML = '';
         overlay.innerHTML = '';
-        spots.forEach((spot) => {
+        targetById = new Map();
+        diffMarkById = new Map();
+
+        // Create marks only for correct targets (diffs).
+        const diffs = targets.filter((t) => Boolean(t && t.is_diff));
+        diffs.forEach((t, index) => {
+            const spotId = String(t.id || index);
+            const xPct = percent(Number(t.x || 0), 200);
+            const yPct = percent(Number(t.y || 0), 120);
             const mark = document.createElement('span');
             mark.className = 'diff-mark';
-            mark.style.left = `${spot.x}%`;
-            mark.style.top = `${spot.y}%`;
+            mark.style.left = xPct;
+            mark.style.top = yPct;
+            mark.dataset.id = spotId;
             overlay.appendChild(mark);
+            diffMarkById.set(spotId, mark);
+        });
+
+        // All shapes are clickable.
+        targets.forEach((t, index) => {
+            const targetId = String(t.id || index);
+            const xPct = percent(Number(t.x || 0), 200);
+            const yPct = percent(Number(t.y || 0), 120);
+
+            targetById.set(targetId, t);
 
             const btn = document.createElement('button');
             btn.className = 'hotspot';
             btn.type = 'button';
-            btn.style.left = `${spot.x}%`;
-            btn.style.top = `${spot.y}%`;
-            btn.dataset.id = spot.id;
-            btn.addEventListener('click', () => {
-                if (state.found.has(spot.id)) return;
-                state.found.add(spot.id);
-                btn.classList.add('found');
-                mark.style.opacity = '0';
-                onFound(spot.id);
+            btn.style.left = xPct;
+            btn.style.top = yPct;
+            btn.dataset.id = targetId;
+            btn.setAttribute('aria-label', `Фігура ${index + 1}`);
+
+            btn.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                if (state.found.size === state.total) return;
+
+                const info = targetById.get(targetId);
+                if (!info) return;
+
+                if (info.is_diff) {
+                    if (state.found.has(targetId)) return;
+                    btn.classList.add('found');
+                    const mark = diffMarkById.get(targetId);
+                    if (mark) mark.classList.add('revealed');
+                    onFound(targetId);
+                } else {
+                    setMessage('Не тут 🙂 Спробуй ще!');
+                    // Show miss marker centered on the clicked shape.
+                    const miss = document.createElement('span');
+                    miss.className = 'miss-mark';
+                    miss.style.left = xPct;
+                    miss.style.top = yPct;
+                    overlay.appendChild(miss);
+                    window.setTimeout(() => miss.remove(), 550);
+                    onMiss();
+                }
             });
+
             hotspots.appendChild(btn);
         });
     };
 
+    const applyLevelPayload = (payload) => {
+        if (!payload) return;
+        if (Number.isFinite(payload.level) && payload.level >= 1) {
+            level = payload.level;
+            window.localStorage.setItem(storageKey, String(level));
+            if (levelEl) levelEl.textContent = String(level);
+        }
+        if (payload.left_svg) leftScene.innerHTML = payload.left_svg;
+        if (payload.right_svg) rightScene.innerHTML = payload.right_svg;
+
+        targets = Array.isArray(payload.targets) ? payload.targets : [];
+        resetLevelState();
+        renderDots();
+        renderTargets();
+        applyMeta(payload);
+        setMessage('Порівняй картинки та натискай на відмінності праворуч.');
+    };
+
+    const fetchLevel = async (lvl) => {
+        const url = `/games/attention/?json=1&level=${encodeURIComponent(String(lvl))}`;
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+    };
+
+    const loadLevel = async (lvl) => {
+        setMessage('Завантажую рівень...');
+        try {
+            const payload = await fetchLevel(lvl);
+            applyLevelPayload(payload);
+        } catch (e) {
+            setMessage('Не вдалося завантажити рівень. Спробуй Refresh.');
+        }
+    };
+
+    rightCard.addEventListener('click', (ev) => {
+        if (state.found.size === state.total) return;
+        // If click wasn't captured by a hotspot, it's a miss.
+        setMessage('Не тут 🙂 Спробуй ще!');
+        showMiss(ev.clientX, ev.clientY);
+        onMiss();
+    });
+
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            loadLevel(level);
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            level += 1;
+            window.localStorage.setItem(storageKey, String(level));
+            loadLevel(level);
+        });
+    }
+
     renderDots();
-    renderSpots();
+    renderTargets();
     updateProgress();
-    setMessage('Будь уважним! Натискай на відмінності праворуч.');
+    updateMisses();
+    if (levelEl) levelEl.textContent = String(level);
+    window.localStorage.setItem(storageKey, String(level));
+    // Always sync to stored level without a full page reload.
+    loadLevel(level);
 });

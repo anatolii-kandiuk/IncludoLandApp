@@ -16,6 +16,14 @@
     {% include 'includes/header.html' %}
 
     <main class="learn-page" id="colors-root">
+        <div class="page-nav" aria-label="Навігація">
+            <div class="pill-nav">
+                <a class="pill pill--ghost" href="{% url 'home' %}#games" aria-label="Назад">
+                    <span class="pill__ico" aria-hidden="true">←</span>
+                    <span>Назад</span>
+                </a>
+            </div>
+        </div>
         {{ colors|json_script:"colors-data" }}
 
         <div class="learn-head">
@@ -36,8 +44,10 @@
                     <div class="color-swatch color-swatch--main" id="color-swatch" aria-hidden="true" {% if colors %}
                         style="background: {{ colors.0.hex }}" {% endif %}></div>
                     <div class="flip-sub" id="color-name" data-braille
-                        style="margin-top:10px;font-size:24px;font-weight:1000;">{% if colors %}{{ colors.0.name }}{% endif %}</div>
-                    <div class="flip-sub" id="color-sub" data-braille>{% if colors %}Колір 1 з {{ colors|length }}{% endif %}</div>
+                        style="margin-top:10px;font-size:24px;font-weight:1000;">{% if colors %}{{ colors.0.name }}{%
+                        endif %}</div>
+                    <div class="flip-sub" id="color-sub" data-braille>{% if colors %}Колір 1 з {{ colors|length }}{%
+                        endif %}</div>
                 </div>
                 <button class="learn-btn" type="button" id="color-next" aria-label="Наступний">→</button>
             </div>

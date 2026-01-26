@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Увага — IncludoLand</title>
+    <title>Знайди відмінності — IncludoLand</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/attention.css' %}">
 </head>
@@ -13,12 +13,26 @@
 <body>
     {% include 'includes/header.html' %}
     <main class="page page--attention">
-        <h1 class="attention-title">УВАГА: Знайди Відмінності</h1>
+        <div class="att-top" aria-label="Керування грою">
+            <a class="att-btn att-btn--ghost" href="{% url 'home' %}#games" id="att-back">← Назад</a>
+            <button class="att-btn" type="button" id="att-refresh">↻ Refresh</button>
+            <button class="att-btn att-btn--primary" type="button" id="att-next" hidden>Наступний рівень →</button>
+            <div class="att-meta" aria-hidden="true">
+                <span>Рівень: <span id="att-level">{{ level|default:1 }}</span></span>
+                <span class="att-meta__dot">•</span>
+                <span>Фігур: <span id="att-shapes">{{ shapes_count|default:8 }}</span></span>
+            </div>
+        </div>
+
+        <h1 class="attention-title">Знайди відмінності</h1>
 
         <section class="board" aria-label="Поле гри">
             <div class="board__pair">
-                <div class="board__card" id="left-card" aria-label="Ліва картинка"></div>
+                <div class="board__card" id="left-card" aria-label="Ліва картинка">
+                    <div class="scene" aria-hidden="true">{{ left_svg|safe }}</div>
+                </div>
                 <div class="board__card board__card--right" id="right-card" aria-label="Права картинка">
+                    <div class="scene" aria-hidden="true">{{ right_svg|safe }}</div>
                     <div id="diff-overlay" class="diff-overlay" aria-hidden="true"></div>
                     <div id="hotspots" class="hotspots" aria-label="Зони для пошуку"></div>
                 </div>
@@ -26,7 +40,7 @@
 
             <div class="progress" aria-label="Прогрес">
                 <div class="progress__dots" id="dots" aria-hidden="true"></div>
-                <div class="progress__text"><span id="progress-text">0/5</span></div>
+                <div class="progress__text"><span id="progress-text">0/{{ diff_total|default:5 }}</span></div>
             </div>
         </section>
 
@@ -43,6 +57,9 @@
 
         <a class="exit" href="{% url 'home' %}#games" aria-label="Вийти з гри">×</a>
     </main>
+
+    <script id="attention-data"
+        type="application/json">{"targets": {{ targets_json|safe }}, "total": {{ diff_total|default:5 }}, "level": {{ level|default:1 }}, "shapes_count": {{ shapes_count|default:8 }}}</script>
 
     <script src="{% static 'js/attention.js' %}" defer></script>
 </body>

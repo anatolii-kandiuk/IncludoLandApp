@@ -13,6 +13,14 @@
 <body>
     {% include 'includes/header.html' %}
     <main class="page page--game page--sentences">
+        <div class="page-nav" aria-label="Навігація">
+            <div class="pill-nav">
+                <a class="pill pill--ghost" href="{% url 'home' %}#games" aria-label="Назад">
+                    <span class="pill__ico" aria-hidden="true">←</span>
+                    <span>Назад</span>
+                </a>
+            </div>
+        </div>
         <h1 class="game-title">ПОБУДОВА РЕЧЕНЬ</h1>
 
         <section class="sentences" aria-label="Гра Побудова речень">

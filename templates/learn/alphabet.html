@@ -16,6 +16,14 @@
     {% include 'includes/header.html' %}
 
     <main class="learn-page" id="alphabet-root">
+        <div class="page-nav" aria-label="Навігація">
+            <div class="pill-nav">
+                <a class="pill pill--ghost" href="{% url 'home' %}#games" aria-label="Назад">
+                    <span class="pill__ico" aria-hidden="true">←</span>
+                    <span>Назад</span>
+                </a>
+            </div>
+        </div>
         {{ letters|json_script:"alphabet-data" }}
 
         <div class="learn-head">

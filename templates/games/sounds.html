@@ -13,6 +13,14 @@
 <body>
     {% include 'includes/header.html' %}
     <main class="page page--sounds">
+        <div class="page-nav" aria-label="Навігація">
+            <div class="pill-nav">
+                <a class="pill pill--ghost" href="{% url 'home' %}#games" aria-label="Назад">
+                    <span class="pill__ico" aria-hidden="true">←</span>
+                    <span>Назад</span>
+                </a>
+            </div>
+        </div>
         <h1 class="sounds-title">Слухай та Релакуй</h1>
 
         <section class="sounds-grid" aria-label="Варіанти звуків"

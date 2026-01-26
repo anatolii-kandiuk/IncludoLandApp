@@ -16,6 +16,14 @@
     {% include 'includes/header.html' %}
 
     <main class="learn-page" id="numbers-root">
+        <div class="page-nav" aria-label="Навігація">
+            <div class="pill-nav">
+                <a class="pill pill--ghost" href="{% url 'home' %}#games" aria-label="Назад">
+                    <span class="pill__ico" aria-hidden="true">←</span>
+                    <span>Назад</span>
+                </a>
+            </div>
+        </div>
         {{ numbers|json_script:"numbers-data" }}
 
         <div class="learn-head">
@@ -34,9 +42,11 @@
                 <button class="learn-btn" type="button" id="num-prev" aria-label="Попередня">←</button>
                 <div class="flip-main">
                     <div class="flip-big" id="num-big" data-braille
-                        data-n="{% if numbers %}{{ numbers.0.n }}{% endif %}">{% if numbers %}{{ numbers.0.n }}{% endif %}</div>
+                        data-n="{% if numbers %}{{ numbers.0.n }}{% endif %}">{% if numbers %}{{ numbers.0.n }}{% endif
+                        %}</div>
                     <div class="num-dots" id="num-dots" aria-hidden="true"></div>
-                    <div class="flip-sub" id="num-sub" data-braille>{% if numbers %}Цифра 1 з {{ numbers|length }}{% endif %}</div>
+                    <div class="flip-sub" id="num-sub" data-braille>{% if numbers %}Цифра 1 з {{ numbers|length }}{%
+                        endif %}</div>
                 </div>
                 <button class="learn-btn" type="button" id="num-next" aria-label="Наступна">→</button>
             </div>

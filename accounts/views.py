@@ -603,11 +603,14 @@ def _generate_word_letter_bank(rng: random.Random, word: str) -> list:
 
 
 def _generate_words_items_for_user(rng: random.Random, user, total: int = 10):
-    qs = (
-        WordPuzzleWord.objects.filter(is_active=True, created_by=user)
-        .only('word', 'hint', 'emoji')
-        .order_by('-created_at')
-    )
+    if getattr(user, 'is_authenticated', False):
+        qs = (
+            WordPuzzleWord.objects.filter(is_active=True, created_by=user)
+            .only('word', 'hint', 'emoji')
+            .order_by('-created_at')
+        )
+    else:
+        qs = []
     pool = [
         {
             'word': _normalize_word(w.word),
@@ -658,11 +661,14 @@ def _tokenize_sentence(sentence: str) -> list:
 
 
 def _generate_sentences_items_for_user(rng: random.Random, user, total: int = 10):
-    qs = (
-        SentenceExercise.objects.filter(is_active=True, created_by=user)
-        .only('prompt', 'sentence', 'emoji')
-        .order_by('-created_at')
-    )
+    if getattr(user, 'is_authenticated', False):
+        qs = (
+            SentenceExercise.objects.filter(is_active=True, created_by=user)
+            .only('prompt', 'sentence', 'emoji')
+            .order_by('-created_at')
+        )
+    else:
+        qs = []
     pool = [
         {
             'prompt': (ex.prompt or '').strip(),
@@ -722,18 +728,63 @@ def _svg_for_attention_task(shapes: list) -> str:
     return ''.join(parts)
 
 
-def _generate_attention_items(rng: random.Random, total: int = 10):
+def _attention_grid_positions(rng: random.Random, count: int):
+    count = max(1, int(count))
+
+    # Keep shapes reasonably spaced inside 200x120 viewBox.
+    if count <= 8:
+        cols = 4
+    elif count <= 15:
+        cols = 5
+    else:
+        cols = 6
+
+    rows = (count + cols - 1) // cols
+    rows = max(2, rows)
+
+    x_min, x_max = 34, 166
+    y_min, y_max = 26, 94
+
+    def linspace(a: int, b: int, n: int):
+        if n <= 1:
+            return [int((a + b) / 2)]
+        step = (b - a) / (n - 1)
+        return [int(round(a + step * i)) for i in range(n)]
+
+    xs = linspace(x_min, x_max, cols)
+    ys = linspace(y_min, y_max, rows)
+
+    cells = []
+    for y in ys:
+        for x in xs:
+            # Tiny jitter to avoid perfect grid.
+            jx = rng.randint(-4, 4)
+            jy = rng.randint(-4, 4)
+            cells.append((x + jx, y + jy))
+
+    rng.shuffle(cells)
+    return cells[:count]
+
+
+def _generate_attention_items(
+    rng: random.Random,
+    total: int = 10,
+    *,
+    shapes_count: int = 8,
+    diffs_count: int = 5,
+):
     palette = ['#ff6b6b', '#ffd166', '#06d6a0', '#118ab2', '#9b5de5', '#f15bb5']
     types = ['circle', 'rect', 'tri']
-    grid = [
-        (40, 30), (80, 30), (120, 30), (160, 30),
-        (40, 80), (80, 80), (120, 80), (160, 80),
-    ]
+
+    shapes_count = max(5, int(shapes_count))
+    diffs_count = max(1, min(int(diffs_count), 5))
+    diffs_count = min(diffs_count, shapes_count)
 
     items = []
     for idx in range(total):
+        positions = _attention_grid_positions(rng, shapes_count)
         base = []
-        for (x, y) in grid:
+        for (x, y) in positions:
             base.append(
                 {
                     'type': rng.choice(types),
@@ -744,18 +795,37 @@ def _generate_attention_items(rng: random.Random, total: int = 10):
             )
 
         right = [dict(s) for s in base]
-        diff_idx = _shuffle_with_rng(rng, list(range(len(right))))[:5]
+        diff_idx = _shuffle_with_rng(rng, list(range(len(right))))[:diffs_count]
         for j in diff_idx:
             old = right[j]
             # Change color to a different palette color.
             new_color = rng.choice([c for c in palette if c != old['color']])
             right[j] = {**old, 'color': new_color}
 
+        diff_set = set(diff_idx)
+        targets = []
+        for j, s in enumerate(right):
+            targets.append(
+                {
+                    'id': f's{j}',
+                    # viewBox is 200x120 in _svg_for_attention_task
+                    'x': s['x'],
+                    'y': s['y'],
+                    # click radius in viewBox units
+                    'r': 18,
+                    'is_diff': j in diff_set,
+                }
+            )
+
+        diffs = [t for t in targets if t.get('is_diff')]
+
         items.append(
             {
                 'n': idx + 1,
                 'left_svg': _svg_for_attention_task(base),
                 'right_svg': _svg_for_attention_task(right),
+                'diffs': diffs,
+                'targets': targets,
             }
         )
     return items
@@ -932,10 +1002,8 @@ def specialist_print_memory(request):
     return render(request, 'print/memory.html', context)
 
 
-@login_required
 def print_hub(request):
-    # Public print hub for any authenticated user (kids too).
-    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None)
+    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None) if request.user.is_authenticated else None
     context = {
         'layout': 'public',
         'hub_url_name': 'print_hub',
@@ -945,14 +1013,13 @@ def print_hub(request):
         'attention_url_name': 'print_attention',
         'memory_url_name': 'print_memory',
         'stars': stars,
-        'username': request.user.username,
+        'username': request.user.username if request.user.is_authenticated else 'Гість',
     }
     return render(request, 'print/hub.html', context)
 
 
-@login_required
 def print_math(request):
-    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None)
+    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None) if request.user.is_authenticated else None
 
     rng = random.Random()
     level = _parse_choice(request, 'level', {'easy', 'medium', 'hard'}, 'easy')
@@ -965,7 +1032,7 @@ def print_math(request):
         'self_url_name': 'print_math',
         'stars': stars,
         'title': 'Математика',
-        'username': request.user.username,
+        'username': request.user.username if request.user.is_authenticated else 'Гість',
         'level': level,
         'op': op,
         'items': items,
@@ -973,9 +1040,8 @@ def print_math(request):
     return render(request, 'print/math.html', context)
 
 
-@login_required
 def print_sentences(request):
-    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None)
+    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None) if request.user.is_authenticated else None
 
     rng = random.Random()
     items = _generate_sentences_items_for_user(rng, request.user, total=10)
@@ -986,15 +1052,14 @@ def print_sentences(request):
         'self_url_name': 'print_sentences',
         'stars': stars,
         'title': 'Побудова речень',
-        'username': request.user.username,
+        'username': request.user.username if request.user.is_authenticated else 'Гість',
         'items': items,
     }
     return render(request, 'print/sentences.html', context)
 
 
-@login_required
 def print_words(request):
-    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None)
+    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None) if request.user.is_authenticated else None
 
     rng = random.Random()
     items = _generate_words_items_for_user(rng, request.user, total=10)
@@ -1005,15 +1070,14 @@ def print_words(request):
         'self_url_name': 'print_words',
         'stars': stars,
         'title': 'Пазли слів',
-        'username': request.user.username,
+        'username': request.user.username if request.user.is_authenticated else 'Гість',
         'items': items,
     }
     return render(request, 'print/words.html', context)
 
 
-@login_required
 def print_attention(request):
-    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None)
+    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None) if request.user.is_authenticated else None
 
     rng = random.Random()
     items = _generate_attention_items(rng, total=10)
@@ -1024,15 +1088,14 @@ def print_attention(request):
         'self_url_name': 'print_attention',
         'stars': stars,
         'title': 'Увага',
-        'username': request.user.username,
+        'username': request.user.username if request.user.is_authenticated else 'Гість',
         'items': items,
     }
     return render(request, 'print/attention.html', context)
 
 
-@login_required
 def print_memory(request):
-    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None)
+    stars = getattr(getattr(request.user, 'child_profile', None), 'stars', None) if request.user.is_authenticated else None
 
     rng = random.Random()
     items = _generate_memory_items(rng, total=10)
@@ -1043,7 +1106,7 @@ def print_memory(request):
         'self_url_name': 'print_memory',
         'stars': stars,
         'title': "Памʼять",
-        'username': request.user.username,
+        'username': request.user.username if request.user.is_authenticated else 'Гість',
         'items': items,
     }
     return render(request, 'print/memory.html', context)
