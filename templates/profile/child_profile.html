@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Профіль дитини — IncludoLand</title>
+    <title>Профіль — IncludoLand</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
     <link rel="stylesheet" href="{% static 'css/child_profile.css' %}">
@@ -26,8 +26,7 @@
                     {% for r in rewards_unlocked %}
                     <div class="badge badge--{{ r.tone }} {% if not r.unlocked %}badge--locked{% endif %}">
                         <div class="badge__icon" aria-hidden="true">
-                            {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass'
-                            %}🧭{% else %}🎯{% endif %}
+                            {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass' %}🧭{% else %}🎯{% endif %}
                         </div>
                         <div class="badge__text">
                             <div class="badge__title">{{ r.title }}</div>
@@ -48,8 +47,7 @@
                         {% for r in rewards_locked %}
                         <div class="badge badge--{{ r.tone }} badge--locked">
                             <div class="badge__icon" aria-hidden="true">
-                                {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass'
-                                %}🧭{% else %}🎯{% endif %}
+                                {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass' %}🧭{% else %}🎯{% endif %}
                             </div>
                             <div class="badge__text">
                                 <div class="badge__title">{{ r.title }}</div>
@@ -64,14 +62,14 @@
 
             <a class="dash-tile" href="{% url 'home' %}#games" aria-label="Перейти до ігор">
                 <div class="dash-tile__icon" aria-hidden="true">🎮</div>
-                <div class="dash-tile__label">ІГРИ</div>
+                <div class="dash-tile__label">АКТИВНОСТІ</div>
             </a>
 
             <section class="card child-card child-card--progress">
                 <div class="card__header">
                     <h2 class="card__title">Прогрес Завдань</h2>
                 </div>
-                <div class="card__meta">Слухань казок: {{ stories_listens_count }}</div>
+                <div class="card__meta">Казки: {{ stories_listens_count }}</div>
 
                 <div class="progress-list">
                     {% for p in progress %}
