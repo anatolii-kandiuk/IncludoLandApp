@@ -9,8 +9,19 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'insecure-dev-secret-key')
 
 DEBUG = os.getenv('DEBUG', '1').lower() not in {'0', 'false', 'no'}
 
-raw_allowed_hosts = os.getenv('ALLOWED_HOSTS', '*')
-ALLOWED_HOSTS = [h.strip() for h in raw_allowed_hosts.split(',') if h.strip()]
+# Railway + local defaults (can be overridden via ALLOWED_HOSTS env var)
+DEFAULT_ALLOWED_HOSTS = [
+    'includolandapp-production.up.railway.app',
+    '.railway.app',
+    'localhost',
+    '127.0.0.1',
+]
+
+raw_allowed_hosts = os.getenv('ALLOWED_HOSTS')
+if raw_allowed_hosts:
+    ALLOWED_HOSTS = [h.strip() for h in raw_allowed_hosts.split(',') if h.strip()]
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]'] if DEBUG else DEFAULT_ALLOWED_HOSTS
 
 
 # Application definition
@@ -132,6 +143,13 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
-raw_csrf_trusted = os.getenv('CSRF_TRUSTED_ORIGINS', '')
-CSRF_TRUSTED_ORIGINS = [o.strip() for o in raw_csrf_trusted.split(',') if o.strip()]
+DEFAULT_CSRF_TRUSTED_ORIGINS = [
+    'https://includolandapp-production.up.railway.app',
+]
+
+raw_csrf_trusted = os.getenv('CSRF_TRUSTED_ORIGINS')
+if raw_csrf_trusted:
+    CSRF_TRUSTED_ORIGINS = [o.strip() for o in raw_csrf_trusted.split(',') if o.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = [] if DEBUG else DEFAULT_CSRF_TRUSTED_ORIGINS
 
