@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <link rel="stylesheet" href="{% static 'css/learn_print.css' %}">
     <script src="{% static 'js/print.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -40,6 +41,7 @@
             {% endfor %}
         </section>
     </main>
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>

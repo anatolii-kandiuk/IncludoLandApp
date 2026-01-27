@@ -9,17 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <link rel="stylesheet" href="{% static 'css/learn_print.css' %}">
     <script src="{% static 'js/print.js' %}" defer></script>
-    <style>
-        @media print {
-            .lp-coloring {
-                page-break-after: always;
-            }
-
-            .lp-coloring:last-child {
-                page-break-after: auto;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -42,12 +32,12 @@
             <div class="lp-hints" aria-label="Підказки кольорів">
                 {% for h in p.hints %}
                 <span class="lp-hint" data-braille>
-                    <span class="lp-hint-dot" aria-hidden="true" style="background: {{ h.hex }}"></span>
+                    <span class="lp-hint-dot" aria-hidden="true" data-bg="{{ h.hex }}"></span>
                     {{ h.name }}
                 </span>
                 {% endfor %}
             </div>
-            <div style="margin-top:10px">{{ p.svg|safe }}</div>
+            <div class="lp-coloring__body">{{ p.svg|safe }}</div>
         </section>
         {% endfor %}
 
@@ -55,9 +45,8 @@
         <section class="lp-coloring" aria-label="Розмальовка">
             <h2 data-braille>{{ p.title }}</h2>
             {% if p.file_type == 'image' %}
-            <div style="margin-top:10px">
-                <img src="{{ p.file_url }}" alt="{{ p.title|escape }}"
-                    style="width:100%;max-height:760px;object-fit:contain;border:1px solid rgba(0,0,0,.12);border-radius:12px">
+            <div class="lp-coloring__body">
+                <img class="lp-upload-img" src="{{ p.file_url }}" alt="{{ p.title|escape }}">
             </div>
             {% else %}
             <p data-braille>PDF файл: <a href="{{ p.file_url }}" target="_blank" rel="noopener">Відкрити</a></p>
@@ -65,6 +54,7 @@
         </section>
         {% endfor %}
     </main>
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>

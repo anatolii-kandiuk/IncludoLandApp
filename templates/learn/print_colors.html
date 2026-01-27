@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <link rel="stylesheet" href="{% static 'css/learn_print.css' %}">
     <script src="{% static 'js/print.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -29,10 +30,10 @@
             {% for c in colors %}
             <div class="lp-card">
                 <div class="lp-color-row">
-                    <div class="lp-swatch" style="background-color: {{ c.hex }};"></div>
+                    <div class="lp-swatch" data-bg-color="{{ c.hex }}"></div>
                     <div>
                         <div class="lp-color-name" data-braille>{{ c.name }}</div>
-                        <div class="lp-sub" style="margin:4px 0 0;" data-braille>{{ c.hex }}</div>
+                        <div class="lp-sub lp-sub--hex" data-braille>{{ c.hex }}</div>
                     </div>
                 </div>
                 <div class="lp-trace" aria-hidden="true">
@@ -42,9 +43,10 @@
             {% endfor %}
         </section>
 
-        <p class="lp-sub" style="margin-top:12px" data-braille>Порада: якщо принтер не друкує фон, увімкни “Print
+        <p class="lp-sub lp-sub--tip" data-braille>Порада: якщо принтер не друкує фон, увімкни “Print
             background graphics”.</p>
     </main>
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>

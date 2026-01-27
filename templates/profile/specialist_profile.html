@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
     <script src="{% static 'js/specialist_charts.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -48,7 +49,7 @@
                                     <div class="student__sub">{{ s.subtitle }}</div>
                                     <div class="student__bar" role="progressbar" aria-valuenow="{{ s.progress }}"
                                         aria-valuemin="0" aria-valuemax="100">
-                                        <div class="student__fill" style="width: {{ s.progress }}%"></div>
+                                        <div class="student__fill" data-width="{{ s.progress }}"></div>
                                     </div>
                                 </div>
                                 <div class="student__actions">
@@ -71,26 +72,26 @@
                                 {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
 
                                 <select class="chart-filters__control" name="perf_child" aria-label="Учень">
-                                    <option value="all" {% if perf_child == 'all' %}selected{% endif %}>Усі учні</option>
+                                    <option value="all" {% if perf_child=='all' %}selected{% endif %}>Усі учні</option>
                                     {% for s in my_students %}
-                                    <option value="{{ s.id }}" {% if perf_child == s.id %}selected{% endif %}>
+                                    <option value="{{ s.id }}" {% if perf_child==s.id %}selected{% endif %}>
                                         {{ s.user.username }}</option>
                                     {% endfor %}
                                 </select>
 
                                 <select class="chart-filters__control" name="perf_game" aria-label="Гра">
-                                    <option value="all" {% if perf_game == 'all' %}selected{% endif %}>Усі ігри</option>
+                                    <option value="all" {% if perf_game=='all' %}selected{% endif %}>Усі ігри</option>
                                     {% for value,label in perf_game_choices %}
-                                    <option value="{{ value }}" {% if perf_game == value %}selected{% endif %}>{{ label }}
+                                    <option value="{{ value }}" {% if perf_game==value %}selected{% endif %}>{{ label }}
                                     </option>
                                     {% endfor %}
                                 </select>
 
                                 <select class="chart-filters__control" name="perf_days" aria-label="Період">
-                                    <option value="7" {% if perf_days == 7 %}selected{% endif %}>7 днів</option>
-                                    <option value="14" {% if perf_days == 14 %}selected{% endif %}>14 днів</option>
-                                    <option value="30" {% if perf_days == 30 %}selected{% endif %}>30 днів</option>
-                                    <option value="90" {% if perf_days == 90 %}selected{% endif %}>90 днів</option>
+                                    <option value="7" {% if perf_days==7 %}selected{% endif %}>7 днів</option>
+                                    <option value="14" {% if perf_days==14 %}selected{% endif %}>14 днів</option>
+                                    <option value="30" {% if perf_days==30 %}selected{% endif %}>30 днів</option>
+                                    <option value="90" {% if perf_days==90 %}selected{% endif %}>90 днів</option>
                                 </select>
                                 <button class="chart-filters__btn" type="submit">Показати</button>
                             </form>
@@ -172,6 +173,7 @@
             </section>
         </main>
     </div>
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>

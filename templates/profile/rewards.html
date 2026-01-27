@@ -8,6 +8,7 @@
     <title>Нагороди — IncludoLand</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -16,7 +17,7 @@
     <main class="page profile">
         <section class="card">
             <div class="card__header">
-                <h1 class="card__title" style="font-size:22px;">Нагороди</h1>
+                <h1 class="card__title u-text-22">Нагороди</h1>
                 <div class="card__meta">Відкрито: {{ unlocked_count }} / {{ total_count }}</div>
             </div>
 
@@ -36,6 +37,7 @@
             </div>
         </section>
     </main>
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/learn.css' %}">
     <script src="{% static 'js/print.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -43,7 +44,7 @@
                     <div class="hints" aria-label="Підказки кольорів">
                         {% for h in p.hints %}
                         <span class="hint" data-braille>
-                            <span class="hint-dot" aria-hidden="true" style="background: {{ h.hex }}"></span>
+                            <span class="hint-dot" aria-hidden="true" data-bg="{{ h.hex }}"></span>
                             {{ h.name }}
                         </span>
                         {% endfor %}
@@ -55,7 +56,7 @@
 
         {% if uploaded_pages %}
         <section class="learn-card" aria-label="Додаткові розмальовки">
-            <h2 class="coloring-title" data-braille style="margin:0 0 10px;">Додаткові розмальовки</h2>
+            <h2 class="coloring-title coloring-title--section" data-braille>Додаткові розмальовки</h2>
             <div class="coloring-grid">
                 {% for p in uploaded_pages %}
                 <div class="coloring-card">
@@ -72,6 +73,7 @@
         </section>
         {% endif %}
     </main>
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>

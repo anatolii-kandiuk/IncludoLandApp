@@ -8,6 +8,7 @@
     <title>Розмальовки — Профіль спеціаліста</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -62,8 +63,8 @@
 
                             <div class="field">
                                 <label class="check">
-                                    <input class="check__box" type="checkbox" name="is_active" 
-                                    {% if form.is_active.value %}checked{% endif %}>
+                                    <input class="check__box" type="checkbox" name="is_active" {% if
+                                        form.is_active.value %}checked{% endif %}>
                                     <span class="check__label">Активна (доступна дітям)</span>
                                 </label>
                                 {% if form.is_active.errors %}
@@ -91,7 +92,8 @@
                                 <div class="file-row__meta">
                                     <div class="file-row__title">{{ p.title }}</div>
                                     <div class="file-row__sub">
-                                        {% if p.file_type == 'pdf' %}PDF{% else %}Зображення{% endif %} · {% if p.is_active %}Активна{% else %}Вимкнена{% endif %}
+                                        {% if p.file_type == 'pdf' %}PDF{% else %}Зображення{% endif %} · {% if
+                                        p.is_active %}Активна{% else %}Вимкнена{% endif %}
                                     </div>
                                     {% if p.file_url %}
                                     <div class="file-row__preview">
@@ -109,7 +111,7 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="next" value="{% url 'specialist_coloring_pages' %}">
                                     <button class="student__btn student__btn--danger" type="submit"
-                                        onclick="return confirm('Видалити «{{ p.title|escapejs }}»?');">🗑</button>
+                                        data-confirm="Видалити «{{ p.title|escapejs }}»?">🗑</button>
                                 </form>
                             </div>
                             {% endfor %}
@@ -122,6 +124,7 @@
             </section>
         </main>
     </div>
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>

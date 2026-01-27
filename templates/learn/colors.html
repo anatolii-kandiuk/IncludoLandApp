@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/learn.css' %}">
     <script src="{% static 'js/print.js' %}" defer></script>
     <script src="{% static 'js/learn_colors.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -42,9 +43,9 @@
                 <button class="learn-btn" type="button" id="color-prev" aria-label="Попередній">←</button>
                 <div class="flip-main">
                     <div class="color-swatch color-swatch--main" id="color-swatch" aria-hidden="true" {% if colors %}
-                        style="background: {{ colors.0.hex }}" {% endif %}></div>
-                    <div class="flip-sub" id="color-name" data-braille
-                        style="margin-top:10px;font-size:24px;font-weight:1000;">{% if colors %}{{ colors.0.name }}{%
+                        data-bg="{{ colors.0.hex }}" {% endif %}></div>
+                    <div class="flip-sub flip-sub--title" id="color-name" data-braille>{% if colors %}{{ colors.0.name
+                        }}{%
                         endif %}</div>
                     <div class="flip-sub" id="color-sub" data-braille>{% if colors %}Колір 1 з {{ colors|length }}{%
                         endif %}</div>
@@ -57,14 +58,15 @@
             <div class="grid" aria-label="Кольори">
                 {% for c in colors %}
                 <div class="grid-item">
-                    <div class="color-swatch" style="background:{{ c.hex }}"></div>
-                    <div class="grid-item__small" data-braille style="margin-top:8px;font-size:14px;font-weight:1000;">
+                    <div class="color-swatch" data-bg="{{ c.hex }}"></div>
+                    <div class="grid-item__small grid-item__small--name" data-braille>
                         {{ c.name }}</div>
                 </div>
                 {% endfor %}
             </div>
         </section>
     </main>
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>

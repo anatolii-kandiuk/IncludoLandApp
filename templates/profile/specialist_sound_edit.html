@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
     <link rel="stylesheet" href="{% static 'css/specialist_sounds.css' %}">
     <script src="{% static 'js/specialist_sounds.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -39,7 +40,7 @@
                         <div class="current-files" aria-label="Поточні файли">
                             <div class="current-files__row">
                                 <div class="current-files__label">Поточне зображення:</div>
-                                <div class="current-files__img" style="background-image: url('{{ card.image.url }}');">
+                                <div class="current-files__img" data-bg-image="{{ card.image.url }}">
                                 </div>
                             </div>
                             <div class="current-files__row">
@@ -76,8 +77,7 @@
                     <aside class="preview" aria-label="Попередній перегляд">
                         <div class="preview__title">Попередній перегляд</div>
                         <div class="preview-card" id="preview-card">
-                            <div class="preview-card__img" id="preview-img"
-                                style="background-image: url('{{ card.image.url }}');"></div>
+                            <div class="preview-card__img" id="preview-img" data-bg-image="{{ card.image.url }}"></div>
                             <div class="preview-card__label" id="preview-label">{{ card.title }}</div>
                             <button class="preview-card__play" id="preview-play" type="button"
                                 aria-label="Відтворити">▶</button>
@@ -88,6 +88,7 @@
             </section>
         </main>
     </div>
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>

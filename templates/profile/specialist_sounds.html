@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
     <link rel="stylesheet" href="{% static 'css/specialist_sounds.css' %}">
     <script src="{% static 'js/specialist_sounds.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -99,8 +100,8 @@
                         <div class="lib-card" data-card-id="{{ c.id }}" data-title="{{ c.title|escape }}"
                             data-image-url="{{ c.safe_image_url }}" data-audio-url="{{ c.safe_audio_url }}"
                             role="button" tabindex="0" aria-label="Редагувати: {{ c.title|escape }}">
-                            <div class="lib-card__img" {% if c.safe_image_url %}
-                                style="background-image: url('{{ c.safe_image_url }}');" {% endif %}></div>
+                            <div class="lib-card__img" {% if c.safe_image_url %}data-bg-image="{{ c.safe_image_url }}"
+                                {% endif %}></div>
                             <div class="lib-card__label">{{ c.title }}</div>
                             <div class="lib-card__actions">
                                 <button class="lib-card__play" type="button" data-audio-url="{{ c.safe_audio_url }}" {%
@@ -113,7 +114,7 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="next" value="{% url 'specialist_sounds' %}">
                                     <button class="lib-card__btn lib-card__btn--danger" type="submit"
-                                        onclick="return confirm('Видалити картку «{{ c.title|escapejs }}»?');"
+                                        data-confirm="Видалити картку «{{ c.title|escapejs }}»?"
                                         aria-label="Видалити">🗑</button>
                                 </form>
                             </div>
@@ -125,6 +126,7 @@
             </section>
         </main>
     </div>
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>

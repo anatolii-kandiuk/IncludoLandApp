@@ -8,6 +8,7 @@
     <title>Математика — IncludoLand</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/math.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -28,7 +29,7 @@
 
             <div class="math-card math-card--play" aria-label="Приклад">
                 <div class="math-progress" aria-label="Прогрес">
-                    <div class="math-progress__bar"><span id="math-progress-fill" style="width: 0%"></span></div>
+                    <div class="math-progress__bar"><span id="math-progress-fill"></span></div>
                     <div class="math-progress__text"><span id="math-step">0</span>/<span id="math-total">10</span></div>
                 </div>
 
@@ -81,6 +82,7 @@
     <a class="math-exit" href="{% url 'home' %}#games" aria-label="Вийти">×</a>
 
     <script src="{% static 'js/math.js' %}" defer></script>
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>

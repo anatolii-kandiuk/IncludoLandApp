@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
     <link rel="stylesheet" href="{% static 'css/specialist_words.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -47,8 +48,8 @@
                             placeholder="Емодзі (необовʼязково)" value="{{ form.emoji.value|default:'' }}">
 
                         <label class="chart-filters__control words-inline-check">
-                            <input type="checkbox" name="is_active" value="true" 
-                            {% if form.is_active.value or form.is_active.value is None %}checked{% endif %}>
+                            <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or
+                                form.is_active.value is None %}checked{% endif %}>
                             <span>Активне</span>
                         </label>
 
@@ -56,7 +57,7 @@
                     </form>
 
                     {% if form.errors %}
-                    <div class="form-errors" role="alert" style="margin-top: 12px;">
+                    <div class="form-errors u-mt-12" role="alert">
                         {{ form.errors }}
                     </div>
                     {% endif %}
@@ -67,7 +68,7 @@
                     </div>
                 </section>
 
-                <section class="card card--full" style="margin-top: 18px;">
+                <section class="card card--full u-mt-18">
                     <div class="card__head">
                         <h2 class="card__title">Список слів</h2>
                         <div class="card__meta">Ці слова будуть доступні дітям у «Пазли слів».</div>
@@ -98,11 +99,11 @@
                                 {% endif %}
                             </div>
                             <div class="table__cell table__actions" role="cell">
-                                <form method="post" action="{% url 'specialist_word_delete' w.id %}" style="margin:0;">
+                                <form method="post" action="{% url 'specialist_word_delete' w.id %}" class="u-m0">
                                     {% csrf_token %}
                                     <input type="hidden" name="next" value="{% url 'specialist_words' %}">
                                     <button class="table__btn table__btn--danger" type="submit"
-                                        onclick="return confirm('Видалити слово «{{ w.word|escapejs }}»?');">🗑
+                                        data-confirm="Видалити слово «{{ w.word|escapejs }}»?">🗑
                                         Видалити</button>
                                 </form>
                             </div>
@@ -116,6 +117,7 @@
             </section>
         </main>
     </div>
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>

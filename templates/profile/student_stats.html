@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
     <script src="{% static 'js/profile_charts.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -48,7 +49,7 @@
                         </div>
                         <div class="progress-item__bar" role="progressbar" aria-valuenow="{{ p.value }}"
                             aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-item__fill" style="width: {{ p.value }}%"></div>
+                            <div class="progress-item__fill" data-width="{{ p.value }}"></div>
                         </div>
                     </div>
                     {% endfor %}
@@ -72,6 +73,7 @@
             </section>
         </div>
     </main>
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>

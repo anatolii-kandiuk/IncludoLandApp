@@ -1,0 +1,134 @@
+/* Global responsive tweaks (mobile + tablet) */
+
+:root {
+    --container-pad: 24px;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+audio {
+    width: 100%;
+    max-width: 100%;
+}
+
+input[type="range"] {
+    width: 100%;
+    touch-action: pan-x;
+}
+
+/* Utility helpers (replace inline styles) */
+.u-m0 {
+    margin: 0 !important;
+}
+
+.u-mt-8 {
+    margin-top: 8px !important;
+}
+
+.u-mt-10 {
+    margin-top: 10px !important;
+}
+
+.u-mt-12 {
+    margin-top: 12px !important;
+}
+
+.u-mt-16 {
+    margin-top: 16px !important;
+}
+
+.u-mt-18 {
+    margin-top: 18px !important;
+}
+
+.u-text-14 {
+    font-size: 14px !important;
+}
+
+.u-text-22 {
+    font-size: 22px !important;
+}
+
+.u-fw-1000 {
+    font-weight: 1000 !important;
+}
+
+/* Header/nav: allow wrapping + scrolling on very small screens */
+@media (max-width: 720px) {
+    .site-header__inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .site-header__right {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 520px) {
+    :root {
+        --container-pad: 16px;
+    }
+
+    .page {
+        padding-left: var(--container-pad);
+        padding-right: var(--container-pad);
+    }
+
+    .pill-nav {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+    }
+
+    .pill {
+        scroll-snap-align: start;
+    }
+
+    .pill__ico {
+        font-size: 15px;
+    }
+}
+
+/* Footer */
+.site-footer {
+    padding: 18px var(--container-pad) 26px;
+}
+
+.site-footer__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    border-top: 1px solid rgba(15, 43, 58, 0.10);
+    padding-top: 16px;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.site-footer__brand {
+    font-weight: 1000;
+    opacity: .9;
+}
+
+.site-footer__meta {
+    font-weight: 800;
+    opacity: .65;
+}

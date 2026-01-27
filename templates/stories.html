@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/stories.css' %}">
     <script src="{% static 'js/stories.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -32,8 +33,8 @@
                 data-content-type="{{ s.content_type }}"
                 data-text="{% if s.content_type == 'text' %}{{ s.text|escapejs }}{% endif %}"
                 data-audio-url="{{ s.audio_url }}" data-pdf-url="{{ s.pdf_url }}">
-                <div class="story-card__image" {% if s.image_url %}style="background-image: url('{{ s.image_url }}');"
-                    {% endif %} aria-label="{{ s.title|escape }}"></div>
+                <div class="story-card__image" {% if s.image_url %}data-bg-image="{{ s.image_url }}" {% endif %}
+                    aria-label="{{ s.title|escape }}"></div>
                 <div class="story-card__body">
                     <div class="story-card__title">{{ s.title }}</div>
                     <div class="story-card__actions">
@@ -98,6 +99,8 @@
 
         <audio id="story-audio" preload="none"></audio>
     </main>
+
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>

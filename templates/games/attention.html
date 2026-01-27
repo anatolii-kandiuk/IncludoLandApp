@@ -8,6 +8,7 @@
     <title>Знайди відмінності — IncludoLand</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/attention.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
 <body>
@@ -62,6 +63,7 @@
         type="application/json">{"targets": {{ targets_json|safe }}, "total": {{ diff_total|default:5 }}, "level": {{ level|default:1 }}, "shapes_count": {{ shapes_count|default:8 }}}</script>
 
     <script src="{% static 'js/attention.js' %}" defer></script>
+    {% include 'includes/footer.html' %}
 </body>
 
 </html>
