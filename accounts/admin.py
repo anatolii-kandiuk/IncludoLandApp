@@ -1,8 +1,13 @@
+from django import forms
 from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.contrib.admin.sites import NotRegistered
+from django.contrib.auth.password_validation import validate_password
 from django.core.mail import send_mail
+from django.db import transaction
+from django.http import HttpRequest
+from django.utils.text import slugify
 from django.utils import timezone
 
 from .models import (
@@ -115,10 +120,110 @@ class ChildProfileAdmin(admin.ModelAdmin):
 
 @admin.register(SpecialistProfile)
 class SpecialistProfileAdmin(admin.ModelAdmin):
+    class CreateSpecialistForm(forms.ModelForm):
+        first_name = forms.CharField(label="Ім'я", max_length=150)
+        last_name = forms.CharField(label='Прізвище', max_length=150)
+        password1 = forms.CharField(label='Пароль', widget=forms.PasswordInput)
+        password2 = forms.CharField(label='Повторіть пароль', widget=forms.PasswordInput)
+
+        class Meta:
+            model = SpecialistProfile
+            fields = ()
+
+        def clean(self):
+            cleaned = super().clean()
+            password1 = cleaned.get('password1')
+            password2 = cleaned.get('password2')
+
+            if password1 and password2 and password1 != password2:
+                raise forms.ValidationError('Паролі не співпадають.')
+
+            if password1:
+                validate_password(password1)
+
+            return cleaned
+
+    class ChangeSpecialistForm(forms.ModelForm):
+        class Meta:
+            model = SpecialistProfile
+            fields = ('coins', 'students')
+
     list_display = ('user', 'coins', 'created_at', 'updated_at')
     search_fields = ('user__username', 'user__email')
     list_select_related = ('user',)
     filter_horizontal = ('students',)
+
+    def get_form(self, request: HttpRequest, obj=None, **kwargs):
+        if obj is None:
+            kwargs['form'] = self.CreateSpecialistForm
+        else:
+            kwargs['form'] = self.ChangeSpecialistForm
+        return super().get_form(request, obj, **kwargs)
+
+    def get_fieldsets(self, request: HttpRequest, obj=None):
+        if obj is None:
+            return (
+                (
+                    'Створення спеціаліста',
+                    {
+                        'fields': ('first_name', 'last_name', 'password1', 'password2'),
+                    },
+                ),
+            )
+
+        return (
+            (
+                'Профіль спеціаліста',
+                {
+                    'fields': ('user', 'coins', 'students'),
+                },
+            ),
+        )
+
+    def get_readonly_fields(self, request: HttpRequest, obj=None):
+        if obj is None:
+            return ()
+        return ('user',)
+
+    def _generate_username(self, first_name: str, last_name: str) -> str:
+        base = slugify(f"{first_name}-{last_name}", allow_unicode=True)
+        base = (base or 'specialist').replace('-', '_')
+
+        username = base
+        suffix = 1
+        while User.objects.filter(username=username).exists():
+            suffix += 1
+            username = f"{base}_{suffix}"
+
+        return username
+
+    @transaction.atomic
+    def save_model(self, request: HttpRequest, obj: SpecialistProfile, form, change: bool) -> None:
+        if not change:
+            first_name = form.cleaned_data['first_name'].strip()
+            last_name = form.cleaned_data['last_name'].strip()
+            password = form.cleaned_data['password1']
+
+            username = self._generate_username(first_name, last_name)
+
+            user = User.objects.create(
+                username=username,
+                first_name=first_name,
+                last_name=last_name,
+                is_active=True,
+            )
+            user.set_password(password)
+            user.save(update_fields=['password'])
+
+            obj.user = user
+
+            self.message_user(
+                request,
+                f"Створено спеціаліста. Логін для входу: {username}",
+                level=messages.SUCCESS,
+            )
+
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(GameResult)
