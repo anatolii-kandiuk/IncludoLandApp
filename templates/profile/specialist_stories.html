@@ -62,12 +62,12 @@
                                 <div class="type__row" role="radiogroup" aria-label="Тип контенту">
                                     <label class="radio">
                                         <input type="radio" name="content_type" value="text" id="ct_text" {% if
-                                            form.content_type.value|default:'text'=='text' %} checked {% endif %}>
+                                            form.content_type.value|default:'text' == 'text' %} checked {% endif %}>
                                         <span>Вставити текст</span>
                                     </label>
                                     <label class="radio">
                                         <input type="radio" name="content_type" value="pdf" id="ct_pdf" {% if
-                                            form.content_type.value=='pdf' %} checked {% endif %}>
+                                            form.content_type.value == 'pdf' %} checked {% endif %}>
                                         <span>Завантажити PDF</span>
                                     </label>
                                 </div>

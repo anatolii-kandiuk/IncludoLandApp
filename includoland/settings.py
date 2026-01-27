@@ -3,11 +3,26 @@ from pathlib import Path
 
 import dj_database_url
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'insecure-dev-secret-key')
+# Load .env for local/dev runs (Railway provides env vars directly).
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(BASE_DIR / '.env')
+except Exception:
+    pass
+
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = os.getenv('DEBUG', '1').lower() not in {'0', 'false', 'no'}
+
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = 'django-insecure-local-dev'
+    else:
+        raise RuntimeError('SECRET_KEY must be set in production.')
 
 # Railway + local defaults (can be overridden via ALLOWED_HOSTS env var)
 DEFAULT_ALLOWED_HOSTS = [
@@ -69,7 +84,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'includoland.wsgi.application'
 
 
-DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASE_URL = os.getenv('DATABASE_URL') or os.getenv('DATABASE_PUBLIC_URL')
+
+if not DATABASE_URL:
+    pg_host = os.getenv('PGHOST')
+    pg_port = os.getenv('PGPORT', '5432')
+    pg_user = os.getenv('PGUSER')
+    pg_password = os.getenv('PGPASSWORD')
+    pg_database = os.getenv('PGDATABASE') or os.getenv('POSTGRES_DB')
+
+    if pg_host and pg_user and pg_password and pg_database:
+        DATABASE_URL = f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_database}"
 
 if DATABASE_URL:
     DATABASES = {
@@ -80,12 +105,10 @@ if DATABASE_URL:
         ),
     }
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+    raise RuntimeError(
+        'Database is not configured. Set DATABASE_URL (Railway: use DATABASE_URL or DATABASE_PUBLIC_URL), '
+        'or provide PGHOST/PGUSER/PGPASSWORD/PGDATABASE.'
+    )
 
 
 # Password validation

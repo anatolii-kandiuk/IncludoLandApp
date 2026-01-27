@@ -48,8 +48,7 @@
                             placeholder="Емодзі (необовʼязково)" value="{{ form.emoji.value|default:'' }}">
 
                         <label class="chart-filters__control words-inline-check">
-                            <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or
-                                form.is_active.value is None %}checked{% endif %}>
+                            <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or form.is_active.value is None %}checked{% endif %}>
                             <span>Активне</span>
                         </label>
 

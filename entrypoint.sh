@@ -3,6 +3,10 @@ set -eu
 
 mkdir -p /app/media
 
+if [ -z "${DATABASE_URL:-}" ] && [ -z "${DATABASE_PUBLIC_URL:-}" ] && [ -z "${PGHOST:-}" ]; then
+	echo "WARNING: No database environment variables found (DATABASE_URL/DATABASE_PUBLIC_URL/PGHOST). The app may fail to start." >&2
+fi
+
 echo "Applying database migrations..."
 
 # Railway (and other PaaS) can start the web container before the DB is fully ready.
