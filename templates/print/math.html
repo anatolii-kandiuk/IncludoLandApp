@@ -46,19 +46,19 @@
                         <label class="print-label">
                             Рівень
                             <select name="level" class="print-select">
-                                <option value="easy" {% if level=='easy' %}selected{% endif %}>Легко</option>
-                                <option value="medium" {% if level=='medium' %}selected{% endif %}>Середньо</option>
-                                <option value="hard" {% if level=='hard' %}selected{% endif %}>Складно</option>
+                                <option value="easy" {% if level == 'easy' %}selected{% endif %}>Легко</option>
+                                <option value="medium" {% if level == 'medium' %}selected{% endif %}>Середньо</option>
+                                <option value="hard" {% if level == 'hard' %}selected{% endif %}>Складно</option>
                             </select>
                         </label>
                         <label class="print-label">
                             Операція
                             <select name="op" class="print-select">
-                                <option value="mix" {% if op=='mix' %}selected{% endif %}>Мікс</option>
-                                <option value="add" {% if op=='add' %}selected{% endif %}>+</option>
-                                <option value="sub" {% if op=='sub' %}selected{% endif %}>−</option>
-                                <option value="mul" {% if op=='mul' %}selected{% endif %}>×</option>
-                                <option value="div" {% if op=='div' %}selected{% endif %}>÷</option>
+                                <option value="mix" {% if op == 'mix' %}selected{% endif %}>Мікс</option>
+                                <option value="add" {% if op == 'add' %}selected{% endif %}>+</option>
+                                <option value="sub" {% if op == 'sub' %}selected{% endif %}>−</option>
+                                <option value="mul" {% if op == 'mul' %}selected{% endif %}>×</option>
+                                <option value="div" {% if op == 'div' %}selected{% endif %}>÷</option>
                             </select>
                         </label>
                         <button class="print-btn" type="submit">Застосувати</button>

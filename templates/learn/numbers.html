@@ -43,11 +43,9 @@
                 <button class="learn-btn" type="button" id="num-prev" aria-label="Попередня">←</button>
                 <div class="flip-main">
                     <div class="flip-big" id="num-big" data-braille
-                        data-n="{% if numbers %}{{ numbers.0.n }}{% endif %}">{% if numbers %}{{ numbers.0.n }}{% endif
-                        %}</div>
+                        data-n="{% if numbers %}{{ numbers.0.n }}{% endif %}">{% if numbers %}{{ numbers.0.n }}{% endif %}</div>
                     <div class="num-dots" id="num-dots" aria-hidden="true"></div>
-                    <div class="flip-sub" id="num-sub" data-braille>{% if numbers %}Цифра 1 з {{ numbers|length }}{%
-                        endif %}</div>
+                    <div class="flip-sub" id="num-sub" data-braille>{% if numbers %}Цифра 1 з {{ numbers|length }}{% endif %}</div>
                 </div>
                 <button class="learn-btn" type="button" id="num-next" aria-label="Наступна">→</button>
             </div>
