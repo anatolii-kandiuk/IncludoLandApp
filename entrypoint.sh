@@ -21,13 +21,6 @@ done
 
 python manage.py collectstatic --noinput || true
 
-# Auto-create/update default superuser (idempotent).
-# Disable by setting CREATE_DEFAULT_SUPERUSER=0.
-if [ "${CREATE_DEFAULT_SUPERUSER:-1}" = "1" ]; then
-	echo "Ensuring default superuser exists..."
-	python manage.py create_default_superuser
-fi
-
 if [ "${1:-}" = "gunicorn" ]; then
 	host="0.0.0.0"
 		port="${PORT:-8080}"
