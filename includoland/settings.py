@@ -95,6 +95,15 @@ if not DATABASE_URL:
 
     if pg_host and pg_user and pg_password and pg_database:
         DATABASE_URL = f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_database}"
+    else:
+        db_host = os.getenv('DB_HOST')
+        db_port = os.getenv('DB_PORT', '5432')
+        db_user = os.getenv('DB_USER')
+        db_password = os.getenv('DB_PASSWORD')
+        db_name = os.getenv('DB_NAME')
+
+        if db_host and db_user and db_password and db_name:
+            DATABASE_URL = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 
 if DATABASE_URL:
     DATABASES = {
@@ -107,7 +116,7 @@ if DATABASE_URL:
 else:
     raise RuntimeError(
         'Database is not configured. Set DATABASE_URL (Railway: use DATABASE_URL or DATABASE_PUBLIC_URL), '
-        'or provide PGHOST/PGUSER/PGPASSWORD/PGDATABASE.'
+        'or provide PGHOST/PGUSER/PGPASSWORD/PGDATABASE, or DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD.'
     )
 
 

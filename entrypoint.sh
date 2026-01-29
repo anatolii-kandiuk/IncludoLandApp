@@ -3,8 +3,8 @@ set -eu
 
 mkdir -p /app/media
 
-if [ -z "${DATABASE_URL:-}" ] && [ -z "${DATABASE_PUBLIC_URL:-}" ] && [ -z "${PGHOST:-}" ]; then
-	echo "WARNING: No database environment variables found (DATABASE_URL/DATABASE_PUBLIC_URL/PGHOST). The app may fail to start." >&2
+if [ -z "${DATABASE_URL:-}" ] && [ -z "${DATABASE_PUBLIC_URL:-}" ] && [ -z "${PGHOST:-}" ] && [ -z "${DB_HOST:-}" ]; then
+	echo "WARNING: No database environment variables found (DATABASE_URL/DATABASE_PUBLIC_URL/PGHOST/DB_HOST). The app may fail to start." >&2
 fi
 
 echo "Applying database migrations..."
