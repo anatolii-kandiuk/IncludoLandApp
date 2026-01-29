@@ -1,9 +1,0 @@
-services:
-  web:
-    build: .
-    env_file:
-      - .env
-    volumes:
-      - ./media:/app/media
-    ports:
-      - "8000:8000"

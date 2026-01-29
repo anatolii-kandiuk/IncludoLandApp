@@ -1,0 +1,14 @@
+services:
+  web:
+    build: .
+    env_file:
+      - .env
+    environment:
+      DEBUG: "0"
+      PORT: "${PORT:-8000}"
+      DATABASE_URL: "${DATABASE_URL}"
+    volumes:
+      - ./media:/app/media
+    ports:
+      - "8000:${PORT:-8000}"
+    restart: unless-stopped

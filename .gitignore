@@ -11,14 +11,14 @@ dist/
 *.egg-info/
 
 *.log
-db.sqlite3
-db.sqlite3-journal
 /media
 /staticfiles
 
 .env
 .env.*
-!.env.example
+
+# Local-only docker compose (prod uses docker-compose.prod.yml)
+docker-compose.yml
 
 .vscode/
 .idea/
