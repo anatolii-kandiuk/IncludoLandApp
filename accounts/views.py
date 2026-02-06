@@ -310,6 +310,8 @@ class RoleAwareLoginView(LoginView):
             return next_url
 
         user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return reverse('admin:index')
         if hasattr(user, 'specialist_profile'):
             return reverse('specialist_profile')
         if hasattr(user, 'child_profile'):

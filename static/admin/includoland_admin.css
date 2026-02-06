@@ -1,18 +1,49 @@
 :root {
     --incl-primary: #7c3aed;
-    --incl-primary-2: #2b97e5;
-    --incl-bg: #0b1020;
+    --incl-primary-dark: #5b21b6;
+    --incl-accent: #2b97e5;
+    --incl-bg: #f6f7fb;
+    --incl-text: #0f172a;
+    --incl-muted: #64748b;
+    --incl-card: #ffffff;
+    --incl-border: #e2e8f0;
 }
 
-/* Header */
+body {
+    background: var(--incl-bg);
+    color: var(--incl-text);
+}
+
+/* Header (no gradients) */
 #header {
-    background: linear-gradient(90deg, var(--incl-primary), var(--incl-primary-2));
+    background: var(--incl-primary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 #header #site-name a {
-    color: #fff;
+    color: #ffffff;
     font-weight: 700;
     letter-spacing: 0.2px;
+}
+
+.incl-admin-nav {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin: 6px 0 0 0;
+}
+
+.incl-admin-nav__link {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 6px 10px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.incl-admin-nav__link:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 /* Buttons */
@@ -39,6 +70,8 @@ input[type=submit].default:hover,
 .module {
     border-radius: 14px;
     overflow: hidden;
+    border: 1px solid var(--incl-border);
+    background: var(--incl-card);
 }
 
 .dashboard .module table td a {
@@ -48,4 +81,55 @@ input[type=submit].default:hover,
 /* Make filters a bit nicer */
 #changelist-filter {
     border-radius: 14px;
+    border: 1px solid var(--incl-border);
+    background: var(--incl-card);
+}
+
+/* Admin index cards */
+.incl-admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.incl-admin-card {
+    background: var(--incl-card);
+    border: 1px solid var(--incl-border);
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.incl-admin-card__title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.incl-admin-card__model {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-top: 1px solid var(--incl-border);
+}
+
+.incl-admin-card__model:first-child {
+    border-top: none;
+}
+
+.incl-admin-card__model a {
+    color: var(--incl-text);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.incl-admin-card__actions a {
+    color: var(--incl-accent);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.incl-admin-card__actions a:hover {
+    color: var(--incl-primary-dark);
 }

@@ -1,0 +1,24 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+{% if app_list %}
+<div class="incl-admin-grid">
+    {% for app in app_list %}
+    <section class="incl-admin-card" aria-label="{{ app.name }}">
+        <h2 class="incl-admin-card__title">{{ app.name }}</h2>
+        {% for model in app.models %}
+        <div class="incl-admin-card__model">
+            <a href="{{ model.admin_url }}">{{ model.name }}</a>
+            <div class="incl-admin-card__actions">
+                {% if model.add_url %}<a href="{{ model.add_url }}">Додати</a>{% endif %}
+                {% if model.admin_url %}<a href="{{ model.admin_url }}">Список</a>{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </section>
+    {% endfor %}
+</div>
+{% else %}
+<p>Немає доступних розділів.</p>
+{% endif %}
+{% endblock %}

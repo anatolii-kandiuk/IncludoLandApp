@@ -14,4 +14,10 @@
 </h1>
 {% endblock %}
 
-{% block nav-global %}{% endblock %}
+{% block nav-global %}
+<nav class="incl-admin-nav" aria-label="Admin navigation">
+    <a class="incl-admin-nav__link" href="{% url 'admin:index' %}">Панель</a>
+    <a class="incl-admin-nav__link" href="/">Сайт</a>
+    <a class="incl-admin-nav__link" href="{% url 'admin:auth_user_changelist' %}">Користувачі</a>
+</nav>
+{% endblock %}
