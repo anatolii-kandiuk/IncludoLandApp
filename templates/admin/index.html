@@ -2,6 +2,7 @@
 
 {% block content %}
 {% if app_list %}
+<p class="incl-admin-subtitle">Оберіть розділ для керування даними.</p>
 <div class="incl-admin-grid">
     {% for app in app_list %}
     <section class="incl-admin-card" aria-label="{{ app.name }}">

@@ -41,6 +41,12 @@
                     <span class="pill__ico" aria-hidden="true">📈</span>
                     <span>Панель</span>
                 </a>
+                {% if user.is_staff or user.is_superuser %}
+                <a class="pill" href="{% url 'admin:index' %}">
+                    <span class="pill__ico" aria-hidden="true">🛠️</span>
+                    <span>Адмінка</span>
+                </a>
+                {% endif %}
                 <a class="pill" href="{% url 'specialist_print' %}">
                     <span class="pill__ico" aria-hidden="true">🖨️</span>
                     <span>Друк</span>
@@ -55,6 +61,12 @@
                     <span class="pill__ico" aria-hidden="true">🖨️</span>
                     <span>Друк</span>
                 </a>
+                {% if user.is_staff or user.is_superuser %}
+                <a class="pill" href="{% url 'admin:index' %}">
+                    <span class="pill__ico" aria-hidden="true">🛠️</span>
+                    <span>Адмінка</span>
+                </a>
+                {% endif %}
                 {% endif %}
                 <a class="pill" href="{% url 'logout' %}">
                     <span class="pill__ico" aria-hidden="true">⇦</span>
