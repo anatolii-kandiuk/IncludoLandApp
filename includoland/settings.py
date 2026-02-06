@@ -85,15 +85,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'includoland.wsgi.application'
 
-# DB congiguration
+# DB configuration
 db_from_env = os.getenv('DATABASE_URL') or os.getenv('DATABASE_PUBLIC_URL')
 
 if db_from_env:
+    ssl_required = not DEBUG
+    if '@db:' in db_from_env or 'localhost' in db_from_env or '127.0.0.1' in db_from_env:
+        ssl_required = False
+
     DATABASES = {
         'default': dj_database_url.config(
             default=db_from_env,
             conn_max_age=600,
-            ssl_require=False if 'internal' in db_from_env else True
+            ssl_require=ssl_required,
         )
     }
 
