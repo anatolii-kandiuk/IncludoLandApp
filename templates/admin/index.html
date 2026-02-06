@@ -3,22 +3,26 @@
 {% block content %}
 {% if app_list %}
 <p class="incl-admin-subtitle">Оберіть розділ для керування даними.</p>
-<div class="incl-admin-grid">
-    {% for app in app_list %}
-    <section class="incl-admin-card" aria-label="{{ app.name }}">
-        <h2 class="incl-admin-card__title">{{ app.name }}</h2>
-        {% for model in app.models %}
-        <div class="incl-admin-card__model">
-            <a href="{{ model.admin_url }}">{{ model.name }}</a>
-            <div class="incl-admin-card__actions">
-                {% if model.add_url %}<a href="{{ model.add_url }}">Додати</a>{% endif %}
-                {% if model.admin_url %}<a href="{{ model.admin_url }}">Список</a>{% endif %}
-            </div>
-        </div>
-        {% endfor %}
-    </section>
-    {% endfor %}
-</div>
+{% for app in app_list %}
+<section class="incl-admin-table" aria-label="{{ app.name }}">
+    <h2 class="incl-admin-table__title">{{ app.name }}</h2>
+    <table class="incl-admin-table__grid" aria-describedby="{{ app.app_label }}-label">
+        <tbody>
+            {% for model in app.models %}
+            <tr>
+                <th scope="row">
+                    <a href="{{ model.admin_url }}">{{ model.name }}</a>
+                </th>
+                <td class="incl-admin-table__actions">
+                    {% if model.add_url %}<a href="{{ model.add_url }}">Додати</a>{% endif %}
+                    {% if model.admin_url %}<a href="{{ model.admin_url }}">Список</a>{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endfor %}
 {% else %}
 <p>Немає доступних розділів.</p>
 {% endif %}

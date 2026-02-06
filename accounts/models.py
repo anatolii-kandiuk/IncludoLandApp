@@ -27,6 +27,10 @@ class ChildProfile(models.Model):
     def __str__(self) -> str:
         return f"ChildProfile({self.user.username})"
 
+    class Meta:
+        verbose_name = 'Профіль дитини'
+        verbose_name_plural = 'Профілі дітей'
+
 
 class SpecialistProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='specialist_profile')
@@ -43,6 +47,10 @@ class SpecialistProfile(models.Model):
 
     def __str__(self) -> str:
         return f"SpecialistProfile({self.user.username})"
+
+    class Meta:
+        verbose_name = 'Профіль спеціаліста'
+        verbose_name_plural = 'Профілі спеціалістів'
 
 
 class SpecialistInvite(models.Model):
@@ -70,6 +78,8 @@ class SpecialistInvite(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'Запрошення спеціаліста'
+        verbose_name_plural = 'Запрошення спеціалістів'
 
     def __str__(self) -> str:
         return f"SpecialistInvite({self.email}, {self.token})"
@@ -111,6 +121,8 @@ class GameResult(models.Model):
 
     class Meta:
         ordering = ['created_at']
+        verbose_name = 'Результат гри'
+        verbose_name_plural = 'Результати ігор'
 
     def __str__(self) -> str:
         return f"GameResult({self.user.username}, {self.game_type}, {self.score})"
@@ -134,6 +146,8 @@ class SoundCard(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'Картка звуку'
+        verbose_name_plural = 'Картки звуків'
 
     def __str__(self) -> str:
         return f"SoundCard({self.title})"
@@ -166,6 +180,8 @@ class Story(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'Казка'
+        verbose_name_plural = 'Казки'
 
     def __str__(self) -> str:
         return f"Story({self.title})"
@@ -187,6 +203,8 @@ class StoryListen(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'Прослуховування казки'
+        verbose_name_plural = 'Прослуховування казок'
 
     def __str__(self) -> str:
         return f"StoryListen({self.user.username}, {self.story_id})"
@@ -204,6 +222,8 @@ class UserBadge(models.Model):
     class Meta:
         unique_together = (('user', 'code'),)
         ordering = ['-created_at']
+        verbose_name = 'Нагорода'
+        verbose_name_plural = 'Нагороди'
 
     def __str__(self) -> str:
         return f"UserBadge({self.user.username}, {self.code})"
@@ -227,6 +247,8 @@ class WordPuzzleWord(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'Слово пазлу'
+        verbose_name_plural = 'Слова пазлів'
 
     def __str__(self) -> str:
         return f"WordPuzzleWord({self.word})"
@@ -250,6 +272,8 @@ class SentenceExercise(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'Вправа з реченнями'
+        verbose_name_plural = 'Вправи з реченнями'
 
     def __str__(self) -> str:
         return f"SentenceExercise({self.prompt})"
@@ -274,6 +298,8 @@ class SpecialistStudentNote(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'Нотатка спеціаліста'
+        verbose_name_plural = 'Нотатки спеціаліста'
 
     def __str__(self) -> str:
         return f"SpecialistStudentNote({self.specialist.user.username} → {self.student.user.username})"
@@ -300,6 +326,8 @@ class ColoringPage(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'Розмальовка'
+        verbose_name_plural = 'Розмальовки'
 
     def __str__(self) -> str:
         return f"ColoringPage({self.title})"

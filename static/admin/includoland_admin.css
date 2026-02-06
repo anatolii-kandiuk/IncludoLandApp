@@ -16,6 +16,15 @@ body {
     line-height: 1.5;
 }
 
+/* Links */
+a {
+    color: var(--incl-primary);
+}
+
+a:hover {
+    color: var(--incl-primary-dark);
+}
+
 /* Header (no gradients) */
 #header {
     background: var(--incl-primary);
@@ -92,63 +101,66 @@ input[type=submit].default:hover,
     padding: 12px;
 }
 
-/* Admin index cards */
-.incl-admin-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 20px;
-    margin-top: 16px;
-}
-
 .incl-admin-subtitle {
     color: var(--incl-muted);
     margin: 0 0 12px 0;
 }
 
-.incl-admin-card {
+/* Admin index tables (stacked, full width) */
+.incl-admin-table {
     background: var(--incl-card);
     border: 1px solid var(--incl-border);
     border-radius: 14px;
-    padding: 18px;
+    padding: 14px 18px 4px;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    margin-bottom: 18px;
 }
 
-.incl-admin-card__title {
+.incl-admin-table__title {
     font-size: 18px;
     font-weight: 700;
-    margin: 0 0 10px 0;
+    margin: 0 0 12px 0;
 }
 
-.incl-admin-card__model {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
+.incl-admin-table__grid {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.incl-admin-table__grid th,
+.incl-admin-table__grid td {
+    padding: 12px 10px;
     border-top: 1px solid var(--incl-border);
 }
 
-.incl-admin-card__model:first-child {
-    border-top: none;
+.incl-admin-table__grid tr:first-child th,
+.incl-admin-table__grid tr:first-child td {
+    border-top: 1px solid var(--incl-border);
 }
 
-.incl-admin-card__model a {
+.incl-admin-table__grid th a {
     color: var(--incl-text);
     text-decoration: none;
     font-weight: 600;
 }
 
-.incl-admin-card__model a:hover {
+.incl-admin-table__grid th a:hover {
     color: var(--incl-primary-dark);
 }
 
-.incl-admin-card__actions a {
+.incl-admin-table__actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.incl-admin-table__actions a {
     color: var(--incl-accent);
     text-decoration: none;
     font-weight: 600;
-    margin-left: 10px;
+    margin-left: 12px;
 }
 
-.incl-admin-card__actions a:hover {
+.incl-admin-table__actions a:hover {
     color: var(--incl-primary-dark);
 }
 
@@ -171,4 +183,113 @@ table thead th {
 table td,
 table th {
     padding: 10px 12px;
+}
+
+/* Sidebar (changelist) */
+#nav-sidebar {
+    background: var(--incl-card);
+    border-right: 1px solid var(--incl-border);
+    padding: 12px 10px;
+}
+
+#nav-sidebar .module {
+    margin-bottom: 14px;
+}
+
+#nav-sidebar .module caption,
+#nav-sidebar .module h2 {
+    background: #e8edf7;
+    color: var(--incl-text);
+    font-weight: 700;
+    border-radius: 10px 10px 0 0;
+    padding: 10px 12px;
+}
+
+#nav-sidebar .module table {
+    background: var(--incl-card);
+}
+
+#nav-sidebar .module table tr {
+    border-bottom: 1px solid var(--incl-border);
+}
+
+#nav-sidebar .module table td,
+#nav-sidebar .module table th {
+    padding: 8px 10px;
+}
+
+#nav-sidebar .module table td a {
+    font-weight: 600;
+}
+
+/* Changelist toolbar */
+#changelist-search {
+    margin-bottom: 16px;
+}
+
+#changelist-search input[type="text"],
+#changelist-search input[type="search"],
+.search-filter input[type="text"],
+.search-filter input[type="search"],
+.vTextField,
+.vLargeTextField {
+    border-radius: 10px;
+    border: 1px solid var(--incl-border);
+    padding: 8px 10px;
+    background: #fff;
+}
+
+#changelist-search input[type="submit"] {
+    border-radius: 10px;
+    padding: 8px 14px;
+}
+
+/* Filter panel */
+#changelist-filter h2 {
+    font-size: 14px;
+    margin: 0 0 10px 0;
+}
+
+#changelist-filter ul {
+    margin: 0;
+    padding: 0 0 4px 0;
+}
+
+#changelist-filter li a {
+    display: inline-block;
+    padding: 6px 8px;
+    border-radius: 8px;
+    color: var(--incl-text);
+}
+
+#changelist-filter li.selected a {
+    background: #e8edf7;
+    color: var(--incl-primary-dark);
+    font-weight: 700;
+}
+
+/* Changelist result list */
+#result_list {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--incl-border);
+    background: var(--incl-card);
+}
+
+#result_list thead th {
+    background: #eef2ff;
+    font-weight: 700;
+}
+
+#result_list tbody tr:nth-child(even) {
+    background: #fafbff;
+}
+
+/* Pagination */
+.paginator {
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--incl-card);
+    border: 1px solid var(--incl-border);
 }
