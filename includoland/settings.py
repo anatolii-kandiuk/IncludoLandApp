@@ -86,25 +86,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'includoland.wsgi.application'
 
 # DB congiguration
-DATABASE_URL = os.getenv('DATABASE_URL') or os.getenv('DATABASE_PUBLIC_URL')
+db_from_env = os.getenv('DATABASE_URL') or os.getenv('DATABASE_PUBLIC_URL')
 
-if not DATABASE_URL:
-    pg_host = os.getenv('PGHOST')
-    pg_user = os.getenv('PGUSER')
-    if pg_host and pg_user:
-        DATABASE_URL = f"postgresql://{pg_user}:{os.getenv('PGPASSWORD')}@{pg_host}:{os.getenv('PGPORT', '5432')}/{os.getenv('PGDATABASE')}"
-    else:
-        db_host = os.getenv('DB_HOST')
-        db_user = os.getenv('DB_USER')
-        if db_host and db_user:
-            DATABASE_URL = f"postgresql://{db_user}:{os.getenv('DB_PASSWORD')}@{db_host}:{os.getenv('DB_PORT', '5432')}/{os.getenv('DB_NAME')}"
-
-if DATABASE_URL:
+if db_from_env:
     DATABASES = {
         'default': dj_database_url.config(
-            default=DATABASE_URL,
+            default=db_from_env,
             conn_max_age=600,
-            ssl_require=False if 'internal' in DATABASE_URL else (not DEBUG),
+            ssl_require=False if 'internal' in db_from_env else True
         )
     }
 
