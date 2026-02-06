@@ -54,8 +54,27 @@ class SpecialistProfileInline(admin.StackedInline):
 @admin.register(User)
 class UserAdmin(DjangoUserAdmin):
     inlines = (ChildProfileInline, SpecialistProfileInline)
-    list_display = DjangoUserAdmin.list_display + ('is_staff', 'is_superuser', 'is_active')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff_label', 'is_superuser_label', 'is_active_label')
     list_filter = DjangoUserAdmin.list_filter + ('is_staff', 'is_superuser', 'is_active')
+
+    @admin.display(boolean=True, description='Доступ до адмінки')
+    def is_staff_label(self, obj):
+        return obj.is_staff
+
+    @admin.display(boolean=True, description='Суперкористувач')
+    def is_superuser_label(self, obj):
+        return obj.is_superuser
+
+    @admin.display(boolean=True, description='Активний')
+    def is_active_label(self, obj):
+        return obj.is_active
+
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'email', 'first_name', 'last_name', 'password1', 'password2', 'is_staff', 'is_superuser', 'is_active'),
+        }),
+    )
 
 
 @admin.register(SpecialistInvite)
@@ -126,6 +145,7 @@ class ChildProfileAdmin(admin.ModelAdmin):
 class SpecialistProfileAdmin(admin.ModelAdmin):
     class CreateSpecialistForm(forms.ModelForm):
         username = forms.CharField(label='Логін (username)', max_length=150)
+        email = forms.EmailField(label='Email', required=False)
         first_name = forms.CharField(label="Ім'я", max_length=150)
         last_name = forms.CharField(label='Прізвище', max_length=150)
         password1 = forms.CharField(label='Пароль', widget=forms.PasswordInput)
@@ -156,6 +176,7 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
 
     class ChangeSpecialistForm(forms.ModelForm):
         username = forms.CharField(label='Логін (username)', max_length=150)
+        email = forms.EmailField(label='Email', required=False)
         first_name = forms.CharField(label="Ім'я", max_length=150, required=False)
         last_name = forms.CharField(label='Прізвище', max_length=150, required=False)
         password1 = forms.CharField(label='Новий пароль', widget=forms.PasswordInput, required=False)
@@ -170,6 +191,7 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
             user = getattr(self.instance, 'user', None)
             if user is not None:
                 self.fields['username'].initial = user.username
+                self.fields['email'].initial = user.email
                 self.fields['first_name'].initial = user.first_name
                 self.fields['last_name'].initial = user.last_name
 
@@ -196,7 +218,7 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
 
             return cleaned
 
-    list_display = ('username', 'first_name', 'last_name', 'coins', 'created_at', 'updated_at')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'coins', 'created_at', 'updated_at')
     search_fields = ('user__username', 'user__email')
     list_select_related = ('user',)
     filter_horizontal = ('students',)
@@ -204,6 +226,10 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
     @admin.display(ordering='user__username', description='Username')
     def username(self, obj: SpecialistProfile) -> str:
         return obj.user.username
+
+    @admin.display(ordering='user__email', description='Email')
+    def email(self, obj: SpecialistProfile) -> str:
+        return obj.user.email
 
     @admin.display(ordering='user__first_name', description='First name')
     def first_name(self, obj: SpecialistProfile) -> str:
@@ -226,7 +252,7 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
                 (
                     'Створення спеціаліста',
                     {
-                        'fields': ('username', 'first_name', 'last_name', 'password1', 'password2'),
+                        'fields': ('username', 'email', 'first_name', 'last_name', 'password1', 'password2'),
                     },
                 ),
             )
@@ -235,7 +261,7 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
             (
                 'Профіль спеціаліста',
                 {
-                    'fields': ('user', 'username', 'first_name', 'last_name', 'password1', 'password2', 'coins', 'students'),
+                    'fields': ('user', 'username', 'email', 'first_name', 'last_name', 'password1', 'password2', 'coins', 'students'),
                 },
             ),
         )
@@ -255,6 +281,7 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
 
             user = User.objects.create(
                 username=username,
+                email=form.cleaned_data.get('email') or '',
                 first_name=first_name,
                 last_name=last_name,
                 is_active=True,
@@ -273,15 +300,16 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
         else:
             user = obj.user
             user.username = form.cleaned_data['username'].strip()
+            user.email = (form.cleaned_data.get('email') or '').strip()
             user.first_name = (form.cleaned_data.get('first_name') or '').strip()
             user.last_name = (form.cleaned_data.get('last_name') or '').strip()
 
             password1 = form.cleaned_data.get('password1')
             if password1:
                 user.set_password(password1)
-                user.save(update_fields=['username', 'first_name', 'last_name', 'password'])
+                user.save(update_fields=['username', 'email', 'first_name', 'last_name', 'password'])
             else:
-                user.save(update_fields=['username', 'first_name', 'last_name'])
+                user.save(update_fields=['username', 'email', 'first_name', 'last_name'])
 
         super().save_model(request, obj, form, change)
 
