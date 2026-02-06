@@ -7,6 +7,34 @@
     --incl-muted: #64748b;
     --incl-card: #ffffff;
     --incl-border: #e2e8f0;
+
+    /* Django admin theme variables (force light) */
+    --primary: #7c3aed;
+    --secondary: #2b97e5;
+    --accent: #2b97e5;
+    --primary-fg: #ffffff;
+    --body-fg: #0f172a;
+    --body-quiet-color: #64748b;
+    --body-loud-color: #0f172a;
+    --body-bg: #f6f7fb;
+    --body-header-bg: #7c3aed;
+    --body-header-fg: #ffffff;
+    --header-bg: #7c3aed;
+    --header-color: #ffffff;
+    --header-link-color: #ffffff;
+    --breadcrumbs-fg: #0f172a;
+    --breadcrumbs-bg: #ffffff;
+    --link-fg: #7c3aed;
+    --link-hover-color: #5b21b6;
+    --border-color: #e2e8f0;
+    --hairline-color: #e2e8f0;
+    --button-fg: #ffffff;
+    --button-bg: #7c3aed;
+    --button-hover-bg: #5b21b6;
+    --default-button-bg: #7c3aed;
+    --default-button-hover-bg: #5b21b6;
+    --selected-bg: #e8edf7;
+    --selected-row: #eef2ff;
 }
 
 body {
@@ -14,6 +42,39 @@ body {
     color: var(--incl-text);
     font-size: 14.5px;
     line-height: 1.5;
+}
+
+/* Remove text selection highlight */
+::selection {
+    background: transparent;
+    color: inherit;
+}
+
+::-moz-selection {
+    background: transparent;
+    color: inherit;
+}
+
+/* Force light theme regardless of device settings */
+html {
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+
+    html,
+    body {
+        color-scheme: light;
+        background: var(--incl-bg);
+        color: var(--incl-text);
+    }
+}
+
+/* Django admin dark-mode class override (if present) */
+html.theme-dark,
+body.theme-dark {
+    background: var(--incl-bg) !important;
+    color: var(--incl-text) !important;
 }
 
 /* Links */
@@ -59,6 +120,14 @@ a:hover {
     background: rgba(255, 255, 255, 0.2);
 }
 
+/* Hide theme toggle button in admin header */
+#theme-toggle,
+.theme-toggle,
+#user-tools button[title*="theme"],
+#user-tools button[aria-label*="theme"] {
+    display: none !important;
+}
+
 /* Buttons */
 .button,
 input[type=submit],
@@ -87,6 +156,29 @@ input[type=submit].default:hover,
     border: 1px solid var(--incl-border);
     background: var(--incl-card);
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.module table,
+.module table th,
+.module table td {
+    background: #ffffff;
+    color: var(--incl-text);
+}
+
+.module table tr:nth-child(even) th,
+.module table tr:nth-child(even) td {
+    background: #f8fafc;
+}
+
+.dashboard .module table tr th,
+.dashboard .module table tr td {
+    background: #ffffff;
+    color: var(--incl-text);
+}
+
+.dashboard .module table tr:nth-child(even) th,
+.dashboard .module table tr:nth-child(even) td {
+    background: #f8fafc;
 }
 
 .dashboard .module table td a {
@@ -171,8 +263,14 @@ input[type=submit].default:hover,
 
 .breadcrumbs {
     padding: 12px 24px;
-    background: var(--incl-card);
-    border-bottom: 1px solid var(--incl-border);
+    background: var(--header-bg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.breadcrumbs a {
+    color: #ffffff;
+    font-weight: 600;
 }
 
 /* Table readability */
@@ -187,9 +285,38 @@ table th {
 
 /* Sidebar (changelist) */
 #nav-sidebar {
-    background: var(--incl-card);
+    background: #f3e8ff;
     border-right: 1px solid var(--incl-border);
     padding: 12px 10px;
+    width: 420px;
+    min-width: 420px;
+}
+
+/* Remove yellow highlight styles in sidebar */
+#nav-sidebar .current-model a,
+#nav-sidebar .current-app a {
+    background: #e0f2fe;
+    color: #0f172a;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 6px 8px;
+    display: inline-block;
+}
+
+/* Ensure sidebar links and add buttons are neutral (no yellow background) */
+#nav-sidebar a,
+#nav-sidebar a:visited,
+#nav-sidebar .module table td a,
+#nav-sidebar .module table td a:hover {
+    background: transparent;
+}
+
+/* Override any admin default selected row highlight in sidebar */
+#nav-sidebar .selected,
+#nav-sidebar .selected a,
+#nav-sidebar .current-app,
+#nav-sidebar .current-model {
+    background: transparent !important;
 }
 
 #nav-sidebar .module {
@@ -198,8 +325,8 @@ table th {
 
 #nav-sidebar .module caption,
 #nav-sidebar .module h2 {
-    background: #e8edf7;
-    color: var(--incl-text);
+    background: var(--header-bg);
+    color: #ffffff;
     font-weight: 700;
     border-radius: 10px 10px 0 0;
     padding: 10px 12px;
@@ -216,10 +343,31 @@ table th {
 #nav-sidebar .module table td,
 #nav-sidebar .module table th {
     padding: 8px 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #nav-sidebar .module table td a {
+    color: #0f172a;
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#nav-sidebar .module table td a:hover {
+    color: var(--incl-primary-dark);
+}
+
+#nav-sidebar .current-model a,
+#nav-sidebar .current-app a {
+    background: #e0f2fe;
+    color: #0f172a;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 6px 8px;
+    display: inline-block;
 }
 
 /* Changelist toolbar */
@@ -317,6 +465,12 @@ table th {
     overflow: hidden;
     border: 1px solid var(--incl-border);
     background: var(--incl-card);
+}
+
+#result_list thead th,
+#result_list tbody td,
+#result_list tbody th {
+    color: var(--incl-text);
 }
 
 #result_list thead th {

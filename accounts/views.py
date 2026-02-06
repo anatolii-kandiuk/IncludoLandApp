@@ -502,7 +502,6 @@ def specialist_profile(request):
 
     context = {
         'username': request.user.username,
-        'coins': specialist.coins,
         'attention_students': attention_students,
         'my_students': my_students,
         'student_cards': student_cards,
@@ -544,7 +543,6 @@ def specialist_sentences(request):
 
     context = {
         'username': request.user.username,
-        'coins': request.user.specialist_profile.coins,
         'form': form,
         'exercises': exercises,
     }
@@ -958,7 +956,6 @@ def specialist_print(request):
         'attention_url_name': 'specialist_print_attention',
         'memory_url_name': 'specialist_print_memory',
         'username': request.user.username,
-        'coins': request.user.specialist_profile.coins,
     }
     return render(request, 'print/hub.html', context)
 
@@ -980,7 +977,6 @@ def specialist_print_math(request):
         'self_url_name': 'specialist_print_math',
         'title': 'Математика',
         'username': request.user.username,
-        'coins': request.user.specialist_profile.coins,
         'level': level,
         'op': op,
         'items': items,
@@ -1002,7 +998,6 @@ def specialist_print_sentences(request):
         'self_url_name': 'specialist_print_sentences',
         'title': 'Побудова речень',
         'username': request.user.username,
-        'coins': request.user.specialist_profile.coins,
         'items': items,
     }
     return render(request, 'print/sentences.html', context)
@@ -1022,7 +1017,6 @@ def specialist_print_words(request):
         'self_url_name': 'specialist_print_words',
         'title': 'Пазли слів',
         'username': request.user.username,
-        'coins': request.user.specialist_profile.coins,
         'items': items,
     }
     return render(request, 'print/words.html', context)
@@ -1042,7 +1036,6 @@ def specialist_print_attention(request):
         'self_url_name': 'specialist_print_attention',
         'title': 'Увага',
         'username': request.user.username,
-        'coins': request.user.specialist_profile.coins,
         'items': items,
     }
     return render(request, 'print/attention.html', context)
@@ -1062,7 +1055,6 @@ def specialist_print_memory(request):
         'self_url_name': 'specialist_print_memory',
         'title': "Памʼять",
         'username': request.user.username,
-        'coins': request.user.specialist_profile.coins,
         'items': items,
     }
     return render(request, 'print/memory.html', context)
@@ -1405,7 +1397,6 @@ def specialist_sounds(request):
 
     context = {
         'username': request.user.username,
-        'coins': request.user.specialist_profile.coins,
         'form': form,
         'cards': cards,
     }
@@ -1452,7 +1443,6 @@ def specialist_sound_edit(request, card_id: int):
 
     context = {
         'username': request.user.username,
-        'coins': request.user.specialist_profile.coins,
         'form': form,
         'cards': cards,
         'edit_card_id': card.id,
@@ -1538,7 +1528,6 @@ def specialist_stories(request):
 
     context = {
         'username': request.user.username,
-        'coins': request.user.specialist_profile.coins,
         'form': form,
         'stories': stories,
     }
@@ -1629,7 +1618,6 @@ def specialist_story_edit(request, story_id: int):
 
     context = {
         'username': request.user.username,
-        'coins': request.user.specialist_profile.coins,
         'form': form,
         'stories': stories,
         'edit_story_id': story.id,
@@ -1687,7 +1675,6 @@ def specialist_words(request):
 
     context = {
         'username': request.user.username,
-        'coins': request.user.specialist_profile.coins,
         'form': form,
         'words': words,
     }

@@ -34,8 +34,6 @@ class ChildProfile(models.Model):
 
 class SpecialistProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='specialist_profile')
-    coins = models.PositiveIntegerField(default=0)
-
     students = models.ManyToManyField(
         'ChildProfile',
         related_name='specialists',

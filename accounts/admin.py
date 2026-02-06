@@ -184,7 +184,7 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
 
         class Meta:
             model = SpecialistProfile
-            fields = ('coins', 'students')
+            fields = ('students',)
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -218,7 +218,7 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
 
             return cleaned
 
-    list_display = ('username', 'email', 'first_name', 'last_name', 'coins', 'created_at', 'updated_at')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'created_at', 'updated_at')
     search_fields = ('user__username', 'user__email')
     list_select_related = ('user',)
     filter_horizontal = ('students',)
@@ -261,7 +261,7 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
             (
                 'Профіль спеціаліста',
                 {
-                    'fields': ('user', 'username', 'email', 'first_name', 'last_name', 'password1', 'password2', 'coins', 'students'),
+                    'fields': ('user', 'username', 'email', 'first_name', 'last_name', 'password1', 'password2', 'students'),
                 },
             ),
         )
