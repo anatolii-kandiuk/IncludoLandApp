@@ -1,0 +1,17 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}IncludoLand Admin{% if subtitle %} — {{ subtitle }}{% endif %}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/includoland_admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">IncludoLand Admin</a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

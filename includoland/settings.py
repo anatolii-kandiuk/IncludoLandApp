@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'storages',
+
     'accounts.apps.AccountsConfig',
 ]
 
@@ -151,17 +153,59 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
+
+# --- Cloudflare R2 (S3-compatible) for media files ---
+# Remote-only: media must never be stored locally.
+
+# Cloudflare R2 bucket details (your values)
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', 'includo-land-storage')
+AWS_S3_ENDPOINT_URL = os.getenv(
+    'AWS_S3_ENDPOINT_URL',
+    'https://80a148f7dc24f9ebadac3a04a7b15c42.r2.cloudflarestorage.com',
+)
+
+# Public Development URL (r2.dev) domain WITHOUT scheme
+AWS_S3_CUSTOM_DOMAIN = os.getenv(
+    'AWS_S3_CUSTOM_DOMAIN',
+    'pub-5679526c27734cf1ac685264f79b3fa4.r2.dev',
+)
+
+# Credentials (store in .env or platform environment variables)
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+if not (AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY):
+    raise RuntimeError('AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY must be set (remote-only media storage).')
+
+# R2 specifics / sane defaults
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'auto')
+AWS_S3_SIGNATURE_VERSION = os.getenv('AWS_S3_SIGNATURE_VERSION', 's3v4')
+AWS_S3_ADDRESSING_STYLE = os.getenv('AWS_S3_ADDRESSING_STYLE', 'path')
+AWS_S3_USE_SSL = True
+
+# Public read URLs without signed querystrings (r2.dev public bucket)
+# False => clean public URLs; True => signed URLs with query params.
+AWS_QUERYSTRING_AUTH = os.getenv('AWS_QUERYSTRING_AUTH', '0').lower() in {'1', 'true', 'yes'}
+
+# Avoid ACL calls (often blocked / unsupported depending on bucket settings)
+AWS_DEFAULT_ACL = None
+
+# Overwrite behavior.
+# Setting this to True avoids a pre-save HeadObject existence check (which can 403 on some R2 API tokens).
+# We keep filenames unique via upload_to (UUID) so overwrites are extremely unlikely.
+AWS_S3_FILE_OVERWRITE = os.getenv('AWS_S3_FILE_OVERWRITE', '1').lower() in {'1', 'true', 'yes'}
+
 STORAGES = {
     'default': {
-        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
     },
     'staticfiles': {
         'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
     },
 }
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+MEDIA_ROOT = None
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

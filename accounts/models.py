@@ -1,8 +1,20 @@
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from django.utils.deconstruct import deconstructible
 
 import uuid
+from pathlib import Path
+
+
+@deconstructible
+class UniqueUploadTo:
+    def __init__(self, prefix: str):
+        self.prefix = prefix.strip('/')
+
+    def __call__(self, _instance, filename: str) -> str:
+        suffix = Path(filename).suffix.lower()
+        return f"{self.prefix}/{uuid.uuid4().hex}{suffix}"
 
 
 class ChildProfile(models.Model):
@@ -112,8 +124,8 @@ class SoundCard(models.Model):
     )
 
     title = models.CharField(max_length=80)
-    image = models.ImageField(upload_to='sounds/images/')
-    audio = models.FileField(upload_to='sounds/audio/')
+    image = models.ImageField(upload_to=UniqueUploadTo('sounds/images'))
+    audio = models.FileField(upload_to=UniqueUploadTo('sounds/audio'))
 
     is_active = models.BooleanField(default=True)
 
@@ -141,11 +153,11 @@ class Story(models.Model):
     title = models.CharField(max_length=120)
     content_type = models.CharField(max_length=8, choices=ContentType.choices, default=ContentType.TEXT)
 
-    image = models.ImageField(upload_to='stories/images/', blank=True, null=True)
+    image = models.ImageField(upload_to=UniqueUploadTo('stories/images'), blank=True, null=True)
 
     text = models.TextField(blank=True)
-    pdf_file = models.FileField(upload_to='stories/pdf/', blank=True, null=True)
-    audio = models.FileField(upload_to='stories/audio/', blank=True, null=True)
+    pdf_file = models.FileField(upload_to=UniqueUploadTo('stories/pdf'), blank=True, null=True)
+    audio = models.FileField(upload_to=UniqueUploadTo('stories/audio'), blank=True, null=True)
 
     is_active = models.BooleanField(default=True)
 
@@ -279,7 +291,7 @@ class ColoringPage(models.Model):
     )
 
     title = models.CharField(max_length=120)
-    file = models.FileField(upload_to='coloring/pages/')
+    file = models.FileField(upload_to=UniqueUploadTo('coloring/pages'))
     file_type = models.CharField(max_length=8, choices=FileType.choices, default=FileType.IMAGE)
 
     is_active = models.BooleanField(default=True)

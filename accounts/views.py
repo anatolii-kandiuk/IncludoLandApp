@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.views.decorators.http import require_POST
 from django.shortcuts import redirect, render
 from django.db.models import Avg, Q
@@ -1300,6 +1300,7 @@ def specialist_student_note_delete(request, note_id: int):
 
 @login_required
 def specialist_coloring_pages(request):
+    raise Http404()
     if not hasattr(request.user, 'specialist_profile'):
         return redirect('child_profile')
 
@@ -1349,6 +1350,7 @@ def specialist_coloring_pages(request):
 @login_required
 @require_POST
 def specialist_coloring_page_delete(request, page_id: int):
+    raise Http404()
     if not hasattr(request.user, 'specialist_profile'):
         return redirect('child_profile')
 

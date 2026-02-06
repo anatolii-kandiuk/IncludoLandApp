@@ -1,7 +1,7 @@
 import json
 import random
 
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -382,6 +382,7 @@ def learn_colors_print(request):
 
 
 def learn_coloring(request):
+    raise Http404()
     # Simple print-friendly coloring sheets with color hints.
     color_hex = {
         'Червоний': '#ef4444',
@@ -439,6 +440,7 @@ def learn_coloring(request):
 
 
 def learn_coloring_print(request):
+    raise Http404()
     # Reuse the same generation as learn_coloring.
     color_hex = {
         'Червоний': '#ef4444',

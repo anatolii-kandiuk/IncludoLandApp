@@ -1,0 +1,51 @@
+:root {
+    --incl-primary: #7c3aed;
+    --incl-primary-2: #2b97e5;
+    --incl-bg: #0b1020;
+}
+
+/* Header */
+#header {
+    background: linear-gradient(90deg, var(--incl-primary), var(--incl-primary-2));
+}
+
+#header #site-name a {
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+/* Buttons */
+.button,
+input[type=submit],
+input[type=button],
+.submit-row input {
+    border-radius: 10px;
+}
+
+.button.default,
+input[type=submit].default,
+.submit-row input.default {
+    background: var(--incl-primary);
+}
+
+.button.default:hover,
+input[type=submit].default:hover,
+.submit-row input.default:hover {
+    background: #6d28d9;
+}
+
+/* Modules / cards */
+.module {
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.dashboard .module table td a {
+    font-weight: 600;
+}
+
+/* Make filters a bit nicer */
+#changelist-filter {
+    border-radius: 14px;
+}

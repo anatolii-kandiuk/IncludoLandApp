@@ -7,7 +7,6 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.mail import send_mail
 from django.db import transaction
 from django.http import HttpRequest
-from django.utils.text import slugify
 from django.utils import timezone
 
 from .models import (
@@ -32,6 +31,11 @@ try:
     admin.site.unregister(User)
 except NotRegistered:
     pass
+
+
+admin.site.site_header = 'IncludoLand'
+admin.site.site_title = 'IncludoLand Admin'
+admin.site.index_title = 'Панель керування'
 
 
 class ChildProfileInline(admin.StackedInline):
@@ -121,6 +125,7 @@ class ChildProfileAdmin(admin.ModelAdmin):
 @admin.register(SpecialistProfile)
 class SpecialistProfileAdmin(admin.ModelAdmin):
     class CreateSpecialistForm(forms.ModelForm):
+        username = forms.CharField(label='Логін (username)', max_length=150)
         first_name = forms.CharField(label="Ім'я", max_length=150)
         last_name = forms.CharField(label='Прізвище', max_length=150)
         password1 = forms.CharField(label='Пароль', widget=forms.PasswordInput)
@@ -132,8 +137,14 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
 
         def clean(self):
             cleaned = super().clean()
+            username = (cleaned.get('username') or '').strip()
             password1 = cleaned.get('password1')
             password2 = cleaned.get('password2')
+
+            if not username:
+                self.add_error('username', 'Введіть логін.')
+            elif User.objects.filter(username=username).exists():
+                self.add_error('username', 'Цей логін вже зайнятий.')
 
             if password1 and password2 and password1 != password2:
                 raise forms.ValidationError('Паролі не співпадають.')
@@ -144,14 +155,63 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
             return cleaned
 
     class ChangeSpecialistForm(forms.ModelForm):
+        username = forms.CharField(label='Логін (username)', max_length=150)
+        first_name = forms.CharField(label="Ім'я", max_length=150, required=False)
+        last_name = forms.CharField(label='Прізвище', max_length=150, required=False)
+        password1 = forms.CharField(label='Новий пароль', widget=forms.PasswordInput, required=False)
+        password2 = forms.CharField(label='Повторіть пароль', widget=forms.PasswordInput, required=False)
+
         class Meta:
             model = SpecialistProfile
             fields = ('coins', 'students')
 
-    list_display = ('user', 'coins', 'created_at', 'updated_at')
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            user = getattr(self.instance, 'user', None)
+            if user is not None:
+                self.fields['username'].initial = user.username
+                self.fields['first_name'].initial = user.first_name
+                self.fields['last_name'].initial = user.last_name
+
+        def clean(self):
+            cleaned = super().clean()
+
+            user = getattr(self.instance, 'user', None)
+            username = (cleaned.get('username') or '').strip()
+            if not username:
+                self.add_error('username', 'Введіть логін.')
+            else:
+                qs = User.objects.filter(username=username)
+                if user is not None:
+                    qs = qs.exclude(pk=user.pk)
+                if qs.exists():
+                    self.add_error('username', 'Цей логін вже зайнятий.')
+
+            password1 = cleaned.get('password1')
+            password2 = cleaned.get('password2')
+            if password1 or password2:
+                if password1 != password2:
+                    raise forms.ValidationError('Паролі не співпадають.')
+                validate_password(password1)
+
+            return cleaned
+
+    list_display = ('username', 'first_name', 'last_name', 'coins', 'created_at', 'updated_at')
     search_fields = ('user__username', 'user__email')
     list_select_related = ('user',)
     filter_horizontal = ('students',)
+
+    @admin.display(ordering='user__username', description='Username')
+    def username(self, obj: SpecialistProfile) -> str:
+        return obj.user.username
+
+    @admin.display(ordering='user__first_name', description='First name')
+    def first_name(self, obj: SpecialistProfile) -> str:
+        return obj.user.first_name
+
+    @admin.display(ordering='user__last_name', description='Last name')
+    def last_name(self, obj: SpecialistProfile) -> str:
+        return obj.user.last_name
 
     def get_form(self, request: HttpRequest, obj=None, **kwargs):
         if obj is None:
@@ -166,7 +226,7 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
                 (
                     'Створення спеціаліста',
                     {
-                        'fields': ('first_name', 'last_name', 'password1', 'password2'),
+                        'fields': ('username', 'first_name', 'last_name', 'password1', 'password2'),
                     },
                 ),
             )
@@ -175,7 +235,7 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
             (
                 'Профіль спеціаліста',
                 {
-                    'fields': ('user', 'coins', 'students'),
+                    'fields': ('user', 'username', 'first_name', 'last_name', 'password1', 'password2', 'coins', 'students'),
                 },
             ),
         )
@@ -185,26 +245,13 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
             return ()
         return ('user',)
 
-    def _generate_username(self, first_name: str, last_name: str) -> str:
-        base = slugify(f"{first_name}-{last_name}", allow_unicode=True)
-        base = (base or 'specialist').replace('-', '_')
-
-        username = base
-        suffix = 1
-        while User.objects.filter(username=username).exists():
-            suffix += 1
-            username = f"{base}_{suffix}"
-
-        return username
-
     @transaction.atomic
     def save_model(self, request: HttpRequest, obj: SpecialistProfile, form, change: bool) -> None:
         if not change:
+            username = form.cleaned_data['username'].strip()
             first_name = form.cleaned_data['first_name'].strip()
             last_name = form.cleaned_data['last_name'].strip()
             password = form.cleaned_data['password1']
-
-            username = self._generate_username(first_name, last_name)
 
             user = User.objects.create(
                 username=username,
@@ -222,6 +269,19 @@ class SpecialistProfileAdmin(admin.ModelAdmin):
                 f"Створено спеціаліста. Логін для входу: {username}",
                 level=messages.SUCCESS,
             )
+
+        else:
+            user = obj.user
+            user.username = form.cleaned_data['username'].strip()
+            user.first_name = (form.cleaned_data.get('first_name') or '').strip()
+            user.last_name = (form.cleaned_data.get('last_name') or '').strip()
+
+            password1 = form.cleaned_data.get('password1')
+            if password1:
+                user.set_password(password1)
+                user.save(update_fields=['username', 'first_name', 'last_name', 'password'])
+            else:
+                user.save(update_fields=['username', 'first_name', 'last_name'])
 
         super().save_model(request, obj, form, change)
 

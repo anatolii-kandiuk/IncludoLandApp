@@ -61,13 +61,12 @@
                                 <div class="type__label">Тип контенту</div>
                                 <div class="type__row" role="radiogroup" aria-label="Тип контенту">
                                     <label class="radio">
-                                        <input type="radio" name="content_type" value="text" id="ct_text" {% if
-                                            form.content_type.value|default:'text' == 'text' %} checked {% endif %}>
+                                        <input type="radio" name="content_type" value="text" id="ct_text" {% if form.content_type.value|default:'text' == 'text' %}checked{% endif %}>
                                         <span>Вставити текст</span>
                                     </label>
                                     <label class="radio">
-                                        <input type="radio" name="content_type" value="pdf" id="ct_pdf" {% if
-                                            form.content_type.value == 'pdf' %} checked {% endif %}>
+                                        <input type="radio" name="content_type" value="pdf" id="ct_pdf" 
+                                        {% if form.content_type.value == 'pdf' %}checked{% endif %}>
                                         <span>Завантажити PDF</span>
                                     </label>
                                 </div>
@@ -159,8 +158,8 @@
                                         {% else %}
                                         <span class="icon icon--muted" title="Файл відсутній">PDF</span>
                                         {% endif %}
-                                        <button class="icon icon--audio" type="button" title="Відтворити" {% if not
-                                            s.safe_audio_url %} disabled {% endif %}>🔊</button>
+                                        <button class="icon icon--audio" type="button" title="Відтворити" 
+                                        {% if not s.safe_audio_url %}disabled{% endif %}>🔊</button>
                                     </div>
                                 </div>
 
