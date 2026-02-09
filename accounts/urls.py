@@ -32,6 +32,7 @@ urlpatterns = [
     path('specialist/my-story/<int:image_id>/delete/', views.specialist_my_story_delete, name='specialist_my_story_delete'),
 
     path('specialist/activities/', views.specialist_activity_builder, name='specialist_activity_builder'),
+    path('specialist/activities/<int:activity_id>/delete/', views.specialist_activity_delete, name='specialist_activity_delete'),
     path('specialist/activities/steps/<int:step_id>/delete/', views.specialist_activity_step_delete, name='specialist_activity_step_delete'),
 
     path('specialist/coloring/', views.specialist_coloring_pages, name='specialist_coloring_pages'),

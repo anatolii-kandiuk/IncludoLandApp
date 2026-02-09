@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from accounts.models import ArticulationCard, ArticulationCardImage, ColoringPage, MyStoryImage, SentenceExercise, SoundCard, Story, WordPuzzleWord
+from accounts.models import ArticulationCard, ArticulationCardImage, ColoringPage, MyStoryImage, SentenceExercise, SoundCard, SpecialistActivity, SpecialistActivityStep, Story, WordPuzzleWord
 
 # Reuse the existing attention task generator used for printable worksheets.
 from accounts.views import _generate_attention_items
@@ -45,11 +45,94 @@ def _active_coloring_uploads():
     return out
 
 
+def _active_specialist_activities(request):
+    qs = SpecialistActivity.objects.filter(is_active=True).only('id', 'title', 'description', 'created_by', 'created_at')
+
+    if request.user.is_authenticated and hasattr(request.user, 'specialist_profile'):
+        qs = qs.filter(created_by=request.user)
+
+    if request.user.is_authenticated and hasattr(request.user, 'child_profile'):
+        specialists = list(request.user.child_profile.specialists.select_related('user'))
+        if specialists:
+            qs = qs.filter(created_by__in=[s.user for s in specialists])
+
+    activities = []
+    for a in qs.order_by('-created_at')[:50]:
+        activities.append(
+            {
+                'id': a.id,
+                'title': a.title,
+                'description': a.description,
+            }
+        )
+    return activities
+
+
 def home(request):
     context = {
         'stars': _child_stars(request),
+        'specialist_activities': _active_specialist_activities(request),
     }
     return render(request, 'home.html', context)
+
+
+@ensure_csrf_cookie
+def game_specialist_activity(request, activity_id: int):
+    qs = SpecialistActivity.objects.filter(is_active=True).only('id', 'title', 'description', 'created_by')
+
+    if request.user.is_authenticated and hasattr(request.user, 'specialist_profile'):
+        qs = qs.filter(created_by=request.user)
+
+    if request.user.is_authenticated and hasattr(request.user, 'child_profile'):
+        specialists = list(request.user.child_profile.specialists.select_related('user'))
+        if specialists:
+            qs = qs.filter(created_by__in=[s.user for s in specialists])
+
+    activity = qs.filter(id=activity_id).first()
+    if not activity:
+        raise Http404('Activity not found')
+
+    steps_qs = (
+        SpecialistActivityStep.objects.filter(activity=activity)
+        .only('id', 'title', 'description', 'task_text', 'image', 'audio', 'position', 'created_at')
+        .order_by('position', 'created_at')
+    )
+
+    steps = []
+    for s in steps_qs:
+        image_url = ''
+        if s.image:
+            try:
+                if s.image.storage.exists(s.image.name):
+                    image_url = s.image.url
+            except Exception:
+                image_url = ''
+        audio_url = ''
+        if s.audio:
+            try:
+                if s.audio.storage.exists(s.audio.name):
+                    audio_url = s.audio.url
+            except Exception:
+                audio_url = ''
+
+        steps.append(
+            {
+                'id': s.id,
+                'title': s.title,
+                'description': s.description or '',
+                'task_text': s.task_text,
+                'image_url': image_url,
+                'audio_url': audio_url,
+            }
+        )
+
+    context = {
+        'stars': _child_stars(request),
+        'activity': activity,
+        'steps': steps,
+        'steps_json': json.dumps(steps, ensure_ascii=False),
+    }
+    return render(request, 'games/specialist_activity.html', context)
 
 
 def games(request):

@@ -23,10 +23,6 @@
                 <span class="nav__icon" aria-hidden="true">🖨️</span>
                 <span class="nav__label">Друк завдань</span>
             </a>
-            <a class="nav__item" href="{% url 'home' %}">
-                <span class="nav__icon" aria-hidden="true">🤖</span>
-                <span class="nav__label">ML-Аналітика</span>
-            </a>
         </div>
 
         <div class="nav__section" aria-label="Бібліотека">
@@ -64,7 +60,7 @@
             <a class="nav__item{% if active == 'activity_builder' %} nav__item--active{% endif %}"
                 href="{% url 'specialist_activity_builder' %}">
                 <span class="nav__icon" aria-hidden="true">🎬</span>
-                <span class="nav__label">Сценарії</span>
+                <span class="nav__label">Активності</span>
             </a>
         </div>
 

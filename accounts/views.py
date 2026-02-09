@@ -821,18 +821,50 @@ def specialist_activity_builder(request):
                 audio_url = ''
         preview_step.safe_image_url = image_url
         preview_step.safe_audio_url = audio_url
+    preview_step_index = None
+    if preview_step and steps:
+        for idx, s in enumerate(steps, start=1):
+            if s.id == preview_step.id:
+                preview_step_index = idx
+                break
     context = {
         'username': request.user.username,
         'activities': activities,
         'activity': activity,
         'steps': steps,
         'preview_step': preview_step,
+        'preview_step_index': preview_step_index,
         'editing_step': bool(step_instance),
         'activity_form': activity_form,
         'step_form': step_form,
         'active': 'activity_builder',
     }
     return render(request, 'profile/specialist_activity_builder.html', context)
+
+
+@login_required
+@require_POST
+def specialist_activity_delete(request, activity_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    activity = SpecialistActivity.objects.filter(id=activity_id, created_by=request.user).prefetch_related('steps').first()
+    if activity:
+        for step in activity.steps.all():
+            try:
+                if step.image:
+                    step.image.delete(save=False)
+            except Exception:
+                pass
+            try:
+                if step.audio:
+                    step.audio.delete(save=False)
+            except Exception:
+                pass
+        activity.delete()
+
+    next_url = request.POST.get('next') or reverse('specialist_activity_builder')
+    return redirect(next_url)
 
 
 @login_required

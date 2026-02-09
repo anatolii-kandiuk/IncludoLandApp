@@ -15,6 +15,15 @@
     <main class="page">
         <h1 class="section-title" id="games">Активності</h1>
         <section class="menu menu--compact menu--big" aria-label="Ігри">
+            {% if specialist_activities %}
+            {% for activity in specialist_activities %}
+            <a class="tile tile--blue" href="{% url 'game_specialist_activity' activity.id %}">
+                <div class="tile__icon" aria-hidden="true">🎬</div>
+                <div class="tile__label tile__label--dynamic">{{ activity.title }}</div>
+            </a>
+            {% endfor %}
+            {% endif %}
+
             <a class="tile tile--green" href="{% url 'game_words' %}">
                 <div class="tile__icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" role="img" focusable="false">

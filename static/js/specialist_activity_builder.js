@@ -48,16 +48,16 @@ ready(() => {
         toggleHidden(previewAudio, !audio);
         toggleHidden(previewAudioEmpty, !!audio);
 
-        document.querySelectorAll('.step-card--active').forEach((el) => {
-            el.classList.remove('step-card--active');
+        document.querySelectorAll('.step-pill--active').forEach((el) => {
+            el.classList.remove('step-pill--active');
         });
-        card.classList.add('step-card--active');
+        card.classList.add('step-pill--active');
     };
 
-    document.querySelectorAll('[data-preview-step]').forEach((btn) => {
+    document.querySelectorAll('[data-step-pill]').forEach((btn) => {
         btn.addEventListener('click', (event) => {
             event.preventDefault();
-            const card = btn.closest('.step-card');
+            const card = btn.closest('.step-pill');
             updatePreview(card);
         });
     });

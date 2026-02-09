@@ -1,0 +1,63 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{{ activity.title }} — IncludoLand</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist_activity.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+    <main class="page page--activity" data-steps='{{ steps_json|default:"[]"|safe }}'>
+        <header class="activity-header">
+            <a class="pill pill--ghost" href="{% url 'home' %}#games" aria-label="Назад">
+                <span class="pill__ico" aria-hidden="true">←</span>
+                <span>Назад</span>
+            </a>
+            <div>
+                <h1 class="activity-title">{{ activity.title }}</h1>
+                {% if activity.description %}
+                <div class="activity-subtitle">{{ activity.description }}</div>
+                {% endif %}
+            </div>
+        </header>
+
+        <section class="activity-shell">
+            <div class="activity-stage">
+                <div class="activity-card">
+                    <div class="activity-card__media">
+                        <img id="activity-image" class="activity-card__image" alt="Зображення кроку" />
+                        <div id="activity-image-empty" class="activity-card__placeholder">Зображення не додано</div>
+                    </div>
+                    <div class="activity-card__body">
+                        <div class="activity-step" id="activity-step">Крок 1/1</div>
+                        <div class="activity-card__title" id="activity-title">Крок активності</div>
+                        <div class="activity-card__desc" id="activity-description"></div>
+                        <div class="activity-card__task" id="activity-task"></div>
+                        <audio id="activity-audio" class="activity-card__audio" controls hidden></audio>
+                        <div id="activity-audio-empty" class="activity-card__audio-empty">Аудіо не додано</div>
+                        <div class="activity-card__actions">
+                            <button class="activity-btn activity-btn--ghost" id="activity-prev"
+                                type="button">Назад</button>
+                            <button class="activity-btn activity-btn--primary" id="activity-next"
+                                type="button">Далі</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'js/specialist_activity.js' %}" defer></script>
+    {% include 'includes/footer.html' %}
+</body>
+
+</html>

@@ -207,6 +207,11 @@ body {
     font-size: 26px;
 }
 
+.tile__label--dynamic {
+    font-size: 22px;
+    letter-spacing: 0.4px;
+}
+
 .tile--green {
     background: linear-gradient(135deg, #73d25f, #48b85a)
 }
