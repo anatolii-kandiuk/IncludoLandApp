@@ -47,7 +47,10 @@
                             placeholder="Коротка інструкція (необовʼязково)"
                             rows="2">{{ form.instruction.value|default:'' }}</textarea>
                         <input class="chart-filters__control" type="file" name="image" accept="image/*" required>
-                        <input class="chart-filters__control" type="file" name="images" accept="image/*" multiple>
+                        <input class="chart-filters__control" type="file" name="image_1" accept="image/*">
+                        <input class="chart-filters__control" type="file" name="image_2" accept="image/*">
+                        <input class="chart-filters__control" type="file" name="image_3" accept="image/*">
+                        <input class="chart-filters__control" type="file" name="image_4" accept="image/*">
 
                         <label class="chart-filters__control art-inline-check">
                             <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or form.is_active.value is None %}checked{% endif %}>
@@ -65,7 +68,7 @@
 
                     <div class="art-help">
                         Порада: використовуйте зрозумілі назви (наприклад: «Парканчик», «Грибочок») та короткі
-                        інструкції. Можна додавати кілька зображень до однієї вправи.
+                        інструкції. Перше зображення обовʼязкове, ще до 4 — додаткові.
                     </div>
                 </section>
 

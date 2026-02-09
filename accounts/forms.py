@@ -77,16 +77,11 @@ class StoryForm(forms.ModelForm):
         return instance
 
 
-class MultiFileInput(forms.ClearableFileInput):
-    allow_multiple_selected = True
-
-
 class ArticulationCardForm(forms.ModelForm):
-    images = forms.FileField(
-        required=False,
-        widget=MultiFileInput(),
-        label='Додаткові зображення',
-    )
+    image_1 = forms.FileField(required=False, label='Додаткове зображення 1')
+    image_2 = forms.FileField(required=False, label='Додаткове зображення 2')
+    image_3 = forms.FileField(required=False, label='Додаткове зображення 3')
+    image_4 = forms.FileField(required=False, label='Додаткове зображення 4')
 
     class Meta:
         model = ArticulationCard
@@ -128,24 +123,38 @@ class ArticulationCardForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-        images = self.files.getlist('images') if self.files else []
-        if images:
-            for f in images:
-                name = (getattr(f, 'name', '') or '').lower()
-                allowed = ('.png', '.jpg', '.jpeg', '.webp')
-                if not any(name.endswith(ext) for ext in allowed):
-                    self.add_error('images', 'Підтримуються лише PNG, JPG/JPEG, WEBP.')
-                    break
-                size = getattr(f, 'size', 0) or 0
-                if size > 10 * 1024 * 1024:
-                    self.add_error('images', 'Файл завеликий (макс. 10 MB).')
-                    break
+        extras = [
+            self.files.get('image_1') if self.files else None,
+            self.files.get('image_2') if self.files else None,
+            self.files.get('image_3') if self.files else None,
+            self.files.get('image_4') if self.files else None,
+        ]
+        for idx, f in enumerate(extras, start=1):
+            if not f:
+                continue
+            name = (getattr(f, 'name', '') or '').lower()
+            allowed = ('.png', '.jpg', '.jpeg', '.webp')
+            if not any(name.endswith(ext) for ext in allowed):
+                self.add_error(f'image_{idx}', 'Підтримуються лише PNG, JPG/JPEG, WEBP.')
+                break
+            size = getattr(f, 'size', 0) or 0
+            if size > 10 * 1024 * 1024:
+                self.add_error(f'image_{idx}', 'Файл завеликий (макс. 10 MB).')
+                break
         return cleaned
 
     def get_additional_images(self):
         if not self.files:
             return []
-        return self.files.getlist('images')
+        return [
+            f for f in (
+                self.files.get('image_1'),
+                self.files.get('image_2'),
+                self.files.get('image_3'),
+                self.files.get('image_4'),
+            )
+            if f
+        ]
 
 
 class MyStoryImageForm(forms.ModelForm):
