@@ -15,8 +15,8 @@ from django.db.models import F
 
 import random
 
-from .forms import RegisterForm, ColoringPageForm, SentenceExerciseForm, SoundCardForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
-from .models import ChildProfile, ColoringPage, GameResult, SentenceExercise, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
+from .forms import ArticulationCardForm, RegisterForm, ColoringPageForm, SentenceExerciseForm, SoundCardForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
+from .models import ArticulationCard, ChildProfile, ColoringPage, GameResult, SentenceExercise, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
 
 
 BADGE_DEFINITIONS = [
@@ -54,6 +54,13 @@ BADGE_DEFINITIONS = [
         'subtitle': '5 ігор зі звуками',
         'tone': 'yellow',
         'icon': 'target',
+    },
+    {
+        'code': 'articulation_5',
+        'title': 'Артикулятор',
+        'subtitle': '5 вправ з артикуляційної гімнастики',
+        'tone': 'teal',
+        'icon': 'mouth',
     },
     {
         'code': 'stories_3',
@@ -96,6 +103,13 @@ BADGE_DEFINITIONS = [
         'subtitle': '20 ігор зі звуками',
         'tone': 'yellow',
         'icon': 'target',
+    },
+    {
+        'code': 'articulation_20',
+        'title': 'Майстер артикуляції',
+        'subtitle': '20 вправ з артикуляційної гімнастики',
+        'tone': 'teal',
+        'icon': 'mouth',
     },
     {
         'code': 'stories_10',
@@ -149,6 +163,11 @@ def _sync_badges_for_user(user) -> None:
     if GameResult.objects.filter(user=user, game_type=GameResult.GameType.SOUND).count() >= 20:
         _award_badge(user, 'sound_20')
 
+    if GameResult.objects.filter(user=user, game_type=GameResult.GameType.ARTICULATION).count() >= 5:
+        _award_badge(user, 'articulation_5')
+    if GameResult.objects.filter(user=user, game_type=GameResult.GameType.ARTICULATION).count() >= 20:
+        _award_badge(user, 'articulation_20')
+
     if GameResult.objects.filter(user=user, game_type=GameResult.GameType.SENTENCES).count() >= 5:
         _award_badge(user, 'sentences_5')
 
@@ -194,6 +213,7 @@ def _build_child_stats_for_user(user):
     sound_values = [r.score if r.game_type == GameResult.GameType.SOUND else None for r in results]
     words_values = [r.score if r.game_type == GameResult.GameType.WORDS else None for r in results]
     sentences_values = [r.score if r.game_type == GameResult.GameType.SENTENCES else None for r in results]
+    articulation_values = [r.score if r.game_type == GameResult.GameType.ARTICULATION else None for r in results]
 
     def avg_score(game_type: str) -> int:
         values = [r.score for r in results if r.game_type == game_type]
@@ -206,6 +226,7 @@ def _build_child_stats_for_user(user):
     sound_avg = avg_score(GameResult.GameType.SOUND)
     words_avg = avg_score(GameResult.GameType.WORDS)
     sentences_avg = avg_score(GameResult.GameType.SENTENCES)
+    articulation_avg = avg_score(GameResult.GameType.ARTICULATION)
 
     total_stories = Story.objects.filter(is_active=True).count()
     listened_unique = (
@@ -222,11 +243,12 @@ def _build_child_stats_for_user(user):
         {'label': 'Звуки', 'value': sound_avg},
         {'label': 'Пазли слів', 'value': words_avg},
         {'label': 'Побудова речень', 'value': sentences_avg},
+        {'label': 'Артикуляція', 'value': articulation_avg},
         {'label': 'Казки (слухання)', 'value': stories_listen_pct},
     ]
 
-    radar_labels = ['Математика', "Памʼять", 'Звуки', 'Пазли слів', 'Речення', 'Казки']
-    radar_values = [math_avg, memory_avg, sound_avg, words_avg, sentences_avg, stories_listen_pct]
+    radar_labels = ['Математика', "Памʼять", 'Звуки', 'Пазли слів', 'Речення', 'Артикуляція', 'Казки']
+    radar_values = [math_avg, memory_avg, sound_avg, words_avg, sentences_avg, articulation_avg, stories_listen_pct]
 
     line_datasets = [
         {'label': 'Математика', 'data': math_values, 'color': '#2b97e5'},
@@ -234,6 +256,7 @@ def _build_child_stats_for_user(user):
         {'label': 'Звуки', 'data': sound_values, 'color': '#c28b00'},
         {'label': 'Пазли слів', 'data': words_values, 'color': '#7c3aed'},
         {'label': 'Побудова речень', 'data': sentences_values, 'color': '#8b5cf6'},
+        {'label': 'Артикуляція', 'data': articulation_values, 'color': '#2fb7a7'},
     ]
 
     return {
@@ -252,6 +275,7 @@ def _build_child_stats_for_user(user):
             'sound': sound_avg,
             'words': words_avg,
             'sentences': sentences_avg,
+            'articulation': articulation_avg,
             'stories_listen': stories_listen_pct,
         },
     }
@@ -391,6 +415,7 @@ def specialist_profile(request):
             ('Звуки', int(avg.get('sound') or 0)),
             ('Пазли слів', int(avg.get('words') or 0)),
             ('Побудова речень', int(avg.get('sentences') or 0)),
+            ('Артикуляція', int(avg.get('articulation') or 0)),
         ]
         label, value = min(candidates, key=lambda x: x[1])
         severity = max(0, min(100, 100 - int(value)))
@@ -485,6 +510,7 @@ def specialist_profile(request):
             GameResult.GameType.SOUND: '#c28b00',
             GameResult.GameType.WORDS: '#7c3aed',
             GameResult.GameType.SENTENCES: '#8b5cf6',
+            GameResult.GameType.ARTICULATION: '#2fb7a7',
         }
         game_labels = {
             GameResult.GameType.MATH: 'Математика',
@@ -492,10 +518,18 @@ def specialist_profile(request):
             GameResult.GameType.SOUND: 'Звуки',
             GameResult.GameType.WORDS: 'Пазли слів',
             GameResult.GameType.SENTENCES: 'Побудова речень',
+            GameResult.GameType.ARTICULATION: 'Артикуляція',
         }
 
         if perf_game == 'all':
-            for gt in (GameResult.GameType.MATH, GameResult.GameType.MEMORY, GameResult.GameType.SOUND, GameResult.GameType.WORDS, GameResult.GameType.SENTENCES):
+            for gt in (
+                GameResult.GameType.MATH,
+                GameResult.GameType.MEMORY,
+                GameResult.GameType.SOUND,
+                GameResult.GameType.WORDS,
+                GameResult.GameType.SENTENCES,
+                GameResult.GameType.ARTICULATION,
+            ):
                 perf_datasets.append({'label': game_labels[gt], 'data': build_series(gt), 'color': game_palette[gt]})
         else:
             perf_datasets.append({'label': game_labels.get(perf_game, perf_game), 'data': build_series(perf_game), 'color': game_palette.get(perf_game, '#2b97e5')})
@@ -557,6 +591,64 @@ def specialist_sentence_delete(request, exercise_id: int):
 
     SentenceExercise.objects.filter(id=exercise_id, created_by=request.user).delete()
     next_url = request.POST.get('next') or reverse('specialist_sentences')
+    return redirect(next_url)
+
+
+@login_required
+def specialist_articulation(request):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    if request.method == 'POST':
+        form = ArticulationCardForm(request.POST, request.FILES)
+        if form.is_valid():
+            item = form.save(commit=False)
+            item.created_by = request.user
+            item.save()
+            return redirect('specialist_articulation')
+    else:
+        form = ArticulationCardForm(initial={'is_active': True})
+
+    cards = list(
+        ArticulationCard.objects.filter(created_by=request.user)
+        .only('id', 'title', 'instruction', 'image', 'is_active', 'created_at')
+        .order_by('-created_at')
+    )
+
+    for c in cards:
+        image_url = ''
+        if c.image:
+            try:
+                if c.image.storage.exists(c.image.name):
+                    image_url = c.image.url
+            except Exception:
+                image_url = ''
+        c.safe_image_url = image_url
+
+    context = {
+        'username': request.user.username,
+        'form': form,
+        'cards': cards,
+    }
+    return render(request, 'profile/specialist_articulation.html', context)
+
+
+@login_required
+@require_POST
+def specialist_articulation_delete(request, card_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    card = ArticulationCard.objects.filter(id=card_id, created_by=request.user).first()
+    if card:
+        try:
+            if card.image:
+                card.image.delete(save=False)
+        except Exception:
+            pass
+        card.delete()
+
+    next_url = request.POST.get('next') or reverse('specialist_articulation')
     return redirect(next_url)
 
 
@@ -1252,6 +1344,7 @@ def specialist_student_notes(request, child_profile_id: int):
         ('Звуки', int(avg.get('sound') or 0)),
         ('Пазли слів', int(avg.get('words') or 0)),
         ('Побудова речень', int(avg.get('sentences') or 0)),
+        ('Артикуляція', int(avg.get('articulation') or 0)),
     ]
     focus_label, focus_value = min(focus_candidates, key=lambda x: x[1])
     focus_severity = max(0, min(100, 100 - int(focus_value)))
@@ -1710,6 +1803,7 @@ def record_game_result(request):
         GameResult.GameType.SOUND,
         GameResult.GameType.WORDS,
         GameResult.GameType.SENTENCES,
+        GameResult.GameType.ARTICULATION,
     ):
         return JsonResponse({'ok': False, 'error': 'invalid_game_type'}, status=400)
 
@@ -1764,6 +1858,8 @@ def record_game_result(request):
         GameResult.GameType.MEMORY: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.MEMORY).count(),
         GameResult.GameType.SOUND: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.SOUND).count(),
         GameResult.GameType.WORDS: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.WORDS).count(),
+        GameResult.GameType.SENTENCES: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.SENTENCES).count(),
+        GameResult.GameType.ARTICULATION: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.ARTICULATION).count(),
     }
     if counts_by_game[GameResult.GameType.MATH] >= 5:
         _award_badge(request.user, 'math_5')
@@ -1773,6 +1869,10 @@ def record_game_result(request):
         _award_badge(request.user, 'words_5')
     if counts_by_game[GameResult.GameType.SOUND] >= 5:
         _award_badge(request.user, 'sound_5')
+    if counts_by_game[GameResult.GameType.SENTENCES] >= 5:
+        _award_badge(request.user, 'sentences_5')
+    if counts_by_game[GameResult.GameType.ARTICULATION] >= 5:
+        _award_badge(request.user, 'articulation_5')
 
     new_total = ChildProfile.objects.filter(id=profile.id).values_list('stars', flat=True).first() or 0
     return JsonResponse({'ok': True, 'id': result.id, 'stars_earned': stars_earned, 'stars_total': new_total})

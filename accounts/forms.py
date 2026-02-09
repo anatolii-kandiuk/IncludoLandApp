@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import ColoringPage, SentenceExercise, SoundCard, SpecialistStudentNote, Story, WordPuzzleWord
+from .models import ArticulationCard, ColoringPage, SentenceExercise, SoundCard, SpecialistStudentNote, Story, WordPuzzleWord
 
 
 class RegisterForm(UserCreationForm):
@@ -75,6 +75,46 @@ class StoryForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+
+class ArticulationCardForm(forms.ModelForm):
+    class Meta:
+        model = ArticulationCard
+        fields = ('title', 'instruction', 'image', 'is_active')
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'Назва вправи'}),
+            'instruction': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Коротка інструкція (необовʼязково)'}),
+        }
+
+    def clean_title(self):
+        value = (self.cleaned_data.get('title') or '').strip()
+        if not value:
+            raise forms.ValidationError('Введіть назву вправи.')
+        if len(value) > 80:
+            raise forms.ValidationError('Назва надто довга (макс. 80 символів).')
+        return value
+
+    def clean_instruction(self):
+        value = (self.cleaned_data.get('instruction') or '').strip()
+        if len(value) > 400:
+            raise forms.ValidationError('Інструкція надто довга (макс. 400 символів).')
+        return value
+
+    def clean_image(self):
+        f = self.cleaned_data.get('image')
+        if not f:
+            raise forms.ValidationError('Оберіть зображення.')
+
+        name = (getattr(f, 'name', '') or '').lower()
+        allowed = ('.png', '.jpg', '.jpeg', '.webp')
+        if not any(name.endswith(ext) for ext in allowed):
+            raise forms.ValidationError('Підтримуються лише PNG, JPG/JPEG, WEBP.')
+
+        size = getattr(f, 'size', 0) or 0
+        if size > 10 * 1024 * 1024:
+            raise forms.ValidationError('Файл завеликий (макс. 10 MB).')
+
+        return f
 
 
 class WordPuzzleWordForm(forms.ModelForm):

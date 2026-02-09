@@ -10,6 +10,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 
 from .models import (
+    ArticulationCard,
     ChildProfile,
     ColoringPage,
     GameResult,
@@ -327,6 +328,14 @@ class SoundCardAdmin(admin.ModelAdmin):
     list_display = ('title', 'created_by', 'is_active', 'created_at', 'updated_at')
     list_filter = ('is_active',)
     search_fields = ('title', 'created_by__username', 'created_by__email')
+    list_select_related = ('created_by',)
+
+
+@admin.register(ArticulationCard)
+class ArticulationCardAdmin(admin.ModelAdmin):
+    list_display = ('title', 'created_by', 'is_active', 'created_at', 'updated_at')
+    list_filter = ('is_active',)
+    search_fields = ('title', 'instruction', 'created_by__username', 'created_by__email')
     list_select_related = ('created_by',)
 
 

@@ -8,6 +8,7 @@ from django.urls import include
 from .views import (
     coming_soon,
     game_attention,
+    game_articulation,
     game_math,
     game_memory,
     game_sentences,
@@ -36,6 +37,7 @@ urlpatterns = [
     path('games/memory/', game_memory, name='game_memory'),
     path('games/attention/', game_attention, name='game_attention'),
     path('games/math/', game_math, name='game_math'),
+    path('games/articulation/', game_articulation, name='game_articulation'),
     path('stories/', stories_library, name='stories'),
     path('sounds/', game_sounds, name='sounds'),
     path('learn/alphabet/', learn_alphabet, name='learn_alphabet'),

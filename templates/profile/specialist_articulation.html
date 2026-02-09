@@ -1,0 +1,126 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Артикуляція — Профіль спеціаліста</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist_articulation.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+</head>
+
+<body>
+    <div class="shell">
+        {% include 'includes/specialist_sidebar.html' with active='articulation' %}
+
+        <main class="main">
+            <header class="top">
+                <div class="top__left"></div>
+                <div class="top__right">
+                    <div class="chip chip--user">
+                        <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
+                        <span class="chip__text">{{ username }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="page-title">
+                    <h1 class="page-title__h">Артикуляція: мої вправи</h1>
+                </div>
+
+                <section class="card card--full">
+                    <div class="card__head">
+                        <h2 class="card__title">Додати вправу</h2>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data" action="{% url 'specialist_articulation' %}"
+                        class="chart-filters">
+                        {% csrf_token %}
+
+                        <input class="chart-filters__control" name="title" maxlength="80" placeholder="Назва вправи"
+                            value="{{ form.title.value|default:'' }}" required>
+                        <textarea class="chart-filters__control" name="instruction" maxlength="400"
+                            placeholder="Коротка інструкція (необовʼязково)"
+                            rows="2">{{ form.instruction.value|default:'' }}</textarea>
+                        <input class="chart-filters__control" type="file" name="image" accept="image/*" required>
+
+                        <label class="chart-filters__control art-inline-check">
+                            <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or
+                                form.is_active.value is None %}checked{% endif %}>
+                            <span>Активне</span>
+                        </label>
+
+                        <button class="chart-filters__btn" type="submit">Додати</button>
+                    </form>
+
+                    {% if form.errors %}
+                    <div class="form-errors u-mt-12" role="alert">
+                        {{ form.errors }}
+                    </div>
+                    {% endif %}
+
+                    <div class="art-help">
+                        Порада: використовуйте зрозумілі назви (наприклад: «Парканчик», «Грибочок») та короткі
+                        інструкції.
+                    </div>
+                </section>
+
+                <section class="card card--full u-mt-18">
+                    <div class="card__head">
+                        <h2 class="card__title">Список вправ</h2>
+                        <div class="card__meta">Ці вправи доступні дітям у «Артикуляційна гімнастика».</div>
+                    </div>
+
+                    {% if cards %}
+                    <div class="table" role="table" aria-label="Вправи">
+                        <div class="table__row table__row--head" role="row">
+                            <div class="table__cell" role="columnheader">Картинка</div>
+                            <div class="table__cell" role="columnheader">Назва</div>
+                            <div class="table__cell" role="columnheader">Інструкція</div>
+                            <div class="table__cell" role="columnheader">Статус</div>
+                            <div class="table__cell" role="columnheader"></div>
+                        </div>
+
+                        {% for c in cards %}
+                        <div class="table__row" role="row">
+                            <div class="table__cell" role="cell">
+                                <div class="art-thumb" {% if c.safe_image_url
+                                    %}style="background-image: url('{{ c.safe_image_url }}');" {% endif %}></div>
+                            </div>
+                            <div class="table__cell table__cell--strong" role="cell">{{ c.title }}</div>
+                            <div class="table__cell" role="cell">{% if c.instruction %}{{ c.instruction }}{% else
+                                %}<span class="table__cell--muted">—</span>{% endif %}</div>
+                            <div class="table__cell" role="cell">
+                                {% if c.is_active %}
+                                <span class="badge badge--green">Активне</span>
+                                {% else %}
+                                <span class="badge badge--locked">Вимкнено</span>
+                                {% endif %}
+                            </div>
+                            <div class="table__cell table__actions" role="cell">
+                                <form method="post" action="{% url 'specialist_articulation_delete' c.id %}"
+                                    class="u-m0">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{% url 'specialist_articulation' %}">
+                                    <button class="table__btn table__btn--danger" type="submit"
+                                        data-confirm="Видалити вправу «{{ c.title|escapejs }}»?">🗑 Видалити</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty">Поки що немає вправ. Додайте першу вправу вище.</div>
+                    {% endif %}
+                </section>
+            </section>
+        </main>
+    </div>
+    {% include 'includes/footer.html' %}
+</body>
+
+</html>

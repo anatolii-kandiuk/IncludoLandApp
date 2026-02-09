@@ -97,6 +97,7 @@ class GameResult(models.Model):
         SOUND = 'sound', 'Sound'
         WORDS = 'words', 'Words'
         SENTENCES = 'sentences', 'Sentences'
+        ARTICULATION = 'articulation', 'Articulation'
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -149,6 +150,31 @@ class SoundCard(models.Model):
 
     def __str__(self) -> str:
         return f"SoundCard({self.title})"
+
+
+class ArticulationCard(models.Model):
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='articulation_cards',
+    )
+
+    title = models.CharField(max_length=80)
+    instruction = models.TextField(blank=True)
+    image = models.ImageField(upload_to=UniqueUploadTo('articulation/images'))
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Артикуляційна вправа'
+        verbose_name_plural = 'Артикуляційні вправи'
+
+    def __str__(self) -> str:
+        return f"ArticulationCard({self.title})"
 
 
 class Story(models.Model):

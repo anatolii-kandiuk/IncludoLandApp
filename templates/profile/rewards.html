@@ -25,7 +25,8 @@
                 {% for r in rewards %}
                 <div class="badge badge--{{ r.tone }} {% if not r.unlocked %}badge--locked{% endif %}">
                     <div class="badge__icon" aria-hidden="true">
-                        {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass' %}🧭{% else
+                        {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass' %}🧭{% elif
+                        r.icon == 'mouth' %}👄{% else
                         %}🎯{% endif %}
                     </div>
                     <div class="badge__text">

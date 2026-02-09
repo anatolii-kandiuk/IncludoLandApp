@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from accounts.models import ColoringPage, SentenceExercise, SoundCard, Story, WordPuzzleWord
+from accounts.models import ArticulationCard, ColoringPage, SentenceExercise, SoundCard, Story, WordPuzzleWord
 
 # Reuse the existing attention task generator used for printable worksheets.
 from accounts.views import _generate_attention_items
@@ -107,6 +107,47 @@ def game_sounds(request):
         'sound_cards_json': json.dumps(sound_cards_payload, ensure_ascii=False),
     }
     return render(request, 'games/sounds.html', context)
+
+
+@ensure_csrf_cookie
+def game_articulation(request):
+    qs = ArticulationCard.objects.filter(is_active=True).only('id', 'title', 'instruction', 'image', 'created_by')
+
+    # If specialist opens the game, show their own cards.
+    if request.user.is_authenticated and hasattr(request.user, 'specialist_profile'):
+        qs = qs.filter(created_by=request.user)
+
+    # If child has assigned specialists, show cards added by those specialists.
+    if request.user.is_authenticated and hasattr(request.user, 'child_profile'):
+        specialists = list(request.user.child_profile.specialists.select_related('user'))
+        if specialists:
+            qs = qs.filter(created_by__in=[s.user for s in specialists])
+
+    cards = []
+    for c in qs.order_by('-created_at')[:200]:
+        if not c.image:
+            continue
+        try:
+            if not c.image.storage.exists(c.image.name):
+                continue
+        except Exception:
+            continue
+
+        cards.append(
+            {
+                'id': c.id,
+                'title': c.title,
+                'instruction': c.instruction or '',
+                'image_url': c.image.url,
+            }
+        )
+
+    context = {
+        'stars': _child_stars(request),
+        'articulation_cards': cards,
+        'articulation_cards_json': json.dumps(cards, ensure_ascii=False),
+    }
+    return render(request, 'games/articulation.html', context)
 
 
 @ensure_csrf_cookie

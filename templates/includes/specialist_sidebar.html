@@ -41,6 +41,11 @@
                 <span class="nav__icon" aria-hidden="true">🔊</span>
                 <span class="nav__label">Звуки</span>
             </a>
+            <a class="nav__item{% if active == 'articulation' %} nav__item--active{% endif %}"
+                href="{% url 'specialist_articulation' %}">
+                <span class="nav__icon" aria-hidden="true">👄</span>
+                <span class="nav__label">Артикуляція</span>
+            </a>
             <a class="nav__item{% if active == 'words' %} nav__item--active{% endif %}"
                 href="{% url 'specialist_words' %}">
                 <span class="nav__icon" aria-hidden="true">🔤</span>
@@ -66,6 +71,10 @@
             <a class="nav__item" href="{% url 'game_memory' %}">
                 <span class="nav__icon" aria-hidden="true">🧠</span>
                 <span class="nav__label">Памʼять</span>
+            </a>
+            <a class="nav__item" href="{% url 'game_articulation' %}">
+                <span class="nav__icon" aria-hidden="true">👄</span>
+                <span class="nav__label">Артикуляція</span>
             </a>
             <a class="nav__item" href="{% url 'game_attention' %}">
                 <span class="nav__icon" aria-hidden="true">🎯</span>

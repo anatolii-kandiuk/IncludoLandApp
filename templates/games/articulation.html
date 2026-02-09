@@ -1,0 +1,81 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Артикуляційна гімнастика — IncludoLand</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/articulation.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+    <main class="page page--articulation">
+        <header class="art-header">
+            <a class="pill pill--ghost" href="{% url 'home' %}#games" aria-label="Назад">
+                <span class="pill__ico" aria-hidden="true">←</span>
+                <span>Назад</span>
+            </a>
+            <h1 class="art-title">Артикуляційна гімнастика</h1>
+        </header>
+
+        <section class="art-shell" data-cards='{{ articulation_cards_json|default:"[]"|safe }}'>
+            {% csrf_token %}
+            <aside class="art-nav" aria-label="Список вправ">
+                {% if articulation_cards %}
+                {% for c in articulation_cards %}
+                <button class="art-nav__item art-nav__item--{% cycle 'blue' 'green' 'orange' 'purple' %}" type="button"
+                    data-card-id="{{ c.id }}" data-title="{{ c.title|escape }}"
+                    data-instruction="{{ c.instruction|escape }}" data-image-url="{{ c.image_url }}">
+                    <span class="art-nav__icon" aria-hidden="true">●</span>
+                    <span class="art-nav__label">{{ c.title }}</span>
+                </button>
+                {% endfor %}
+                {% else %}
+                <div class="art-empty">Поки що немає вправ. Спеціаліст має додати картки.</div>
+                {% endif %}
+            </aside>
+
+            <section class="art-stage" aria-label="Вправа">
+                <div class="art-card">
+                    <div class="art-card__media">
+                        <div class="art-card__image" id="art-image" role="img" aria-label="Зображення вправи">
+                            <span class="art-card__placeholder">🙂</span>
+                        </div>
+                    </div>
+                    <div class="art-card__body">
+                        <div class="art-card__title" id="art-title">Обери вправу</div>
+                        <div class="art-card__text" id="art-instruction">Натисни на вправу зі списку ліворуч.</div>
+                        <div class="art-card__meta">
+                            <span>Виконано:</span>
+                            <strong id="art-count">0</strong>
+                        </div>
+                        <div class="art-card__actions">
+                            <button class="art-btn art-btn--primary" id="art-start" type="button">Почати вправу</button>
+                            <button class="art-btn art-btn--ghost" id="art-done" type="button" hidden>Завершити</button>
+                        </div>
+                        <div class="art-card__msg" id="art-msg" role="status" aria-live="polite">Оберіть вправу, щоб
+                            почати.</div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <nav class="art-tabs" aria-label="Інші вправи">
+            <a class="art-tab" href="{% url 'coming_soon' 'breathing' %}">Дихальна гімнастика</a>
+            <a class="art-tab" href="{% url 'coming_soon' 'mimic' %}">Мімічна гімнастика</a>
+            <a class="art-tab" href="{% url 'coming_soon' 'finger' %}">Пальчикова гімнастика</a>
+        </nav>
+    </main>
+
+    <script src="{% static 'js/articulation.js' %}" defer></script>
+    {% include 'includes/footer.html' %}
+</body>
+
+</html>
