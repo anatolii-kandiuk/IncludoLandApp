@@ -59,6 +59,8 @@
                         <div class="art-card__actions">
                             <button class="art-btn art-btn--primary" id="art-start" type="button">Почати вправу</button>
                             <button class="art-btn art-btn--ghost" id="art-done" type="button" hidden>Завершити</button>
+                            <button class="art-btn art-btn--ghost" id="art-next-image" type="button" hidden>Інша
+                                картинка</button>
                         </div>
                         <div class="art-card__msg" id="art-msg" role="status" aria-live="polite">Оберіть вправу, щоб
                             почати.</div>
@@ -67,11 +69,6 @@
             </section>
         </section>
 
-        <nav class="art-tabs" aria-label="Інші вправи">
-            <a class="art-tab" href="{% url 'coming_soon' 'breathing' %}">Дихальна гімнастика</a>
-            <a class="art-tab" href="{% url 'coming_soon' 'mimic' %}">Мімічна гімнастика</a>
-            <a class="art-tab" href="{% url 'coming_soon' 'finger' %}">Пальчикова гімнастика</a>
-        </nav>
     </main>
 
     <script src="{% static 'js/articulation.js' %}" defer></script>

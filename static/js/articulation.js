@@ -7,9 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const countEl = document.getElementById('art-count');
     const startBtn = document.getElementById('art-start');
     const doneBtn = document.getElementById('art-done');
+    const nextImageBtn = document.getElementById('art-next-image');
     const msgEl = document.getElementById('art-msg');
 
-    if (!shell || !imageEl || !titleEl || !instructionEl || !countEl || !startBtn || !doneBtn || !msgEl) return;
+    if (!shell || !imageEl || !titleEl || !instructionEl || !countEl || !startBtn || !doneBtn || !nextImageBtn || !msgEl) return;
 
     let cards = [];
     try {
@@ -19,6 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let current = null;
+    let currentImages = [];
+    let currentImageIndex = 0;
     let startedAt = null;
     let completed = 0;
 
@@ -45,9 +48,24 @@ document.addEventListener('DOMContentLoaded', () => {
         current = card;
         titleEl.textContent = card.title || 'Вправа';
         instructionEl.textContent = card.instruction || 'Виконуй вправу у комфортному темпі.';
-        imageEl.style.backgroundImage = card.image_url ? `url('${card.image_url}')` : '';
-        imageEl.classList.toggle('has-image', Boolean(card.image_url));
+        currentImages = Array.isArray(card.images) && card.images.length
+            ? card.images
+            : (card.image_url ? [card.image_url] : []);
+        currentImageIndex = 0;
+        if (currentImages.length) {
+            imageEl.style.backgroundImage = `url('${currentImages[0]}')`;
+        } else {
+            imageEl.style.backgroundImage = '';
+        }
+        imageEl.classList.toggle('has-image', Boolean(currentImages.length));
+        nextImageBtn.hidden = currentImages.length <= 1;
         setActiveButton(card.id);
+    }
+
+    function showNextImage() {
+        if (!currentImages.length) return;
+        currentImageIndex = (currentImageIndex + 1) % currentImages.length;
+        imageEl.style.backgroundImage = `url('${currentImages[currentImageIndex]}')`;
     }
 
     function selectCard(cardId) {
@@ -124,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     startBtn.addEventListener('click', startExercise);
     doneBtn.addEventListener('click', finishExercise);
+    nextImageBtn.addEventListener('click', showNextImage);
 
     if (!cards.length) {
         startBtn.disabled = true;

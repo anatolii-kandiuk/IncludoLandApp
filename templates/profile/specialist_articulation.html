@@ -47,10 +47,10 @@
                             placeholder="Коротка інструкція (необовʼязково)"
                             rows="2">{{ form.instruction.value|default:'' }}</textarea>
                         <input class="chart-filters__control" type="file" name="image" accept="image/*" required>
+                        <input class="chart-filters__control" type="file" name="images" accept="image/*" multiple>
 
                         <label class="chart-filters__control art-inline-check">
-                            <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or
-                                form.is_active.value is None %}checked{% endif %}>
+                            <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or form.is_active.value is None %}checked{% endif %}>
                             <span>Активне</span>
                         </label>
 
@@ -65,7 +65,7 @@
 
                     <div class="art-help">
                         Порада: використовуйте зрозумілі назви (наприклад: «Парканчик», «Грибочок») та короткі
-                        інструкції.
+                        інструкції. Можна додавати кілька зображень до однієї вправи.
                     </div>
                 </section>
 
@@ -81,6 +81,7 @@
                             <div class="table__cell" role="columnheader">Картинка</div>
                             <div class="table__cell" role="columnheader">Назва</div>
                             <div class="table__cell" role="columnheader">Інструкція</div>
+                            <div class="table__cell" role="columnheader">Зображення</div>
                             <div class="table__cell" role="columnheader">Статус</div>
                             <div class="table__cell" role="columnheader"></div>
                         </div>
@@ -88,12 +89,14 @@
                         {% for c in cards %}
                         <div class="table__row" role="row">
                             <div class="table__cell" role="cell">
-                                <div class="art-thumb" {% if c.safe_image_url
-                                    %}style="background-image: url('{{ c.safe_image_url }}');" {% endif %}></div>
+                                <div class="art-thumb" {% if c.safe_image_url %}
+                                    style="background-image: url('{{ c.safe_image_url }}');" {% endif %}></div>
                             </div>
                             <div class="table__cell table__cell--strong" role="cell">{{ c.title }}</div>
-                            <div class="table__cell" role="cell">{% if c.instruction %}{{ c.instruction }}{% else
-                                %}<span class="table__cell--muted">—</span>{% endif %}</div>
+                            <div class="table__cell" role="cell">{% if c.instruction %}{{ c.instruction }}{% else %}<span class="table__cell--muted">—</span>{% endif %}</div>
+                            <div class="table__cell" role="cell">
+                                <span class="table__cell--muted">{{ c.extra_images_count|default:0 }}</span>
+                            </div>
                             <div class="table__cell" role="cell">
                                 {% if c.is_active %}
                                 <span class="badge badge--green">Активне</span>

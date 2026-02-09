@@ -27,8 +27,7 @@
                     {% for r in rewards_unlocked %}
                     <div class="badge badge--{{ r.tone }} {% if not r.unlocked %}badge--locked{% endif %}">
                         <div class="badge__icon" aria-hidden="true">
-                            {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass' %}🧭{%
-                            elif r.icon == 'mouth' %}👄{% else %}🎯{% endif %}
+                            {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass' %}🧭{% elif r.icon == 'mouth' %}👄{% else %}🎯{% endif %}
                         </div>
                         <div class="badge__text">
                             <div class="badge__title">{{ r.title }}</div>
@@ -49,8 +48,7 @@
                         {% for r in rewards_locked %}
                         <div class="badge badge--{{ r.tone }} badge--locked">
                             <div class="badge__icon" aria-hidden="true">
-                                {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass'
-                                %}🧭{% elif r.icon == 'mouth' %}👄{% else %}🎯{% endif %}
+                                {% if r.icon == 'book' %}📕{% elif r.icon == 'calc' %}🧮{% elif r.icon == 'compass' %}🧭{% elif r.icon == 'mouth' %}👄{% else %}🎯{% endif %}
                             </div>
                             <div class="badge__text">
                                 <div class="badge__title">{{ r.title }}</div>

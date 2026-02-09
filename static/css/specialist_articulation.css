@@ -39,9 +39,9 @@
 
 .table__row {
     display: grid;
-    grid-template-columns: 120px 1.2fr 2.2fr .8fr 1fr;
+    grid-template-columns: 120px 1.2fr 2fr .8fr .7fr 1fr;
     align-items: center;
-    min-width: 960px;
+    min-width: 1040px;
 }
 
 .table__row--head {

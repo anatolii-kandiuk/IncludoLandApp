@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from .models import (
     ArticulationCard,
+    ArticulationCardImage,
     ChildProfile,
     ColoringPage,
     GameResult,
@@ -339,6 +340,13 @@ class ArticulationCardAdmin(admin.ModelAdmin):
     list_filter = ('is_active',)
     search_fields = ('title', 'instruction', 'created_by__username', 'created_by__email')
     list_select_related = ('created_by',)
+
+
+@admin.register(ArticulationCardImage)
+class ArticulationCardImageAdmin(admin.ModelAdmin):
+    list_display = ('card', 'created_at')
+    search_fields = ('card__title', 'card__created_by__username', 'card__created_by__email')
+    list_select_related = ('card', 'card__created_by')
 
 
 @admin.register(Story)

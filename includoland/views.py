@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from accounts.models import ArticulationCard, ColoringPage, MyStoryImage, SentenceExercise, SoundCard, Story, WordPuzzleWord
+from accounts.models import ArticulationCard, ArticulationCardImage, ColoringPage, MyStoryImage, SentenceExercise, SoundCard, Story, WordPuzzleWord
 
 # Reuse the existing attention task generator used for printable worksheets.
 from accounts.views import _generate_attention_items
@@ -111,7 +111,7 @@ def game_sounds(request):
 
 @ensure_csrf_cookie
 def game_articulation(request):
-    qs = ArticulationCard.objects.filter(is_active=True).only('id', 'title', 'instruction', 'image', 'created_by')
+    qs = ArticulationCard.objects.filter(is_active=True).only('id', 'title', 'instruction', 'image', 'created_by').prefetch_related('images')
 
     # If specialist opens the game, show their own cards.
     if request.user.is_authenticated and hasattr(request.user, 'specialist_profile'):
@@ -125,12 +125,25 @@ def game_articulation(request):
 
     cards = []
     for c in qs.order_by('-created_at')[:200]:
-        if not c.image:
-            continue
-        try:
-            if not c.image.storage.exists(c.image.name):
+        image_urls = []
+        if c.image:
+            try:
+                if c.image.storage.exists(c.image.name):
+                    image_urls.append(c.image.url)
+            except Exception:
+                pass
+
+        for img in c.images.all():
+            if not img.image:
                 continue
-        except Exception:
+            try:
+                if img.image.storage.exists(img.image.name):
+                    image_urls.append(img.image.url)
+            except Exception:
+                continue
+
+        image_urls = [u for u in image_urls if u]
+        if not image_urls:
             continue
 
         cards.append(
@@ -138,7 +151,8 @@ def game_articulation(request):
                 'id': c.id,
                 'title': c.title,
                 'instruction': c.instruction or '',
-                'image_url': c.image.url,
+                'image_url': image_urls[0],
+                'images': image_urls,
             }
         )
 
@@ -306,8 +320,6 @@ def game_sentences(request):
     return render(request, 'games/sentences.html', context)
 
 
-def coming_soon(request, section: str):
-    return render(request, 'coming_soon.html', {'section': section})
 
 
 def learn_alphabet(request):

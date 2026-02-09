@@ -34,7 +34,7 @@
                     <input id="braille-toggle" type="checkbox" />
                     <span data-braille>Брайль</span>
                 </label>
-                <a class="learn-btn" href="{% url 'learn_colors_print' %}" data-braille>Друк (A4)</a>
+                <a class="learn-btn" href="{% url 'learn_colors_print' %}" data-braille>Друк</a>
             </div>
         </div>
 
@@ -42,12 +42,9 @@
             <div class="flip" aria-label="Перегляд кольорів">
                 <button class="learn-btn" type="button" id="color-prev" aria-label="Попередній">←</button>
                 <div class="flip-main">
-                    <div class="color-swatch color-swatch--main" id="color-swatch" aria-hidden="true" {% if colors
-                        %}data-bg="{{ colors.0.hex }}" {% endif %}></div>
-                    <div class="flip-sub flip-sub--title" id="color-name" data-braille>{% if colors %}{{ colors.0.name
-                        }}{% endif %}</div>
-                    <div class="flip-sub" id="color-sub" data-braille>{% if colors %}Колір 1 з {{ colors|length }}{%
-                        endif %}</div>
+                    <div class="color-swatch color-swatch--main" id="color-swatch" aria-hidden="true" {% if colors %}data-bg="{{ colors.0.hex }}" {% endif %}></div>
+                    <div class="flip-sub flip-sub--title" id="color-name" data-braille>{% if colors %}{{ colors.0.name }}{% endif %}</div>
+                    <div class="flip-sub" id="color-sub" data-braille>{% if colors %}Колір 1 з {{ colors|length }}{% endif %}</div>
                 </div>
                 <button class="learn-btn" type="button" id="color-next" aria-label="Наступний">→</button>
             </div>

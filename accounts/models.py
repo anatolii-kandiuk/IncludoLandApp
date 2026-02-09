@@ -177,6 +177,24 @@ class ArticulationCard(models.Model):
         return f"ArticulationCard({self.title})"
 
 
+class ArticulationCardImage(models.Model):
+    card = models.ForeignKey(
+        ArticulationCard,
+        on_delete=models.CASCADE,
+        related_name='images',
+    )
+    image = models.ImageField(upload_to=UniqueUploadTo('articulation/images'))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Зображення для артикуляції'
+        verbose_name_plural = 'Зображення для артикуляції'
+
+    def __str__(self) -> str:
+        return f"ArticulationCardImage({self.card_id})"
+
+
 class Story(models.Model):
     class ContentType(models.TextChoices):
         TEXT = 'text', 'Text'

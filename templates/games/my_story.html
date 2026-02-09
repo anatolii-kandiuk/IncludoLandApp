@@ -26,7 +26,6 @@
         </header>
 
         <section class="story-panel">
-            {% csrf_token %}
             <div class="story-hero" aria-label="Картинка для історії">
                 <div class="story-hero__image" id="story-image" role="img" aria-label="Ілюстрація">
                     <span class="story-hero__placeholder">📚</span>
@@ -36,14 +35,11 @@
             <div class="story-body">
                 <p class="story-prompt">Подивись на картинку і придумай, що тут відбувається. Хто ці герої? Що вони
                     роблять?</p>
-                <textarea class="story-input" id="story-text" rows="5"
-                    placeholder="Напиши свою історію тут..."></textarea>
                 <div class="story-actions">
-                    <button class="story-btn" id="story-save" type="button">Зберегти казку</button>
                     <button class="story-btn story-btn--ghost" id="story-next" type="button">Інша картинка</button>
                 </div>
-                <div class="story-msg" id="story-msg" role="status" aria-live="polite">Оберіть картинку і почніть
-                    історію.</div>
+                <div class="story-msg" id="story-msg" role="status" aria-live="polite">Обери картинку і розкажи
+                    історію вголос.</div>
             </div>
         </section>
     </main>

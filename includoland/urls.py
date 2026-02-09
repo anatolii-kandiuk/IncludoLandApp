@@ -6,7 +6,6 @@ from django.urls import path
 from django.urls import include
 
 from .views import (
-    coming_soon,
     game_attention,
     game_articulation,
     game_math,
@@ -50,7 +49,6 @@ urlpatterns = [
     path('learn/colors/print/', learn_colors_print, name='learn_colors_print'),
     path('learn/coloring/', learn_coloring, name='learn_coloring'),
     path('learn/coloring/print/', learn_coloring_print, name='learn_coloring_print'),
-    path('soon/<str:section>/', coming_soon, name='coming_soon'),
     # /rewards/ handled by accounts.urls (auth-gated)
 ]
 

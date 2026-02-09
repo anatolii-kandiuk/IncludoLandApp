@@ -77,7 +77,17 @@ class StoryForm(forms.ModelForm):
         return instance
 
 
+class MultiFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
 class ArticulationCardForm(forms.ModelForm):
+    images = forms.FileField(
+        required=False,
+        widget=MultiFileInput(),
+        label='Додаткові зображення',
+    )
+
     class Meta:
         model = ArticulationCard
         fields = ('title', 'instruction', 'image', 'is_active')
@@ -115,6 +125,27 @@ class ArticulationCardForm(forms.ModelForm):
             raise forms.ValidationError('Файл завеликий (макс. 10 MB).')
 
         return f
+
+    def clean(self):
+        cleaned = super().clean()
+        images = self.files.getlist('images') if self.files else []
+        if images:
+            for f in images:
+                name = (getattr(f, 'name', '') or '').lower()
+                allowed = ('.png', '.jpg', '.jpeg', '.webp')
+                if not any(name.endswith(ext) for ext in allowed):
+                    self.add_error('images', 'Підтримуються лише PNG, JPG/JPEG, WEBP.')
+                    break
+                size = getattr(f, 'size', 0) or 0
+                if size > 10 * 1024 * 1024:
+                    self.add_error('images', 'Файл завеликий (макс. 10 MB).')
+                    break
+        return cleaned
+
+    def get_additional_images(self):
+        if not self.files:
+            return []
+        return self.files.getlist('images')
 
 
 class MyStoryImageForm(forms.ModelForm):

@@ -16,7 +16,7 @@ from django.db.models import F
 import random
 
 from .forms import ArticulationCardForm, MyStoryImageForm, RegisterForm, ColoringPageForm, SentenceExerciseForm, SoundCardForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
-from .models import ArticulationCard, ChildProfile, ColoringPage, GameResult, MyStoryEntry, MyStoryImage, SentenceExercise, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
+from .models import ArticulationCard, ArticulationCardImage, ChildProfile, ColoringPage, GameResult, MyStoryEntry, MyStoryImage, SentenceExercise, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
 
 
 BADGE_DEFINITIONS = [
@@ -605,6 +605,9 @@ def specialist_articulation(request):
             item = form.save(commit=False)
             item.created_by = request.user
             item.save()
+            extra_images = form.get_additional_images()
+            for f in extra_images:
+                ArticulationCardImage.objects.create(card=item, image=f)
             return redirect('specialist_articulation')
     else:
         form = ArticulationCardForm(initial={'is_active': True})
@@ -612,6 +615,7 @@ def specialist_articulation(request):
     cards = list(
         ArticulationCard.objects.filter(created_by=request.user)
         .only('id', 'title', 'instruction', 'image', 'is_active', 'created_at')
+        .prefetch_related('images')
         .order_by('-created_at')
     )
 
@@ -624,6 +628,7 @@ def specialist_articulation(request):
             except Exception:
                 image_url = ''
         c.safe_image_url = image_url
+        c.extra_images_count = len(list(getattr(c, 'images', []).all()))
 
     context = {
         'username': request.user.username,

@@ -105,8 +105,7 @@
                             <div class="lib-card__label">{{ c.title }}</div>
                             <div class="lib-card__actions">
                                 <button class="lib-card__play" type="button" data-audio-url="{{ c.safe_audio_url }}" {%
-                                    if not c.safe_audio_url %}disabled title="Файл звуку відсутній" {% endif
-                                    %}>▶</button>
+                                    if not c.safe_audio_url %}disabled title="Файл звуку відсутній" {% endif %}>▶</button>
                                 <button class="lib-card__btn lib-card__edit" type="button"
                                     aria-label="Редагувати">✎</button>
                                 <form class="lib-card__delete" method="post"

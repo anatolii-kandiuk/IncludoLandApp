@@ -92,8 +92,7 @@
                                 <div class="file-row__meta">
                                     <div class="file-row__title">{{ p.title }}</div>
                                     <div class="file-row__sub">
-                                        {% if p.file_type == 'pdf' %}PDF{% else %}Зображення{% endif %} · {% if
-                                        p.is_active %}Активна{% else %}Вимкнена{% endif %}
+                                        {% if p.file_type == 'pdf' %}PDF{% else %}Зображення{% endif %} · {% if p.is_active %}Активна{% else %}Вимкнена{% endif %}
                                     </div>
                                     {% if p.file_url %}
                                     <div class="file-row__preview">
