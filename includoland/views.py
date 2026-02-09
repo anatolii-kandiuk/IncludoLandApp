@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from accounts.models import ArticulationCard, ColoringPage, SentenceExercise, SoundCard, Story, WordPuzzleWord
+from accounts.models import ArticulationCard, ColoringPage, MyStoryImage, SentenceExercise, SoundCard, Story, WordPuzzleWord
 
 # Reuse the existing attention task generator used for printable worksheets.
 from accounts.views import _generate_attention_items
@@ -148,6 +148,45 @@ def game_articulation(request):
         'articulation_cards_json': json.dumps(cards, ensure_ascii=False),
     }
     return render(request, 'games/articulation.html', context)
+
+
+@ensure_csrf_cookie
+def game_my_story(request):
+    qs = MyStoryImage.objects.filter(is_active=True).only('id', 'title', 'image', 'created_by')
+
+    # If specialist opens the activity, show their own images.
+    if request.user.is_authenticated and hasattr(request.user, 'specialist_profile'):
+        qs = qs.filter(created_by=request.user)
+
+    # If child has assigned specialists, show images added by those specialists.
+    if request.user.is_authenticated and hasattr(request.user, 'child_profile'):
+        specialists = list(request.user.child_profile.specialists.select_related('user'))
+        if specialists:
+            qs = qs.filter(created_by__in=[s.user for s in specialists])
+
+    images = []
+    for img in qs.order_by('-created_at')[:200]:
+        if not img.image:
+            continue
+        try:
+            if not img.image.storage.exists(img.image.name):
+                continue
+        except Exception:
+            continue
+
+        images.append(
+            {
+                'id': img.id,
+                'title': img.title,
+                'image_url': img.image.url,
+            }
+        )
+
+    context = {
+        'stars': _child_stars(request),
+        'my_story_images_json': json.dumps(images, ensure_ascii=False),
+    }
+    return render(request, 'games/my_story.html', context)
 
 
 @ensure_csrf_cookie

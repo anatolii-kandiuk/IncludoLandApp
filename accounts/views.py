@@ -15,8 +15,8 @@ from django.db.models import F
 
 import random
 
-from .forms import ArticulationCardForm, RegisterForm, ColoringPageForm, SentenceExerciseForm, SoundCardForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
-from .models import ArticulationCard, ChildProfile, ColoringPage, GameResult, SentenceExercise, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
+from .forms import ArticulationCardForm, MyStoryImageForm, RegisterForm, ColoringPageForm, SentenceExerciseForm, SoundCardForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
+from .models import ArticulationCard, ChildProfile, ColoringPage, GameResult, MyStoryEntry, MyStoryImage, SentenceExercise, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
 
 
 BADGE_DEFINITIONS = [
@@ -649,6 +649,64 @@ def specialist_articulation_delete(request, card_id: int):
         card.delete()
 
     next_url = request.POST.get('next') or reverse('specialist_articulation')
+    return redirect(next_url)
+
+
+@login_required
+def specialist_my_story(request):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    if request.method == 'POST':
+        form = MyStoryImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            item = form.save(commit=False)
+            item.created_by = request.user
+            item.save()
+            return redirect('specialist_my_story')
+    else:
+        form = MyStoryImageForm(initial={'is_active': True})
+
+    images = list(
+        MyStoryImage.objects.filter(created_by=request.user)
+        .only('id', 'title', 'image', 'is_active', 'created_at')
+        .order_by('-created_at')
+    )
+
+    for img in images:
+        image_url = ''
+        if img.image:
+            try:
+                if img.image.storage.exists(img.image.name):
+                    image_url = img.image.url
+            except Exception:
+                image_url = ''
+        img.safe_image_url = image_url
+
+    context = {
+        'username': request.user.username,
+        'form': form,
+        'images': images,
+    }
+    return render(request, 'profile/specialist_my_story.html', context)
+
+
+@login_required
+@require_POST
+def specialist_my_story_delete(request, image_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    image = MyStoryImage.objects.filter(id=image_id, created_by=request.user).first()
+    if image:
+        try:
+            if image.image:
+                image.image.delete(save=False)
+        except Exception:
+            pass
+        image.delete()
+
+    next_url = request.POST.get('next') or reverse('specialist_my_story')
     return redirect(next_url)
 
 
@@ -1930,3 +1988,39 @@ def record_story_listen(request):
 
     new_total = ChildProfile.objects.filter(id=profile.id).values_list('stars', flat=True).first() or 0
     return JsonResponse({'ok': True, 'id': listen.id, 'stars_earned': stars_earned, 'stars_total': new_total})
+
+
+@login_required
+@require_POST
+def record_my_story(request):
+    if hasattr(request.user, 'specialist_profile'):
+        return JsonResponse({'ok': False, 'error': 'specialist_cannot_record'}, status=403)
+
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'ok': False, 'error': 'invalid_json'}, status=400)
+
+    text = (payload.get('text') or '').strip()
+    if not text:
+        return JsonResponse({'ok': False, 'error': 'empty_text'}, status=400)
+    if len(text) > 4000:
+        return JsonResponse({'ok': False, 'error': 'text_too_long'}, status=400)
+
+    image_id = payload.get('image_id')
+    image = None
+    if image_id is not None:
+        try:
+            image_id_int = int(image_id)
+        except (TypeError, ValueError):
+            image_id_int = None
+        if image_id_int is not None:
+            image = MyStoryImage.objects.filter(id=image_id_int, is_active=True).first()
+
+    entry = MyStoryEntry.objects.create(
+        user=request.user,
+        image=image,
+        text=text,
+    )
+
+    return JsonResponse({'ok': True, 'id': entry.id})

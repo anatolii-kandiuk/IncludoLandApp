@@ -14,6 +14,8 @@ from .models import (
     ChildProfile,
     ColoringPage,
     GameResult,
+    MyStoryEntry,
+    MyStoryImage,
     SentenceExercise,
     SoundCard,
     SpecialistInvite,
@@ -352,6 +354,21 @@ class StoryListenAdmin(admin.ModelAdmin):
     list_display = ('user', 'story', 'duration_seconds', 'created_at')
     search_fields = ('user__username', 'user__email', 'story__title')
     list_select_related = ('user', 'story')
+
+
+@admin.register(MyStoryImage)
+class MyStoryImageAdmin(admin.ModelAdmin):
+    list_display = ('title', 'created_by', 'is_active', 'created_at', 'updated_at')
+    list_filter = ('is_active',)
+    search_fields = ('title', 'created_by__username', 'created_by__email')
+    list_select_related = ('created_by',)
+
+
+@admin.register(MyStoryEntry)
+class MyStoryEntryAdmin(admin.ModelAdmin):
+    list_display = ('user', 'image', 'created_at')
+    search_fields = ('user__username', 'user__email', 'text')
+    list_select_related = ('user', 'image')
 
 
 @admin.register(UserBadge)

@@ -6,6 +6,7 @@ from . import views
 urlpatterns = [
     path('api/game-results/', views.record_game_result, name='record_game_result'),
     path('api/story-listens/', views.record_story_listen, name='record_story_listen'),
+    path('api/my-stories/', views.record_my_story, name='record_my_story'),
     path('rewards/', views.rewards_entry, name='rewards'),
     path('profile/', views.child_profile, name='child_profile'),
     path('specialist/', views.specialist_profile, name='specialist_profile'),
@@ -26,6 +27,9 @@ urlpatterns = [
 
     path('specialist/articulation/', views.specialist_articulation, name='specialist_articulation'),
     path('specialist/articulation/<int:card_id>/delete/', views.specialist_articulation_delete, name='specialist_articulation_delete'),
+
+    path('specialist/my-story/', views.specialist_my_story, name='specialist_my_story'),
+    path('specialist/my-story/<int:image_id>/delete/', views.specialist_my_story_delete, name='specialist_my_story_delete'),
 
     path('specialist/coloring/', views.specialist_coloring_pages, name='specialist_coloring_pages'),
     path('specialist/coloring/<int:page_id>/delete/', views.specialist_coloring_page_delete, name='specialist_coloring_page_delete'),

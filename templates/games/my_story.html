@@ -1,0 +1,55 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Моя історія — IncludoLand</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/my_story.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+    <main class="page page--my-story" data-images='{{ my_story_images_json|default:"[]"|safe }}'>
+        <header class="story-top">
+            <a class="pill pill--ghost" href="{% url 'home' %}#games" aria-label="Назад">
+                <span class="pill__ico" aria-hidden="true">←</span>
+                <span>Назад</span>
+            </a>
+            <h1 class="story-top__title">Склади свою казку!</h1>
+        </header>
+
+        <section class="story-panel">
+            {% csrf_token %}
+            <div class="story-hero" aria-label="Картинка для історії">
+                <div class="story-hero__image" id="story-image" role="img" aria-label="Ілюстрація">
+                    <span class="story-hero__placeholder">📚</span>
+                </div>
+            </div>
+
+            <div class="story-body">
+                <p class="story-prompt">Подивись на картинку і придумай, що тут відбувається. Хто ці герої? Що вони
+                    роблять?</p>
+                <textarea class="story-input" id="story-text" rows="5"
+                    placeholder="Напиши свою історію тут..."></textarea>
+                <div class="story-actions">
+                    <button class="story-btn" id="story-save" type="button">Зберегти казку</button>
+                    <button class="story-btn story-btn--ghost" id="story-next" type="button">Інша картинка</button>
+                </div>
+                <div class="story-msg" id="story-msg" role="status" aria-live="polite">Оберіть картинку і почніть
+                    історію.</div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'js/my_story.js' %}" defer></script>
+    {% include 'includes/footer.html' %}
+</body>
+
+</html>

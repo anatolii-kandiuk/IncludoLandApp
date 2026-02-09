@@ -56,6 +56,11 @@
                 <span class="nav__icon" aria-hidden="true">🧩</span>
                 <span class="nav__label">Речення</span>
             </a>
+            <a class="nav__item{% if active == 'my_story' %} nav__item--active{% endif %}"
+                href="{% url 'specialist_my_story' %}">
+                <span class="nav__icon" aria-hidden="true">📚</span>
+                <span class="nav__label">Моя історія</span>
+            </a>
         </div>
 
         <div class="nav__section" aria-label="Ігри">

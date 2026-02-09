@@ -234,6 +234,56 @@ class StoryListen(models.Model):
         return f"StoryListen({self.user.username}, {self.story_id})"
 
 
+class MyStoryImage(models.Model):
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='my_story_images',
+    )
+
+    title = models.CharField(max_length=120)
+    image = models.ImageField(upload_to=UniqueUploadTo('my_story/images'))
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Зображення для історії'
+        verbose_name_plural = 'Зображення для історій'
+
+    def __str__(self) -> str:
+        return f"MyStoryImage({self.title})"
+
+
+class MyStoryEntry(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='my_story_entries',
+    )
+    image = models.ForeignKey(
+        MyStoryImage,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='entries',
+    )
+
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Моя історія'
+        verbose_name_plural = 'Мої історії'
+
+    def __str__(self) -> str:
+        return f"MyStoryEntry({self.user.username}, {self.id})"
+
+
 class UserBadge(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
