@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import ArticulationCard, ColoringPage, MyStoryImage, SentenceExercise, SoundCard, SpecialistStudentNote, Story, WordPuzzleWord
+from .models import ArticulationCard, ColoringPage, MyStoryImage, SentenceExercise, SoundCard, SpecialistActivity, SpecialistActivityStep, SpecialistStudentNote, Story, WordPuzzleWord
 
 
 class RegisterForm(UserCreationForm):
@@ -176,6 +176,86 @@ class MyStoryImageForm(forms.ModelForm):
     def clean_image(self):
         f = self.cleaned_data.get('image')
         if not f:
+            raise forms.ValidationError('Оберіть зображення.')
+
+        name = (getattr(f, 'name', '') or '').lower()
+        allowed = ('.png', '.jpg', '.jpeg', '.webp')
+        if not any(name.endswith(ext) for ext in allowed):
+            raise forms.ValidationError('Підтримуються лише PNG, JPG/JPEG, WEBP.')
+
+        size = getattr(f, 'size', 0) or 0
+        if size > 10 * 1024 * 1024:
+            raise forms.ValidationError('Файл завеликий (макс. 10 MB).')
+
+        return f
+
+
+class SpecialistActivityForm(forms.ModelForm):
+    class Meta:
+        model = SpecialistActivity
+        fields = ('title', 'description', 'is_active')
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'Назва активності'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Короткий опис активності'}),
+        }
+
+    def clean_title(self):
+        value = (self.cleaned_data.get('title') or '').strip()
+        if not value:
+            raise forms.ValidationError('Введіть назву активності.')
+        if len(value) > 160:
+            raise forms.ValidationError('Назва надто довга (макс. 160 символів).')
+        return value
+
+    def clean_description(self):
+        value = (self.cleaned_data.get('description') or '').strip()
+        if len(value) > 600:
+            raise forms.ValidationError('Опис надто довгий (макс. 600 символів).')
+        return value
+
+
+class SpecialistActivityStepForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if getattr(self.instance, 'pk', None):
+            self.fields['image'].required = False
+
+    class Meta:
+        model = SpecialistActivityStep
+        fields = ('title', 'description', 'task_text', 'image', 'audio')
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'Назва кроку'}),
+            'description': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Опис активності'}),
+            'task_text': forms.TextInput(attrs={'placeholder': 'Текст завдання'}),
+        }
+
+    def clean_title(self):
+        value = (self.cleaned_data.get('title') or '').strip()
+        if not value:
+            raise forms.ValidationError('Введіть назву кроку.')
+        if len(value) > 160:
+            raise forms.ValidationError('Назва кроку надто довга (макс. 160 символів).')
+        return value
+
+    def clean_description(self):
+        value = (self.cleaned_data.get('description') or '').strip()
+        if len(value) > 400:
+            raise forms.ValidationError('Опис надто довгий (макс. 400 символів).')
+        return value
+
+    def clean_task_text(self):
+        value = (self.cleaned_data.get('task_text') or '').strip()
+        if not value:
+            raise forms.ValidationError('Введіть текст завдання.')
+        if len(value) > 220:
+            raise forms.ValidationError('Текст завдання надто довгий (макс. 220 символів).')
+        return value
+
+    def clean_image(self):
+        f = self.cleaned_data.get('image')
+        if not f:
+            if getattr(self.instance, 'pk', None) and getattr(self.instance, 'image', None):
+                return self.instance.image
             raise forms.ValidationError('Оберіть зображення.')
 
         name = (getattr(f, 'name', '') or '').lower()

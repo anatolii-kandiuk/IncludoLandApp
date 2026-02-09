@@ -17,6 +17,8 @@ from .models import (
     GameResult,
     MyStoryEntry,
     MyStoryImage,
+    SpecialistActivity,
+    SpecialistActivityStep,
     SentenceExercise,
     SoundCard,
     SpecialistInvite,
@@ -377,6 +379,21 @@ class MyStoryEntryAdmin(admin.ModelAdmin):
     list_display = ('user', 'image', 'created_at')
     search_fields = ('user__username', 'user__email', 'text')
     list_select_related = ('user', 'image')
+
+
+@admin.register(SpecialistActivity)
+class SpecialistActivityAdmin(admin.ModelAdmin):
+    list_display = ('title', 'created_by', 'is_active', 'created_at', 'updated_at')
+    list_filter = ('is_active',)
+    search_fields = ('title', 'description', 'created_by__username', 'created_by__email')
+    list_select_related = ('created_by',)
+
+
+@admin.register(SpecialistActivityStep)
+class SpecialistActivityStepAdmin(admin.ModelAdmin):
+    list_display = ('activity', 'position', 'title', 'created_at')
+    list_select_related = ('activity',)
+    search_fields = ('title', 'task_text', 'activity__title', 'activity__created_by__username')
 
 
 @admin.register(UserBadge)

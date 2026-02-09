@@ -15,8 +15,8 @@ from django.db.models import F
 
 import random
 
-from .forms import ArticulationCardForm, MyStoryImageForm, RegisterForm, ColoringPageForm, SentenceExerciseForm, SoundCardForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
-from .models import ArticulationCard, ArticulationCardImage, ChildProfile, ColoringPage, GameResult, MyStoryEntry, MyStoryImage, SentenceExercise, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
+from .forms import ArticulationCardForm, MyStoryImageForm, RegisterForm, ColoringPageForm, SentenceExerciseForm, SoundCardForm, SpecialistActivityForm, SpecialistActivityStepForm, SpecialistStudentNoteForm, StoryForm, WordPuzzleWordForm
+from .models import ArticulationCard, ArticulationCardImage, ChildProfile, ColoringPage, GameResult, MyStoryEntry, MyStoryImage, SpecialistActivity, SpecialistActivityStep, SentenceExercise, SoundCard, SpecialistStudentNote, Story, StoryListen, UserBadge, WordPuzzleWord
 
 
 BADGE_DEFINITIONS = [
@@ -713,6 +713,152 @@ def specialist_my_story_delete(request, image_id: int):
 
     next_url = request.POST.get('next') or reverse('specialist_my_story')
     return redirect(next_url)
+
+
+@login_required
+def specialist_activity_builder(request):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    activity_id_raw = request.GET.get('activity') or request.POST.get('activity_id')
+    activity = None
+    if activity_id_raw:
+        try:
+            activity_id = int(activity_id_raw)
+        except (TypeError, ValueError):
+            activity_id = None
+        if activity_id:
+            activity = SpecialistActivity.objects.filter(id=activity_id, created_by=request.user).first()
+
+    step_id_raw = request.GET.get('step') or request.POST.get('step_id')
+    step_instance = None
+    if activity and step_id_raw:
+        try:
+            step_id = int(step_id_raw)
+        except (TypeError, ValueError):
+            step_id = None
+        if step_id:
+            step_instance = SpecialistActivityStep.objects.filter(id=step_id, activity=activity).first()
+
+    activity_form = SpecialistActivityForm(instance=activity)
+    step_form = SpecialistActivityStepForm(instance=step_instance)
+
+    if request.method == 'POST':
+        form_type = (request.POST.get('form_type') or '').strip()
+
+        if form_type == 'activity':
+            activity_form = SpecialistActivityForm(request.POST, instance=activity)
+            if activity_form.is_valid():
+                obj = activity_form.save(commit=False)
+                obj.created_by = request.user
+                obj.save()
+                return redirect(f"{reverse('specialist_activity_builder')}?activity={obj.id}")
+
+        if form_type == 'step' and activity:
+            step_form = SpecialistActivityStepForm(request.POST, request.FILES, instance=step_instance)
+            if step_form.is_valid():
+                step_obj = step_form.save(commit=False)
+                step_obj.activity = activity
+                if not step_instance:
+                    last_pos = (
+                        SpecialistActivityStep.objects.filter(activity=activity)
+                        .order_by('-position')
+                        .values_list('position', flat=True)
+                        .first()
+                        or 0
+                    )
+                    step_obj.position = last_pos + 1
+                step_obj.save()
+                return redirect(f"{reverse('specialist_activity_builder')}?activity={activity.id}&step={step_obj.id}")
+
+    activities = list(
+        SpecialistActivity.objects.filter(created_by=request.user)
+        .only('id', 'title', 'is_active', 'created_at')
+        .order_by('-created_at')
+    )
+
+    steps = []
+    if activity:
+        steps = list(
+            SpecialistActivityStep.objects.filter(activity=activity)
+            .only('id', 'title', 'description', 'task_text', 'image', 'audio', 'position', 'created_at')
+            .order_by('position', 'created_at')
+        )
+
+        for s in steps:
+            image_url = ''
+            if s.image:
+                try:
+                    if s.image.storage.exists(s.image.name):
+                        image_url = s.image.url
+                except Exception:
+                    image_url = ''
+            audio_url = ''
+            if s.audio:
+                try:
+                    if s.audio.storage.exists(s.audio.name):
+                        audio_url = s.audio.url
+                except Exception:
+                    audio_url = ''
+            s.safe_image_url = image_url
+            s.safe_audio_url = audio_url
+
+    preview_step = step_instance or (steps[0] if steps else None)
+    if preview_step and not hasattr(preview_step, 'safe_image_url'):
+        image_url = ''
+        if preview_step.image:
+            try:
+                if preview_step.image.storage.exists(preview_step.image.name):
+                    image_url = preview_step.image.url
+            except Exception:
+                image_url = ''
+        audio_url = ''
+        if preview_step.audio:
+            try:
+                if preview_step.audio.storage.exists(preview_step.audio.name):
+                    audio_url = preview_step.audio.url
+            except Exception:
+                audio_url = ''
+        preview_step.safe_image_url = image_url
+        preview_step.safe_audio_url = audio_url
+    context = {
+        'username': request.user.username,
+        'activities': activities,
+        'activity': activity,
+        'steps': steps,
+        'preview_step': preview_step,
+        'editing_step': bool(step_instance),
+        'activity_form': activity_form,
+        'step_form': step_form,
+        'active': 'activity_builder',
+    }
+    return render(request, 'profile/specialist_activity_builder.html', context)
+
+
+@login_required
+@require_POST
+def specialist_activity_step_delete(request, step_id: int):
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+
+    step = SpecialistActivityStep.objects.filter(id=step_id, activity__created_by=request.user).select_related('activity').first()
+    activity_id = step.activity_id if step else None
+    if step:
+        try:
+            if step.image:
+                step.image.delete(save=False)
+        except Exception:
+            pass
+        try:
+            if step.audio:
+                step.audio.delete(save=False)
+        except Exception:
+            pass
+        step.delete()
+
+    if activity_id:
+        return redirect(f"{reverse('specialist_activity_builder')}?activity={activity_id}")
+    return redirect('specialist_activity_builder')
 
 
 def _require_specialist(request):

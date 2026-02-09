@@ -1,0 +1,250 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Сценарії активностей — Профіль спеціаліста</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist_activity_builder.css' %}">
+    <script src="{% static 'js/specialist_activity_builder.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+</head>
+
+<body>
+    <div class="shell">
+        {% include 'includes/specialist_sidebar.html' with active=active %}
+
+        <main class="main">
+            <header class="top">
+                <div class="top__left"></div>
+                <div class="top__right">
+                    <div class="chip chip--user">
+                        <span class="chip__avatar" aria-hidden="true">👩‍🏫</span>
+                        <span class="chip__text">{{ username }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="page-title">
+                    <h1 class="page-title__h">Сценарії активностей</h1>
+                    <div class="page-title__sub">Створюйте та тестуйте покрокові завдання</div>
+                </div>
+
+                <div class="builder">
+                    <section class="builder__left">
+                        <div class="card">
+                            <div class="card__head">
+                                <h2 class="card__title">Мої сценарії</h2>
+                            </div>
+                            <div class="activity-list">
+                                {% for item in activities %}
+                                <a class="activity-pill{% if activity and item.id == activity.id %} activity-pill--active{% endif %}"
+                                    href="{% url 'specialist_activity_builder' %}?activity={{ item.id }}">
+                                    <span class="activity-pill__title">{{ item.title }}</span>
+                                    {% if item.is_active %}
+                                    <span class="badge badge--active">активна</span>
+                                    {% else %}
+                                    <span class="badge badge--muted">пауза</span>
+                                    {% endif %}
+                                </a>
+                                {% empty %}
+                                <div class="empty">Поки що немає сценаріїв. Додайте перший.</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__head">
+                                <h2 class="card__title">{% if activity %}Редагувати сценарій{% else %}Новий сценарій{%
+                                    endif %}
+                                </h2>
+                            </div>
+                            <form class="s-form" method="post" action="{% url 'specialist_activity_builder' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="activity">
+                                {% if activity %}
+                                <input type="hidden" name="activity_id" value="{{ activity.id }}">
+                                {% endif %}
+
+                                <label class="field">
+                                    <span class="label">Назва</span>
+                                    <input class="input" type="text" name="title" maxlength="160" required
+                                        value="{{ activity_form.title.value|default:'' }}">
+                                    {% if activity_form.title.errors %}
+                                    <span class="error">{{ activity_form.title.errors|striptags }}</span>
+                                    {% endif %}
+                                </label>
+
+                                <label class="field">
+                                    <span class="label">Опис</span>
+                                    <textarea class="input input--textarea" name="description"
+                                        rows="3">{{ activity_form.description.value|default:'' }}</textarea>
+                                    {% if activity_form.description.errors %}
+                                    <span class="error">{{ activity_form.description.errors|striptags }}</span>
+                                    {% endif %}
+                                </label>
+
+                                <label class="toggle">
+                                    <input type="checkbox" name="is_active" {% if
+                                        activity_form.is_active.value|default:True %}checked{% endif %}>
+                                    <span>Активна</span>
+                                </label>
+
+                                <button class="btn" type="submit">{% if activity %}Оновити сценарій{% else %}Зберегти
+                                    сценарій{% endif %}</button>
+                            </form>
+                        </div>
+                    </section>
+
+                    <section class="builder__right">
+                        <div class="card">
+                            <div class="card__head">
+                                <h2 class="card__title">Кроки активності</h2>
+                                {% if activity %}
+                                <span class="chip chip--ghost">{{ steps|length }} кроків</span>
+                                {% endif %}
+                            </div>
+
+                            {% if not activity %}
+                            <div class="empty">Спершу створіть або оберіть сценарій, щоб додавати кроки.</div>
+                            {% else %}
+                            <div class="step-list">
+                                {% for step in steps %}
+                                <div class="step-card{% if preview_step and step.id == preview_step.id %} step-card--active{% endif %}"
+                                    data-title="{{ step.title|escape }}"
+                                    data-description="{{ step.description|escape }}"
+                                    data-task="{{ step.task_text|escape }}"
+                                    data-image="{{ step.safe_image_url|default:'' }}"
+                                    data-audio="{{ step.safe_audio_url|default:'' }}">
+                                    <div class="step-card__main">
+                                        <div class="step-card__index">{{ forloop.counter }}</div>
+                                        <div>
+                                            <div class="step-card__title">{{ step.title }}</div>
+                                            <div class="step-card__task">{{ step.task_text }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="step-card__actions">
+                                        <a class="btn btn--ghost"
+                                            href="{% url 'specialist_activity_builder' %}?activity={{ activity.id }}&step={{ step.id }}">Редагувати</a>
+                                        <button class="btn btn--ghost" type="button" data-preview-step>Перегляд</button>
+                                        <form method="post"
+                                            action="{% url 'specialist_activity_step_delete' step.id %}">
+                                            {% csrf_token %}
+                                            <button class="btn btn--danger" type="submit">Видалити</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="empty">Додайте перший крок.</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="divider"></div>
+
+                            <form class="s-form" method="post" enctype="multipart/form-data"
+                                action="{% url 'specialist_activity_builder' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="step">
+                                <input type="hidden" name="activity_id" value="{{ activity.id }}">
+                                {% if editing_step and preview_step and preview_step.id %}
+                                <input type="hidden" name="step_id" value="{{ preview_step.id }}">
+                                {% endif %}
+
+                                <label class="field">
+                                    <span class="label">Назва кроку</span>
+                                    <input class="input" type="text" name="title" maxlength="160" required
+                                        value="{{ step_form.title.value|default:'' }}">
+                                    {% if step_form.title.errors %}
+                                    <span class="error">{{ step_form.title.errors|striptags }}</span>
+                                    {% endif %}
+                                </label>
+
+                                <label class="field">
+                                    <span class="label">Опис (необов'язково)</span>
+                                    <textarea class="input input--textarea" name="description"
+                                        rows="2">{{ step_form.description.value|default:'' }}</textarea>
+                                    {% if step_form.description.errors %}
+                                    <span class="error">{{ step_form.description.errors|striptags }}</span>
+                                    {% endif %}
+                                </label>
+
+                                <label class="field">
+                                    <span class="label">Текст завдання</span>
+                                    <input class="input" type="text" name="task_text" maxlength="220" required
+                                        value="{{ step_form.task_text.value|default:'' }}">
+                                    {% if step_form.task_text.errors %}
+                                    <span class="error">{{ step_form.task_text.errors|striptags }}</span>
+                                    {% endif %}
+                                </label>
+
+                                <label class="field">
+                                    <span class="label">Зображення</span>
+                                    <input class="input input--file" type="file" name="image" accept="image/*">
+                                    {% if step_form.image.errors %}
+                                    <span class="error">{{ step_form.image.errors|striptags }}</span>
+                                    {% endif %}
+                                </label>
+
+                                <div class="field">
+                                    <span class="label">Аудіо (необов'язково)</span>
+                                    <div class="audio-row">
+                                        <input class="input input--file" type="file" name="audio" accept="audio/*"
+                                            data-audio-input>
+                                        <button class="btn btn--ghost" type="button" data-audio-record>Записати</button>
+                                    </div>
+                                    <span class="hint" id="recording-status">Можна завантажити або записати
+                                        аудіо.</span>
+                                </div>
+
+                                <button class="btn" type="submit">{% if editing_step %}Оновити крок{% else %}Додати
+                                    крок{% endif %}</button>
+                            </form>
+                            {% endif %}
+                        </div>
+
+                        <div class="card preview">
+                            <div class="card__head">
+                                <h2 class="card__title">Попередній перегляд</h2>
+                            </div>
+
+                            {% if preview_step %}
+                            <div class="preview__grid">
+                                <div class="preview__media">
+                                    <img id="preview-image"
+                                        class="preview__image{% if not preview_step.safe_image_url %} is-hidden{% endif %}"
+                                        src="{{ preview_step.safe_image_url|default:'' }}" alt="Зображення кроку">
+                                    <div id="preview-image-empty"
+                                        class="preview__image-empty{% if preview_step.safe_image_url %} is-hidden{% endif %}">
+                                        Зображення не додано
+                                    </div>
+                                </div>
+                                <div class="preview__body">
+                                    <div class="preview__title" id="preview-title">{{ preview_step.title }}</div>
+                                    <div class="preview__desc" id="preview-description">{{
+                                        preview_step.description|default:'' }}</div>
+                                    <div class="preview__task" id="preview-task">{{ preview_step.task_text }}</div>
+                                    <audio id="preview-audio"
+                                        class="preview__audio{% if not preview_step.safe_audio_url %} is-hidden{% endif %}"
+                                        controls src="{{ preview_step.safe_audio_url|default:'' }}"></audio>
+                                    <div id="preview-audio-empty"
+                                        class="preview__audio-empty{% if preview_step.safe_audio_url %} is-hidden{% endif %}">
+                                        Аудіо не додано
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="empty">Створіть крок, щоб побачити попередній перегляд.</div>
+                            {% endif %}
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

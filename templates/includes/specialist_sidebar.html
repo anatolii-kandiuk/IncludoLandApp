@@ -61,6 +61,11 @@
                 <span class="nav__icon" aria-hidden="true">📚</span>
                 <span class="nav__label">Моя історія</span>
             </a>
+            <a class="nav__item{% if active == 'activity_builder' %} nav__item--active{% endif %}"
+                href="{% url 'specialist_activity_builder' %}">
+                <span class="nav__icon" aria-hidden="true">🎬</span>
+                <span class="nav__label">Сценарії</span>
+            </a>
         </div>
 
         <div class="nav__section" aria-label="Ігри">

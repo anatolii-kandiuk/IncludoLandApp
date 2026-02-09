@@ -302,6 +302,57 @@ class MyStoryEntry(models.Model):
         return f"MyStoryEntry({self.user.username}, {self.id})"
 
 
+class SpecialistActivity(models.Model):
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='specialist_activities',
+    )
+
+    title = models.CharField(max_length=160)
+    description = models.TextField(blank=True)
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Сценарій активності'
+        verbose_name_plural = 'Сценарії активностей'
+
+    def __str__(self) -> str:
+        return f"SpecialistActivity({self.title})"
+
+
+class SpecialistActivityStep(models.Model):
+    activity = models.ForeignKey(
+        SpecialistActivity,
+        on_delete=models.CASCADE,
+        related_name='steps',
+    )
+
+    title = models.CharField(max_length=160)
+    description = models.TextField(blank=True)
+    task_text = models.CharField(max_length=220)
+    image = models.ImageField(upload_to=UniqueUploadTo('activities/images'))
+    audio = models.FileField(upload_to=UniqueUploadTo('activities/audio'), blank=True, null=True)
+
+    position = models.PositiveIntegerField(default=1)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['position', 'created_at']
+        verbose_name = 'Крок активності'
+        verbose_name_plural = 'Кроки активності'
+
+    def __str__(self) -> str:
+        return f"SpecialistActivityStep({self.activity_id}, {self.position})"
+
+
 class UserBadge(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
