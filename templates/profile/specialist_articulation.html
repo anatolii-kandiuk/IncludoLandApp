@@ -63,8 +63,7 @@
                             <span>Активне</span>
                         </label>
 
-                        <button class="chart-filters__btn" type="submit">{% if edit_card_id %}Зберегти{% else %}Додати{%
-                            endif %}</button>
+                        <button class="chart-filters__btn" type="submit">{% if edit_card_id %}Зберегти{% else %}Додати{%endif %}</button>
                         {% if edit_card_id %}
                         <a class="chart-filters__btn" href="{% url 'specialist_articulation' %}">Скасувати</a>
                         {% endif %}
@@ -106,8 +105,7 @@
                                     style="background-image: url('{{ c.safe_image_url }}');" {% endif %}></div>
                             </div>
                             <div class="table__cell table__cell--strong" role="cell">{{ c.title }}</div>
-                            <div class="table__cell" role="cell">{% if c.instruction %}{{ c.instruction }}{% else
-                                %}<span class="table__cell--muted">—</span>{% endif %}</div>
+                            <div class="table__cell" role="cell">{% if c.instruction %}{{ c.instruction }}{% else %}<span class="table__cell--muted">—</span>{% endif %}</div>
                             <div class="table__cell" role="cell">
                                 <span class="table__cell--muted">{{ c.extra_images_count|default:0 }}</span>
                             </div>
