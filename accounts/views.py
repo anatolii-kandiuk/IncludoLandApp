@@ -599,18 +599,37 @@ def specialist_articulation(request):
     if not hasattr(request.user, 'specialist_profile'):
         return redirect('child_profile')
 
+    edit_card = None
+    edit_card_id = request.GET.get('edit')
+    if edit_card_id:
+        edit_card = ArticulationCard.objects.filter(id=edit_card_id, created_by=request.user).first()
+
     if request.method == 'POST':
-        form = ArticulationCardForm(request.POST, request.FILES)
+        edit_card_id = request.POST.get('edit_id')
+        if edit_card_id:
+            edit_card = ArticulationCard.objects.filter(id=edit_card_id, created_by=request.user).first()
+            if not edit_card:
+                return redirect('specialist_articulation')
+        form = ArticulationCardForm(request.POST, request.FILES, instance=edit_card)
         if form.is_valid():
+            old_image = getattr(edit_card, 'image', None) if edit_card else None
             item = form.save(commit=False)
             item.created_by = request.user
+            if 'image' in request.FILES and old_image:
+                try:
+                    old_image.delete(save=False)
+                except Exception:
+                    pass
             item.save()
             extra_images = form.get_additional_images()
             for f in extra_images:
                 ArticulationCardImage.objects.create(card=item, image=f)
             return redirect('specialist_articulation')
     else:
-        form = ArticulationCardForm(initial={'is_active': True})
+        if edit_card:
+            form = ArticulationCardForm(instance=edit_card)
+        else:
+            form = ArticulationCardForm(initial={'is_active': True})
 
     cards = list(
         ArticulationCard.objects.filter(created_by=request.user)
@@ -634,6 +653,7 @@ def specialist_articulation(request):
         'username': request.user.username,
         'form': form,
         'cards': cards,
+        'edit_card_id': edit_card.id if edit_card else None,
     }
     return render(request, 'profile/specialist_articulation.html', context)
 

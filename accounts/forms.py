@@ -83,6 +83,11 @@ class ArticulationCardForm(forms.ModelForm):
     image_3 = forms.FileField(required=False, label='Додаткове зображення 3')
     image_4 = forms.FileField(required=False, label='Додаткове зображення 4')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if getattr(self.instance, 'pk', None):
+            self.fields['image'].required = False
+
     class Meta:
         model = ArticulationCard
         fields = ('title', 'instruction', 'image', 'sounds', 'is_active')
@@ -115,6 +120,8 @@ class ArticulationCardForm(forms.ModelForm):
     def clean_image(self):
         f = self.cleaned_data.get('image')
         if not f:
+            if getattr(self.instance, 'pk', None) and getattr(self.instance, 'image', None):
+                return self.instance.image
             raise forms.ValidationError('Оберіть зображення.')
 
         name = (getattr(f, 'name', '') or '').lower()

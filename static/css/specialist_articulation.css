@@ -102,6 +102,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    text-decoration: none;
 }
 
 .table__btn:hover {
@@ -116,6 +117,13 @@
 
 .table__btn--danger:hover {
     filter: brightness(.98);
+}
+
+.chart-filters__btn {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .badge {
@@ -139,4 +147,61 @@
 .badge--locked {
     background: rgba(15, 43, 58, .07);
     color: rgba(15, 43, 58, .85);
+}
+
+textarea.chart-filters__control {
+    height: auto;
+    min-height: 72px;
+    padding: 8px 10px;
+}
+
+@media (max-width: 1020px) {
+    .chart-filters {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        align-items: stretch;
+    }
+
+    .chart-filters__control,
+    .chart-filters__btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 900px) {
+    .table__row {
+        grid-template-columns: 90px 1fr .9fr 1fr;
+        min-width: 720px;
+    }
+
+    .table__row .table__cell:nth-child(3),
+    .table__row .table__cell:nth-child(4) {
+        display: none;
+    }
+}
+
+@media (max-width: 720px) {
+    .chart-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .art-inline-check {
+        padding: 0;
+    }
+
+    .table--scroll {
+        max-height: 440px;
+    }
+
+    .table__row {
+        grid-template-columns: 78px 1fr auto auto;
+        min-width: 640px;
+    }
+
+    .table__btn {
+        height: 32px;
+        padding: 0 10px;
+        font-size: 12px;
+    }
 }

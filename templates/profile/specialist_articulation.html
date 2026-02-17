@@ -34,12 +34,16 @@
 
                 <section class="card card--full">
                     <div class="card__head">
-                        <h2 class="card__title">Додати вправу</h2>
+                        <h2 class="card__title">{% if edit_card_id %}Редагувати вправу{% else %}Додати вправу{% endif %}
+                        </h2>
                     </div>
 
                     <form method="post" enctype="multipart/form-data" action="{% url 'specialist_articulation' %}"
                         class="chart-filters">
                         {% csrf_token %}
+                        {% if edit_card_id %}
+                        <input type="hidden" name="edit_id" value="{{ edit_card_id }}">
+                        {% endif %}
 
                         <input class="chart-filters__control" name="title" maxlength="80" placeholder="Назва вправи"
                             value="{{ form.title.value|default:'' }}" required>
@@ -48,18 +52,24 @@
                             rows="2">{{ form.instruction.value|default:'' }}</textarea>
                         <input class="chart-filters__control" name="sounds" maxlength="120"
                             placeholder="Звук (необовʼязково)" value="{{ form.sounds.value|default:'' }}">
-                        <input class="chart-filters__control" type="file" name="image" accept="image/*" required>
+                        <input class="chart-filters__control" type="file" name="image" accept="image/*" {% if not
+                            edit_card_id %}required{% endif %}>
                         <input class="chart-filters__control" type="file" name="image_1" accept="image/*">
                         <input class="chart-filters__control" type="file" name="image_2" accept="image/*">
                         <input class="chart-filters__control" type="file" name="image_3" accept="image/*">
                         <input class="chart-filters__control" type="file" name="image_4" accept="image/*">
 
                         <label class="chart-filters__control art-inline-check">
-                            <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or form.is_active.value is None %}checked{% endif %}>
+                            <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or
+                                form.is_active.value is None %}checked{% endif %}>
                             <span>Активне</span>
                         </label>
 
-                        <button class="chart-filters__btn" type="submit">Додати</button>
+                        <button class="chart-filters__btn" type="submit">{% if edit_card_id %}Зберегти{% else %}Додати{%
+                            endif %}</button>
+                        {% if edit_card_id %}
+                        <a class="chart-filters__btn" href="{% url 'specialist_articulation' %}">Скасувати</a>
+                        {% endif %}
                     </form>
 
                     {% if form.errors %}
@@ -111,6 +121,9 @@
                                 {% endif %}
                             </div>
                             <div class="table__cell table__actions" role="cell">
+                                <a class="table__btn" href="{% url 'specialist_articulation' %}?edit={{ c.id }}">
+                                    ✎ Редагувати
+                                </a>
                                 <form method="post" action="{% url 'specialist_articulation_delete' c.id %}"
                                     class="u-m0">
                                     {% csrf_token %}
