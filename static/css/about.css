@@ -96,6 +96,34 @@
     color: rgba(17, 33, 44, 0.68);
 }
 
+.about-policy {
+    margin-top: 10px;
+    display: grid;
+    gap: 14px;
+}
+
+.about-policy__section {
+    background: rgba(255, 255, 255, 0.55);
+    border-radius: 14px;
+    padding: 12px 14px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.about-policy__title {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.about-policy__list {
+    margin: 8px 0 0 18px;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+    font-weight: 700;
+    color: rgba(17, 33, 44, 0.78);
+}
+
 .about-details {
     margin-top: 20px;
     display: grid;
