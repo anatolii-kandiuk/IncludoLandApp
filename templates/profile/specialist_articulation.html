@@ -55,8 +55,7 @@
                         <input class="chart-filters__control" type="file" name="image_4" accept="image/*">
 
                         <label class="chart-filters__control art-inline-check">
-                            <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or
-                                form.is_active.value is None %}checked{% endif %}>
+                            <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or form.is_active.value is None %}checked{% endif %}>
                             <span>Активне</span>
                         </label>
 
