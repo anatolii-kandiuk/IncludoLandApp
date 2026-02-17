@@ -41,9 +41,25 @@
         });
     }
 
+    function wireSidebarToggle() {
+        document.querySelectorAll('[data-sidebar-toggle]').forEach(function (btn) {
+            if (btn.__sidebarWired) return;
+            btn.__sidebarWired = true;
+
+            var sidebar = btn.closest('.sidebar');
+            if (!sidebar) return;
+
+            btn.addEventListener('click', function () {
+                var isOpen = sidebar.classList.toggle('is-open');
+                btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
+        });
+    }
+
     function init() {
         applyDataDrivenStyles();
         wireConfirmButtons();
+        wireSidebarToggle();
     }
 
     if (document.readyState === 'loading') {
