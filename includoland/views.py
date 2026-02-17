@@ -76,6 +76,10 @@ def home(request):
     return render(request, 'home.html', context)
 
 
+def about_app(request):
+    return render(request, 'about.html')
+
+
 @ensure_csrf_cookie
 def game_specialist_activity(request, activity_id: int):
     qs = SpecialistActivity.objects.filter(is_active=True).only('id', 'title', 'description', 'created_by')

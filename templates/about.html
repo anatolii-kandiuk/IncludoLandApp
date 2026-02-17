@@ -1,0 +1,71 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Про застосунок — IncludoLand</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/about.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+</head>
+
+<body>
+    {% include 'includes/header.html' %}
+
+    <main class="page page--about">
+        <header class="about-hero">
+            <div class="about-hero__text">
+                <p class="about-hero__tag">Про застосунок</p>
+                <h1 class="about-hero__title">IncludoLand</h1>
+                <p class="about-hero__subtitle">Освiтнi практики для розвитку мовлення, уваги та пам'ятi.</p>
+            </div>
+            <div class="about-hero__badge" aria-hidden="true">
+                <span class="about-hero__badge-text">v1.0.0</span>
+            </div>
+        </header>
+
+        <section class="about-grid">
+            <article class="about-card">
+                <h2 class="about-card__title">Автор</h2>
+                <p class="about-card__text">Анатолiй Кандюк</p>
+                <p class="about-card__meta">Карпатський нацiональний унiверситет iм. Василя Стефаника</p>
+            </article>
+
+            <article class="about-card">
+                <h2 class="about-card__title">Контакти</h2>
+                <p class="about-card__text">Email: anatolii.kandiuk.01etgmail.com</p>
+                <p class="about-card__meta">Зв'язок для питань та пропозицiй.</p>
+            </article>
+
+            <article class="about-card about-card--wide">
+                <h2 class="about-card__title">Безпека даних</h2>
+                <p class="about-card__text">
+                    Данi користувачiв обробляються з урахуванням принципiв конфiденцiйностi та захисту.
+                    Доступ до iнформацiї має лише уповноважений персонал, а обмiн даними виконується через
+                    захищенi канали. Ми дотримуємося вимог щодо обробки персональних даних та чинних норм
+                    безпеки, щоб забезпечити надiйний захист iнформацiї.
+                </p>
+            </article>
+        </section>
+
+        <section class="about-details">
+            <div class="about-details__item">
+                <span class="about-details__label">Версiя застосунку</span>
+                <span class="about-details__value">1.0.0</span>
+            </div>
+            <div class="about-details__item">
+                <span class="about-details__label">Пiдтримка</span>
+                <span class="about-details__value">anatolii.kandiuk.01etgmail.com</span>
+            </div>
+        </section>
+    </main>
+
+    {% include 'includes/footer.html' %}
+</body>
+
+</html>

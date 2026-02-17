@@ -2,7 +2,10 @@
 <footer class="site-footer" role="contentinfo">
     <div class="site-footer__inner">
         <div class="site-footer__brand">IncludoLand</div>
-        <div class="site-footer__meta">© {% now "Y" %} IncludoLand</div>
+        <div class="site-footer__meta">
+            <a class="site-footer__link" href="{% url 'about_app' %}">Про застосунок</a>
+            <span>© {% now "Y" %} IncludoLand</span>
+        </div>
     </div>
 </footer>
 

@@ -26,6 +26,7 @@ from .views import (
     learn_numbers,
     learn_numbers_print,
     stories_library,
+    about_app,
 )
 
 urlpatterns = [
@@ -51,6 +52,7 @@ urlpatterns = [
     path('learn/colors/print/', learn_colors_print, name='learn_colors_print'),
     path('learn/coloring/', learn_coloring, name='learn_coloring'),
     path('learn/coloring/print/', learn_coloring_print, name='learn_coloring_print'),
+    path('about/', about_app, name='about_app'),
     # /rewards/ handled by accounts.urls (auth-gated)
 ]
 
