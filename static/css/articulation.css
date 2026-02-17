@@ -57,6 +57,28 @@
     letter-spacing: 0.5px;
 }
 
+.art-filter {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.art-filter__label {
+    font-weight: 700;
+    color: rgba(31, 42, 51, 0.85);
+}
+
+.art-filter__select {
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.9);
+    font-weight: 700;
+    color: var(--art-ink);
+}
+
 .art-shell {
     display: grid;
     grid-template-columns: minmax(200px, 280px) 1fr;
@@ -68,6 +90,9 @@
     display: grid;
     gap: 12px;
     align-content: start;
+    max-height: min(520px, calc(100vh - 260px));
+    overflow-y: auto;
+    padding-right: 6px;
 }
 
 .art-nav__item {

@@ -23,9 +23,24 @@
                 <span>Назад</span>
             </a>
             <h1 class="art-title">Артикуляційна гімнастика</h1>
+            {% if sounds %}
+            <form class="art-filter" method="get">
+                <label class="art-filter__label" for="art-sound">Фільтр по звуку</label>
+                <select class="art-filter__select" id="art-sound" name="sound" onchange="this.form.submit()">
+                    <option value="" {% if not selected_sound %}selected{% endif %}>Всі звуки</option>
+                    {% for sound in sounds %}
+                    <option value="{{ sound }}" {% if selected_sound==sound %}selected{% endif %}>{{ sound }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+            {% endif %}
         </header>
 
-        <section class="art-shell" data-cards='{{ articulation_cards_json|default:"[]"|safe }}'>
+        {% if articulation_cards %}
+        {{ articulation_cards|json_script:"articulation-cards-data" }}
+        {% endif %}
+
+        <section class="art-shell">
             {% csrf_token %}
             <aside class="art-nav" aria-label="Список вправ">
                 {% if articulation_cards %}

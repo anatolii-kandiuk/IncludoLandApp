@@ -85,10 +85,11 @@ class ArticulationCardForm(forms.ModelForm):
 
     class Meta:
         model = ArticulationCard
-        fields = ('title', 'instruction', 'image', 'is_active')
+        fields = ('title', 'instruction', 'image', 'sounds', 'is_active')
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': 'Назва вправи'}),
             'instruction': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Коротка інструкція (необовʼязково)'}),
+            'sounds': forms.TextInput(attrs={'placeholder': 'Звук (необовʼязково)'}),
         }
 
     def clean_title(self):
@@ -104,6 +105,12 @@ class ArticulationCardForm(forms.ModelForm):
         if len(value) > 400:
             raise forms.ValidationError('Інструкція надто довга (макс. 400 символів).')
         return value
+
+    def clean_sounds(self):
+        value = (self.cleaned_data.get('sounds') or '').strip()
+        if value and len(value) > 120:
+            raise forms.ValidationError('Поле "Звук" надто довге (макс. 120 символів).')
+        return value or None
 
     def clean_image(self):
         f = self.cleaned_data.get('image')

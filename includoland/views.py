@@ -194,7 +194,14 @@ def game_sounds(request):
 
 @ensure_csrf_cookie
 def game_articulation(request):
-    qs = ArticulationCard.objects.filter(is_active=True).only('id', 'title', 'instruction', 'image', 'created_by').prefetch_related('images')
+    qs = ArticulationCard.objects.filter(is_active=True).only(
+        'id',
+        'title',
+        'instruction',
+        'image',
+        'created_by',
+        'sounds',
+    ).prefetch_related('images')
 
     # If specialist opens the game, show their own cards.
     if request.user.is_authenticated and hasattr(request.user, 'specialist_profile'):
@@ -205,6 +212,19 @@ def game_articulation(request):
         specialists = list(request.user.child_profile.specialists.select_related('user'))
         if specialists:
             qs = qs.filter(created_by__in=[s.user for s in specialists])
+
+    selected_sound = (request.GET.get('sound') or '').strip()
+    sounds = set()
+    for value in qs.values_list('sounds', flat=True):
+        if not value:
+            continue
+        for part in value.split(','):
+            part = part.strip()
+            if part:
+                sounds.add(part)
+
+    if selected_sound:
+        qs = qs.filter(sounds__icontains=selected_sound)
 
     cards = []
     for c in qs.order_by('-created_at')[:200]:
@@ -243,6 +263,8 @@ def game_articulation(request):
         'stars': _child_stars(request),
         'articulation_cards': cards,
         'articulation_cards_json': json.dumps(cards, ensure_ascii=False),
+        'sounds': sorted(sounds, key=str.casefold),
+        'selected_sound': selected_sound,
     }
     return render(request, 'games/articulation.html', context)
 

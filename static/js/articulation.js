@@ -13,10 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!shell || !imageEl || !titleEl || !instructionEl || !countEl || !startBtn || !doneBtn || !nextImageBtn || !msgEl) return;
 
     let cards = [];
-    try {
-        cards = JSON.parse(shell.dataset.cards || '[]');
-    } catch (_e) {
-        cards = [];
+    const dataEl = document.getElementById('articulation-cards-data');
+    if (dataEl) {
+        try {
+            cards = JSON.parse(dataEl.textContent || '[]');
+        } catch (_e) {
+            cards = [];
+        }
     }
 
     let current = null;

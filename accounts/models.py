@@ -162,6 +162,7 @@ class ArticulationCard(models.Model):
     title = models.CharField(max_length=80)
     instruction = models.TextField(blank=True)
     image = models.ImageField(upload_to=UniqueUploadTo('articulation/images'))
+    sounds = models.CharField(max_length=120, blank=True, null=True)
 
     is_active = models.BooleanField(default=True)
 

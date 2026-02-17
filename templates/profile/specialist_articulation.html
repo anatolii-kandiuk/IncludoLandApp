@@ -46,6 +46,8 @@
                         <textarea class="chart-filters__control" name="instruction" maxlength="400"
                             placeholder="Коротка інструкція (необовʼязково)"
                             rows="2">{{ form.instruction.value|default:'' }}</textarea>
+                        <input class="chart-filters__control" name="sounds" maxlength="120"
+                            placeholder="Звук (необовʼязково)" value="{{ form.sounds.value|default:'' }}">
                         <input class="chart-filters__control" type="file" name="image" accept="image/*" required>
                         <input class="chart-filters__control" type="file" name="image_1" accept="image/*">
                         <input class="chart-filters__control" type="file" name="image_2" accept="image/*">
@@ -53,7 +55,8 @@
                         <input class="chart-filters__control" type="file" name="image_4" accept="image/*">
 
                         <label class="chart-filters__control art-inline-check">
-                            <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or form.is_active.value is None %}checked{% endif %}>
+                            <input type="checkbox" name="is_active" value="true" {% if form.is_active.value or
+                                form.is_active.value is None %}checked{% endif %}>
                             <span>Активне</span>
                         </label>
 
@@ -79,7 +82,7 @@
                     </div>
 
                     {% if cards %}
-                    <div class="table" role="table" aria-label="Вправи">
+                    <div class="table table--scroll" role="table" aria-label="Вправи">
                         <div class="table__row table__row--head" role="row">
                             <div class="table__cell" role="columnheader">Картинка</div>
                             <div class="table__cell" role="columnheader">Назва</div>
@@ -96,7 +99,8 @@
                                     style="background-image: url('{{ c.safe_image_url }}');" {% endif %}></div>
                             </div>
                             <div class="table__cell table__cell--strong" role="cell">{{ c.title }}</div>
-                            <div class="table__cell" role="cell">{% if c.instruction %}{{ c.instruction }}{% else %}<span class="table__cell--muted">—</span>{% endif %}</div>
+                            <div class="table__cell" role="cell">{% if c.instruction %}{{ c.instruction }}{% else
+                                %}<span class="table__cell--muted">—</span>{% endif %}</div>
                             <div class="table__cell" role="cell">
                                 <span class="table__cell--muted">{{ c.extra_images_count|default:0 }}</span>
                             </div>

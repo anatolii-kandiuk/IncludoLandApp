@@ -37,6 +37,11 @@
     background: rgba(255, 255, 255, .55);
 }
 
+.table--scroll {
+    max-height: 520px;
+    overflow-y: auto;
+}
+
 .table__row {
     display: grid;
     grid-template-columns: 120px 1.2fr 2fr .8fr .7fr 1fr;
