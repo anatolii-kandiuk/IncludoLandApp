@@ -7,6 +7,7 @@ urlpatterns = [
     path('api/game-results/', views.record_game_result, name='record_game_result'),
     path('api/story-listens/', views.record_story_listen, name='record_story_listen'),
     path('api/my-stories/', views.record_my_story, name='record_my_story'),
+    path('api/predict-performance/', views.predict_performance, name='predict_performance'),
     path('rewards/', views.rewards_entry, name='rewards'),
     path('profile/', views.child_profile, name='child_profile'),
     path('specialist/', views.specialist_profile, name='specialist_profile'),

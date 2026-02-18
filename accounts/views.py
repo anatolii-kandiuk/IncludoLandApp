@@ -2227,3 +2227,113 @@ def record_my_story(request):
     )
 
     return JsonResponse({'ok': True, 'id': entry.id})
+
+
+# ML Prediction API
+@login_required
+def predict_performance(request):
+    """
+    API endpoint for predicting child's future game performance.
+    
+    Query Parameters:
+    - user_id: User ID (defaults to current user)
+    - game_type: Game type to predict (required)
+    - train: If 'true', train model before prediction (optional)
+    
+    Returns JSON with:
+    - predicted_score: Predicted next score (0-100)
+    - current_score: Current last score
+    - confidence: Confidence level
+    - insight: Human-readable insight
+    - days_to_mastery: Estimated days to reach mastery
+    - attempts_to_mastery: Estimated attempts to reach mastery
+    """
+    from ml_services import ProgressPredictor
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    
+    # Get parameters
+    user_id = request.GET.get('user_id')
+    game_type = request.GET.get('game_type')
+    should_train = request.GET.get('train', '').lower() == 'true'
+    
+    # Validate game_type
+    if not game_type:
+        return JsonResponse({
+            'error': 'game_type parameter is required'
+        }, status=400)
+    
+    # Validate game_type is valid choice
+    valid_game_types = dict(GameResult.GameType.choices).keys()
+    if game_type not in valid_game_types:
+        return JsonResponse({
+            'error': f'Invalid game_type. Must be one of: {", ".join(valid_game_types)}'
+        }, status=400)
+    
+    # Use current user if user_id not specified (or not specialist)
+    if not user_id or not hasattr(request.user, 'specialist_profile'):
+        user_id = request.user.id
+    else:
+        try:
+            user_id = int(user_id)
+        except (ValueError, TypeError):
+            return JsonResponse({
+                'error': 'Invalid user_id'
+            }, status=400)
+    
+    try:
+        # Initialize predictor
+        predictor = ProgressPredictor(
+            model_type='random_forest',
+            model_dir='ml_models',
+            window_size=3,
+        )
+        
+        # Try to load existing model
+        model_loaded = predictor.load(game_type=game_type)
+        
+        # Train if requested or model not found
+        if should_train or not model_loaded:
+            logger.info(f"Training model for game_type={game_type}")
+            try:
+                metrics = predictor.train(game_type=game_type, min_entries=3)
+                predictor.save(game_type=game_type)
+                model_info = {
+                    'model_trained': True,
+                    'metrics': metrics,
+                }
+            except ValueError as e:
+                return JsonResponse({
+                    'error': f'Insufficient training data: {str(e)}',
+                    'suggestion': 'More game results are needed to train the model.'
+                }, status=400)
+        else:
+            model_info = {
+                'model_trained': False,
+                'model_loaded': True,
+            }
+        
+        # Make prediction
+        prediction = predictor.predict(user_id=user_id, game_type=game_type)
+        
+        if prediction is None:
+            return JsonResponse({
+                'error': 'Cannot make prediction',
+                'reason': 'Insufficient data for this user and game type',
+                'suggestion': f'User needs at least {predictor.window_size} game results of type "{game_type}"'
+            }, status=400)
+        
+        # Add model info to response
+        prediction['model_info'] = model_info
+        prediction['user_id'] = user_id
+        prediction['game_type'] = game_type
+        
+        return JsonResponse(prediction)
+        
+    except Exception as e:
+        logger.error(f"Error in predict_performance: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'error': 'Internal server error',
+            'message': str(e)
+        }, status=500)
