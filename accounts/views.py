@@ -409,43 +409,23 @@ def specialist_profile(request):
             .order_by('user__username')[:20]
         )
 
-    def _focus_from_stats(stats_dict: dict):
-        avg = stats_dict.get('avg') or {}
-        candidates = [
-            ('Математика', int(avg.get('math') or 0)),
-            ("Памʼять", int(avg.get('memory') or 0)),
-            ('Звуки', int(avg.get('sound') or 0)),
-            ('Пазли слів', int(avg.get('words') or 0)),
-            ('Побудова речень', int(avg.get('sentences') or 0)),
-            ('Артикуляція', int(avg.get('articulation') or 0)),
-        ]
-        label, value = min(candidates, key=lambda x: x[1])
-        severity = max(0, min(100, 100 - int(value)))
-        return label, int(value), severity
-
     attention_students = []
     for s in my_students[:6]:
-        stats = _build_child_stats_for_user(s.user)
-        focus_label, _focus_value, focus_severity = _focus_from_stats(stats)
         attention_students.append(
             {
                 'id': s.id,
                 'name': s.user.username,
-                'subtitle': f'Зосередженість: {focus_label}',
-                'progress': focus_severity,
+                'subtitle': 'Нотатки та аналітика',
             }
         )
 
     student_cards = []
     for s in my_students[:50]:
-        stats = _build_child_stats_for_user(s.user)
-        focus_label, _focus_value, focus_severity = _focus_from_stats(stats)
         student_cards.append(
             {
                 'id': s.id,
                 'name': s.user.username,
-                'subtitle': f'Зосередженість: {focus_label}',
-                'progress': focus_severity,
+                'subtitle': 'Нотатки та аналітика',
                 'stars': s.stars,
             }
         )
@@ -1601,26 +1581,12 @@ def specialist_student_notes(request, child_profile_id: int):
 
     stats = _build_child_stats_for_user(child.user)
     avg = stats.get('avg') or {}
-    focus_candidates = [
-        ('Математика', int(avg.get('math') or 0)),
-        ("Памʼять", int(avg.get('memory') or 0)),
-        ('Звуки', int(avg.get('sound') or 0)),
-        ('Пазли слів', int(avg.get('words') or 0)),
-        ('Побудова речень', int(avg.get('sentences') or 0)),
-        ('Артикуляція', int(avg.get('articulation') or 0)),
-    ]
-    focus_label, focus_value = min(focus_candidates, key=lambda x: x[1])
-    focus_severity = max(0, min(100, 100 - int(focus_value)))
-
     context = {
         'username': request.user.username,
         'student': child,
         'form': form,
         'notes': notes,
         'stats': stats,
-        'focus_label': focus_label,
-        'focus_value': int(focus_value),
-        'focus_severity': int(focus_severity),
         'results_count': stats['results_count'],
         'stories_listens_count': stats['stories_listens_count'],
         'progress': stats['progress'],
