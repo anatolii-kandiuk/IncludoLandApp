@@ -195,7 +195,7 @@
 
             <section class="content">
                 <div class="page-title">
-                    <h1 class="page-title__h">🤖 Прогноз AI (Machine Learning)</h1>
+                    <h1 class="page-title__h">Прогноз AI (Machine Learning)</h1>
                     <p class="page-title__sub">Штучний інтелект аналізує результати дитини та передбачає майбутні
                         показники</p>
                 </div>
@@ -207,7 +207,7 @@
 
                     <div class="card__body">
                         <div class="info-box">
-                            <h3>ℹ️ Як це працює?</h3>
+                            <h3>Як це працює?</h3>
                             <p>Алгоритм машинного навчання аналізує історію ігор дитини і прогнозує:</p>
                             <ul>
                                 <li>Очікуваний результат наступної спроби</li>
@@ -244,7 +244,7 @@
                             </div>
 
                             <button type="submit" class="btn-predict">
-                                🔮 Отримати прогноз
+                                Отримати прогноз
                             </button>
                         </form>
 
@@ -286,23 +286,40 @@
                     {
                         method: 'GET',
                         headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
                         }
                     }
                 );
 
-                const data = await response.json();
-
                 loading.classList.remove('active');
 
-                if (response.ok) {
-                    displaySuccess(data, username, gameType);
-                } else {
-                    displayError(data);
+                if (!response.ok) {
+                    // Try to parse error response
+                    try {
+                        const errorData = await response.json();
+                        displayError(errorData);
+                    } catch (e) {
+                        displayError({
+                            error: 'Помилка сервера',
+                            reason: `HTTP ${response.status}: ${response.statusText}`,
+                            suggestion: 'Перевірте чи запущений сервер та база даних'
+                        });
+                    }
+                    return;
                 }
+
+                const data = await response.json();
+                displaySuccess(data, username, gameType);
+
             } catch (error) {
                 loading.classList.remove('active');
-                displayError({ error: 'Помилка підключення', message: error.message });
+                console.error('Fetch error:', error);
+                displayError({
+                    error: 'Помилка підключення до сервера',
+                    reason: error.message,
+                    suggestion: 'Перевірте чи запущений Django сервер (python manage.py runserver)'
+                });
             }
         });
 
@@ -317,11 +334,11 @@
         const html = `
                 <div class="prediction-result">
                     <div class="result-title">
-                        📊 Аналіз прогресу учня: <strong>${displayName}</strong>
+                        Аналіз прогресу учня: <strong>${displayName}</strong>
                     </div>
                     
                     <div class="insight-box" style="margin-top: 1rem; background: linear-gradient(135deg, #e8f4f8, #d4ebf7); border-left: 5px solid #0f7aa5; font-size: 1.15rem;">
-                        <strong>💬 Рекомендації для роботи з ${displayName}:</strong><br><br>
+                        <strong>Рекомендації для роботи з ${displayName}:</strong><br><br>
                         <div style="padding: 0.5rem; background: white; border-radius: 6px; margin-top: 0.5rem;">
                             ${data.insight}
                         </div>
@@ -351,19 +368,19 @@
                     ${data.days_to_mastery ? `
                         <div class="result-stats">
                             <div class="stat-card">
-                                <div class="stat-label">📅 Днів до майстерності (90+ балів)</div>
+                                <div class="stat-label">Днів до майстерності (90+ балів)</div>
                                 <div class="stat-value">${data.days_to_mastery}</div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-label">🎯 Спроб до майстерності</div>
+                                <div class="stat-label">Спроб до майстерності</div>
                                 <div class="stat-value">${data.attempts_to_mastery}</div>
                             </div>
                         </div>
                     ` : `
                         <div style="padding: 1rem; background: #fff3cd; border-radius: 8px; margin-top: 1rem; border-left: 4px solid #ffc107;">
-                            <strong>ℹ️ Досягнення майстерності:</strong><br>
+                            <strong>Досягнення майстерності:</strong><br>
                             ${data.current_score >= 90
-                ? `${displayName} вже досяг(ла) майстерності! Чудовий результат! 🎉`
+                ? `${displayName} вже досяг(ла) майстерності! Чудовий результат!`
                 : `Продовжуйте практику для покращення результатів.`}
                         </div>
                     `}
@@ -382,7 +399,7 @@
         function displayError(data) {
             const html = `
                 <div class="prediction-result error">
-                    <div class="result-title">❌ Не вдалося отримати прогноз</div>
+                    <div class="result-title">Не вдалося отримати прогноз</div>
                     <div class="insight-box">
                         <p class="error-message">${data.error || 'Невідома помилка'}</p>
                         ${data.reason ? `<p><strong>Причина:</strong> ${data.reason}</p>` : ''}

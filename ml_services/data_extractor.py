@@ -1,14 +1,10 @@
-"""
-Data extraction and preprocessing utilities for ML models.
-"""
 from typing import Dict, List, Optional, Any, Tuple
 import logging
-from datetime import timedelta
 
 import numpy as np
 import pandas as pd
 from django.contrib.auth import get_user_model
-from django.db.models import QuerySet, Q
+from django.db.models import QuerySet
 
 from accounts.models import GameResult
 

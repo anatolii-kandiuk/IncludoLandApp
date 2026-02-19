@@ -2264,14 +2264,14 @@ def predict_performance(request):
     # Validate game_type
     if not game_type:
         return JsonResponse({
-            'error': 'game_type parameter is required'
+            'error': 'Параметр game_type є обов\'язковим'
         }, status=400)
     
     # Validate game_type is valid choice
     valid_game_types = dict(GameResult.GameType.choices).keys()
     if game_type not in valid_game_types:
         return JsonResponse({
-            'error': f'Invalid game_type. Must be one of: {", ".join(valid_game_types)}'
+            'error': f'Невірний game_type. Доступні значення: {", ".join(valid_game_types)}'
         }, status=400)
     
     # Resolve user_id from username if provided
@@ -2281,7 +2281,7 @@ def predict_performance(request):
             user_id = target_user.id
         except User.DoesNotExist:
             return JsonResponse({
-                'error': f'User with username "{username}" not found'
+                'error': f'Користувача з логіном "{username}" не знайдено'
             }, status=404)
     # Use current user if user_id not specified (or not specialist)
     elif not user_id or not hasattr(request.user, 'specialist_profile'):
@@ -2291,7 +2291,7 @@ def predict_performance(request):
             user_id = int(user_id)
         except (ValueError, TypeError):
             return JsonResponse({
-                'error': 'Invalid user_id'
+                'error': 'Невірний user_id'
             }, status=400)
     
     try:
@@ -2316,10 +2316,19 @@ def predict_performance(request):
                     'metrics': metrics,
                 }
             except ValueError as e:
+                logger.warning(f"Insufficient training data for {game_type}: {str(e)}")
                 return JsonResponse({
-                    'error': f'Insufficient training data: {str(e)}',
-                    'suggestion': 'More game results are needed to train the model.'
+                    'error': 'Недостатньо даних для навчання моделі',
+                    'reason': 'Недостатньо даних для цього типу гри',
+                    'suggestion': 'Потрібно більше результатів ігор для тренування моделі. Спробуйте пізніше коли буде більше даних.'
                 }, status=400)
+            except Exception as e:
+                logger.error(f"Training error for {game_type}: {str(e)}", exc_info=True)
+                return JsonResponse({
+                    'error': 'Помилка при навчанні моделі',
+                    'reason': 'Технічна помилка під час навчання моделі',
+                    'suggestion': 'Зверніться до адміністратора або спробуйте інший тип гри.'
+                }, status=500)
         else:
             model_info = {
                 'model_trained': False,
@@ -2330,10 +2339,11 @@ def predict_performance(request):
         prediction = predictor.predict(user_id=user_id, game_type=game_type)
         
         if prediction is None:
+            logger.warning(f"Cannot predict for user_id={user_id}, game_type={game_type} - insufficient data")
             return JsonResponse({
-                'error': 'Cannot make prediction',
-                'reason': 'Insufficient data for this user and game type',
-                'suggestion': f'User needs at least {predictor.window_size} game results of type "{game_type}"'
+                'error': 'Неможливо зробити прогноз',
+                'reason': f'Недостатньо даних для цього учня у грі "{game_type}"',
+                'suggestion': f'Учень повинен зіграти мінімум {predictor.window_size} ігор типу "{game_type}". Перевірте чи обраний правильний учень та тип гри.'
             }, status=400)
         
         # Get username for display
@@ -2343,7 +2353,7 @@ def predict_performance(request):
             if target_user.first_name:
                 display_name = target_user.first_name
         except User.DoesNotExist:
-            display_name = f"User #{user_id}"
+            display_name = f"Користувач №{user_id}"
         
         # Add model info and user info to response
         prediction['model_info'] = model_info
@@ -2356,8 +2366,9 @@ def predict_performance(request):
     except Exception as e:
         logger.error(f"Error in predict_performance: {str(e)}", exc_info=True)
         return JsonResponse({
-            'error': 'Internal server error',
-            'message': str(e)
+            'error': 'Внутрішня помилка сервера',
+            'reason': 'Технічна помилка сервера',
+            'suggestion': 'Перевірте чи запущений сервер та база даних. Якщо проблема продовжується, зверніться до адміністратора.'
         }, status=500)
 
 

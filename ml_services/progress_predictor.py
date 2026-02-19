@@ -1,5 +1,5 @@
 """
-Progress Predictor ML service for game performance prediction.
+ML service for predicting game performance.
 """
 from typing import Dict, Optional, Tuple, Any
 import logging
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 class ProgressPredictor:
     """
-    Machine Learning model for predicting child's future game performance.
+    ML model for predicting child's future game performance.
     
     Supports two model types:
     - 'linear': Linear Regression (faster, interpretable)
@@ -30,7 +30,7 @@ class ProgressPredictor:
     
     Features:
     - Training on historical game data
-    - Predicting next score for specific user and game_type
+    - Predicting next score for a specific user and game_type
     - Model persistence with joblib
     - Performance metrics tracking
     """
@@ -134,7 +134,7 @@ class ProgressPredictor:
             # Select only numeric features
             X_features = X[self.FEATURE_COLUMNS].copy()
             
-            # Handle any missing values
+            # Handle missing values
             X_features = X_features.fillna(0)
             
             # Split data
@@ -254,7 +254,6 @@ class ProgressPredictor:
                 predicted_score=predicted_score,
                 current_score=features['last_score'],
                 score_trend=features['score_trend'],
-                avg_score=features['avg_score'],
                 game_type=game_type,
             )
             
@@ -281,7 +280,7 @@ class ProgressPredictor:
             
             logger.info(
                 f"Prediction for user {user_id}, game {game_type}: "
-                f"score={predicted_score:.1f}, insight='{insight}'"
+                f"score={predicted_score:.1f}, insight_generated=True"
             )
             
             return result
@@ -295,10 +294,9 @@ class ProgressPredictor:
         predicted_score: float,
         current_score: float,
         score_trend: float,
-        avg_score: float,
         game_type: str,
     ) -> str:
-        """Generate human-readable insight from prediction in Ukrainian."""
+        """Generate a specialist-facing insight from the prediction."""
         
         # Game type labels in Ukrainian
         game_labels = {
@@ -311,8 +309,6 @@ class ProgressPredictor:
             'attention': 'іграх на увагу',
         }
         game_label = game_labels.get(game_type, 'цій грі')
-        
-        score_diff = predicted_score - current_score
         
         # Determine skill level and advice
         if predicted_score >= 90:
@@ -346,19 +342,19 @@ class ProgressPredictor:
             else:
                 advice = f"Виникають труднощі в {game_label}. Варто переглянути методику та приділити більше часу базовим вправам."
         
-        # Add emotional touch based on trend
+        # Add status based on trend
         if score_trend > 2:
-            emotion = "Блискучий прогрес! 🌟"
+            status = "Блискучий прогрес."
         elif score_trend > 1:
-            emotion = "Відмінна динаміка! 📈"
+            status = "Відмінна динаміка."
         elif score_trend > 0.3:
-            emotion = "Є покращення! ✅"
+            status = "Є покращення."
         elif score_trend > -0.3:
-            emotion = "Стабільний рівень 📊"
+            status = "Стабільний рівень."
         else:
-            emotion = "Потрібна увага 💪"
+            status = "Потрібна увага."
         
-        return f"{emotion} {level_text}. {advice}"
+        return f"{status} {level_text}. {advice}"
     
     def _estimate_mastery(
         self,

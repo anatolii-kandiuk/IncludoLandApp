@@ -101,7 +101,7 @@ class Command(BaseCommand):
                 # Display results
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f'\n✓ Training complete for game_type={gt or "all"}'
+                        f'\nTraining complete for game_type={gt or "all"}'
                     )
                 )
                 self.stdout.write(f'  Model type: {model_type}')
@@ -122,13 +122,13 @@ class Command(BaseCommand):
             except ValueError as e:
                 self.stdout.write(
                     self.style.ERROR(
-                        f'\n✗ Failed to train model for game_type={gt or "all"}: {str(e)}'
+                        f'\nFailed to train model for game_type={gt or "all"}: {str(e)}'
                     )
                 )
             except Exception as e:
                 self.stdout.write(
                     self.style.ERROR(
-                        f'\n✗ Unexpected error for game_type={gt or "all"}: {str(e)}'
+                        f'\nUnexpected error for game_type={gt or "all"}: {str(e)}'
                     )
                 )
                 if options['verbosity'] >= 2:
@@ -140,7 +140,7 @@ class Command(BaseCommand):
             self.stdout.write('\n' + '=' * 60)
             self.stdout.write(
                 self.style.SUCCESS(
-                    f'\n✓ Successfully trained {len(results)} model(s)'
+                    f'\nSuccessfully trained {len(results)} model(s)'
                 )
             )
             

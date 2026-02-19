@@ -26,6 +26,19 @@ if [ "${CREATE_DEFAULT_SUPERUSER:-1}" = "1" ]; then
 	python manage.py create_default_superuser
 fi
 
+# Check and train ML models if enabled
+if [ "${TRAIN_ML_MODELS:-0}" = "1" ]; then
+	echo "Checking ML model availability..."
+	if [ -d "ml_models" ] && [ "$(ls -A ml_models/*.joblib 2>/dev/null | wc -l)" -gt 0 ]; then
+		echo "ML models found, skipping training."
+	else
+		echo "Training ML models for all game types..."
+		python manage.py train_ml_model --all-game-types --min-entries=3 || {
+			echo "WARNING: ML model training failed. Models will be trained on first prediction request." >&2
+		}
+	fi
+fi
+
 if [ "${1:-}" = "gunicorn" ]; then
 	host="0.0.0.0"
 		port="${PORT:-8080}"
