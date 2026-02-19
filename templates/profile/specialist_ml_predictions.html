@@ -345,6 +345,19 @@
 
         // Get display name (from API response if available)
         const displayName = data.username || username;
+        const modelInfo = data.model_info || {};
+        const metrics = modelInfo.metrics || {};
+        const history = Array.isArray(data.history) ? data.history : [];
+        const formatDate = (value) => {
+            if (!value) {
+                return '-';
+            }
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) {
+                return value;
+            }
+            return date.toLocaleString('uk-UA');
+        };
 
         const html = `
                 <div class="prediction-result">
@@ -380,6 +393,21 @@
                         </div>
                     </div>
 
+                    <div class="result-stats">
+                        <div class="stat-card">
+                            <div class="stat-label">Стан моделі</div>
+                            <div class="stat-value">${modelInfo.model_trained ? 'Навчена зараз' : 'Завантажена'}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Test MAE</div>
+                            <div class="stat-value">${metrics.test_mae !== undefined ? Number(metrics.test_mae).toFixed(2) : '-'}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Test RMSE</div>
+                            <div class="stat-value">${metrics.test_rmse !== undefined ? Number(metrics.test_rmse).toFixed(2) : '-'}</div>
+                        </div>
+                    </div>
+
                     ${data.days_to_mastery ? `
                         <div class="result-stats">
                             <div class="stat-card">
@@ -399,6 +427,24 @@
                 : `Продовжуйте практику для покращення результатів.`}
                         </div>
                     `}
+
+                    <div style="padding: 1rem; background: #ffffff; border-radius: 8px; margin-top: 1rem; border: 1px solid #e5e7eb;">
+                        <strong>Історія результатів активності:</strong>
+                        ${history.length ? `
+                            <div style="margin-top: 0.5rem; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; font-size: 0.95rem;">
+                                <div style="font-weight: 600;">Дата</div>
+                                <div style="font-weight: 600;">Результат</div>
+                                <div style="font-weight: 600;">Тривалість (с)</div>
+                                ${history.map(item => `
+                                    <div>${formatDate(item.created_at)}</div>
+                                    <div>${item.score !== null && item.score !== undefined ? Number(item.score).toFixed(1) : '-'}</div>
+                                    <div>${item.duration_seconds ?? '-'}</div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div style="margin-top: 0.5rem; color: #6c757d;">Дані відсутні</div>
+                        `}
+                    </div>
 
                     <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px; margin-top: 1rem; font-size: 0.9rem; color: #6c757d;">
                         <strong>Тип активності:</strong> ${gameTypeLabels[gameType]}<br>

@@ -2354,12 +2354,29 @@ def predict_performance(request):
                 display_name = target_user.first_name
         except User.DoesNotExist:
             display_name = f"Користувач №{user_id}"
+
+        # Collect recent history for transparency in UI
+        recent_results = (
+            GameResult.objects
+            .filter(user_id=user_id, game_type=game_type)
+            .order_by('-created_at')
+            .values('score', 'duration_seconds', 'created_at')[:10]
+        )
+        history = [
+            {
+                'score': float(item['score']) if item['score'] is not None else None,
+                'duration_seconds': int(item['duration_seconds'] or 0),
+                'created_at': item['created_at'].isoformat() if item['created_at'] else None,
+            }
+            for item in recent_results
+        ]
         
         # Add model info and user info to response
         prediction['model_info'] = model_info
         prediction['user_id'] = user_id
         prediction['username'] = display_name
         prediction['game_type'] = game_type
+        prediction['history'] = history
         
         return JsonResponse(prediction)
         
