@@ -2271,7 +2271,7 @@ def predict_performance(request):
     valid_game_types = dict(GameResult.GameType.choices).keys()
     if game_type not in valid_game_types:
         return JsonResponse({
-            'error': f'Невірний game_type. Доступні значення: {", ".join(valid_game_types)}'
+            'error': f'Невірний тип активності. Доступні значення: {", ".join(valid_game_types)}'
         }, status=400)
     
     # Resolve user_id from username if provided
@@ -2318,16 +2318,16 @@ def predict_performance(request):
             except ValueError as e:
                 logger.warning(f"Insufficient training data for {game_type}: {str(e)}")
                 return JsonResponse({
-                    'error': 'Недостатньо даних для навчання моделі',
-                    'reason': 'Недостатньо даних для цього типу гри',
-                    'suggestion': 'Потрібно більше результатів ігор для тренування моделі. Спробуйте пізніше коли буде більше даних.'
+                    'error': 'Недостатньо даних для аналізу',
+                    'reason': 'Недостатньо даних для цього типу активності',
+                    'suggestion': 'Потрібно більше результатів активностей для аналізу. Спробуйте пізніше коли буде більше даних.'
                 }, status=400)
             except Exception as e:
                 logger.error(f"Training error for {game_type}: {str(e)}", exc_info=True)
                 return JsonResponse({
-                    'error': 'Помилка при навчанні моделі',
-                    'reason': 'Технічна помилка під час навчання моделі',
-                    'suggestion': 'Зверніться до адміністратора або спробуйте інший тип гри.'
+                    'error': 'Помилка під час аналізу',
+                    'reason': 'Технічна помилка під час аналізу даних',
+                    'suggestion': 'Зверніться до адміністратора або спробуйте інший тип активності.'
                 }, status=500)
         else:
             model_info = {
@@ -2342,8 +2342,8 @@ def predict_performance(request):
             logger.warning(f"Cannot predict for user_id={user_id}, game_type={game_type} - insufficient data")
             return JsonResponse({
                 'error': 'Неможливо зробити прогноз',
-                'reason': f'Недостатньо даних для цього учня у грі "{game_type}"',
-                'suggestion': f'Учень повинен зіграти мінімум {predictor.window_size} ігор типу "{game_type}". Перевірте чи обраний правильний учень та тип гри.'
+                'reason': f'Недостатньо даних для цього учня у активності "{game_type}"',
+                'suggestion': f'Учень повинен виконати мінімум {predictor.window_size} активностей типу "{game_type}". Перевірте чи обраний правильний учень та тип активності.'
             }, status=400)
         
         # Get username for display

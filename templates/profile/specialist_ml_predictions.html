@@ -208,15 +208,15 @@
                     <div class="card__body">
                         <div class="info-box">
                             <h3>Як це працює?</h3>
-                            <p>Алгоритм машинного навчання аналізує історію ігор дитини і прогнозує:</p>
+                            <p>Алгоритм машинного навчання аналізує історію активностей дитини і прогнозує:</p>
                             <ul>
                                 <li>Очікуваний результат наступної спроби</li>
                                 <li>Тренд покращення навичок</li>
                                 <li>Приблизний час до досягнення майстерності (90+ балів)</li>
                                 <li>Рекомендації для спеціаліста</li>
                             </ul>
-                            <p><strong>Примітка:</strong> Для точного прогнозу потрібно мінімум 3-5 результатів гри
-                                обраного типу.</p>
+                            <p><strong>Примітка:</strong> Для точного прогнозу потрібно мінімум 3-5 результатів
+                                обраної активності.</p>
                         </div>
 
                         <form id="predictionForm" class="prediction-form"
@@ -235,9 +235,9 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="gameTypeSelect">Тип гри:</label>
+                                <label for="gameTypeSelect">Тип активності:</label>
                                 <select id="gameTypeSelect" name="game_type" required>
-                                    <option value="">-- Оберіть тип гри --</option>
+                                    <option value="">-- Оберіть тип активності --</option>
                                     {% for gt in game_types %}
                                     <option value="{{ gt.value }}">{{ gt.label }}</option>
                                     {% endfor %}
@@ -273,7 +273,7 @@
             const gameType = document.getElementById('gameTypeSelect').value;
 
             if (!username || !gameType) {
-                alert('Будь ласка, оберіть учня та тип гри');
+                alert('Будь ласка, оберіть учня та тип активності');
                 return;
             }
 
@@ -369,13 +369,13 @@
                             <div class="stat-value big">${data.predicted_score.toFixed(1)}</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-label">Тренд (+/- за гру)</div>
+                            <div class="stat-label">Тренд (+/- за активність)</div>
                             <div class="stat-value" style="color: ${data.score_trend > 0 ? '#27ae60' : '#e74c3c'}">
                                 ${data.score_trend > 0 ? '+' : ''}${data.score_trend.toFixed(2)}
                             </div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-label">Впевненість моделі</div>
+                            <div class="stat-label">Впевненість аналізу</div>
                             <div class="stat-value">${data.confidence.toFixed(0)}%</div>
                         </div>
                     </div>
@@ -401,7 +401,7 @@
                     `}
 
                     <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px; margin-top: 1rem; font-size: 0.9rem; color: #6c757d;">
-                        <strong>Тип гри:</strong> ${gameTypeLabels[gameType]}<br>
+                        <strong>Тип активності:</strong> ${gameTypeLabels[gameType]}<br>
                         <strong>Учень:</strong> ${displayName} (${username})
                     </div>
                 </div>
