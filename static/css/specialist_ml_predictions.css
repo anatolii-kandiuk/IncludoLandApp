@@ -1,0 +1,126 @@
+.ml-hidden {
+	display: none;
+}
+
+.prediction-result {
+	background: #f1f3f5;
+	border-radius: 12px;
+	padding: 1.5rem;
+	border-left: 4px solid #0f7aa5;
+	margin-top: 1.5rem;
+}
+
+.prediction-result.error {
+	border-left-color: #e74c3c;
+	background: #fff5f5;
+}
+
+.result-title {
+	font-weight: 700;
+	font-size: 1.1rem;
+	margin-bottom: 1rem;
+	color: #1f2a37;
+}
+
+.ml-insight-box {
+	margin-top: 1rem;
+	background: linear-gradient(135deg, #e8f4f8, #d4ebf7);
+	border-left: 5px solid #0f7aa5;
+	font-size: 1.05rem;
+	padding: 1rem;
+	border-radius: 8px;
+}
+
+.ml-insight-content {
+	padding: 0.5rem;
+	background: #ffffff;
+	border-radius: 6px;
+	margin-top: 0.5rem;
+}
+
+.ml-result-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+	gap: 0.75rem;
+	margin-top: 1rem;
+}
+
+.ml-stat-card {
+	background: #ffffff;
+	border-radius: 10px;
+	padding: 0.9rem 1rem;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.ml-stat-label {
+	font-size: 0.85rem;
+	color: #6c757d;
+	margin-bottom: 0.35rem;
+}
+
+.ml-stat-value {
+	font-size: 1.3rem;
+	font-weight: 700;
+	color: #1f2a37;
+}
+
+.ml-stat-value-big {
+	font-size: 1.5rem;
+	color: #0f7aa5;
+}
+
+.ml-positive {
+	color: #27ae60;
+}
+
+.ml-negative {
+	color: #e74c3c;
+}
+
+.ml-mastery-box {
+	padding: 1rem;
+	background: #fff3cd;
+	border-radius: 8px;
+	margin-top: 1rem;
+	border-left: 4px solid #ffc107;
+}
+
+.ml-meta-box {
+	padding: 1rem;
+	background: #f8f9fa;
+	border-radius: 8px;
+	margin-top: 1rem;
+	font-size: 0.9rem;
+	color: #6c757d;
+}
+
+.ml-history-box {
+	padding: 1rem;
+	background: #ffffff;
+	border-radius: 8px;
+	margin-top: 1rem;
+	border: 1px solid #e5e7eb;
+}
+
+.ml-history-grid {
+	margin-top: 0.5rem;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	gap: 0.5rem;
+	font-size: 0.95rem;
+}
+
+.ml-history-header {
+	font-weight: 600;
+}
+
+.ml-history-empty {
+	margin-top: 0.5rem;
+	color: #6c757d;
+}
+
+.ml-error-box {
+	background: #ffffff;
+	border-radius: 8px;
+	padding: 1rem;
+}
