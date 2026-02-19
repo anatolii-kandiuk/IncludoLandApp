@@ -2440,6 +2440,27 @@ def predict_performance(request):
                 'model_loaded': True,
             }
         
+        history = build_history(user_id, game_type)
+        min_history_for_ml = 10
+
+        if len(history) < min_history_for_ml:
+            heuristic = build_heuristic_prediction(history, predictor, game_type)
+            if heuristic:
+                heuristic['model_info'] = {
+                    'model_trained': False,
+                    'model_loaded': model_loaded,
+                    'analysis_mode': 'heuristic',
+                }
+                heuristic['user_id'] = user_id
+                try:
+                    target_user = User.objects.get(id=user_id)
+                    heuristic['username'] = target_user.first_name or target_user.username
+                except User.DoesNotExist:
+                    heuristic['username'] = f"Користувач №{user_id}"
+                heuristic['game_type'] = game_type
+                heuristic['history'] = history
+                return JsonResponse(heuristic)
+
         # Make prediction
         prediction = predictor.predict(user_id=user_id, game_type=game_type)
         

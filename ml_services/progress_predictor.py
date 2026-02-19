@@ -245,6 +245,10 @@ class ProgressPredictor:
             
             # Clip to valid score range
             predicted_score = np.clip(predicted_score, 0, 100)
+
+            # Prevent sharp drop when current score is high and trend is positive
+            if features['last_score'] >= 90 and features['score_trend'] > 0:
+                predicted_score = max(predicted_score, features['last_score'] - 15)
             
             # Calculate confidence based on model type
             if self.model_type == 'random_forest' and hasattr(self.model, 'estimators_'):
