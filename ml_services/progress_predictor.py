@@ -255,6 +255,7 @@ class ProgressPredictor:
                 current_score=features['last_score'],
                 score_trend=features['score_trend'],
                 avg_score=features['avg_score'],
+                game_type=game_type,
             )
             
             # Estimate mastery timeline
@@ -295,38 +296,69 @@ class ProgressPredictor:
         current_score: float,
         score_trend: float,
         avg_score: float,
+        game_type: str,
     ) -> str:
-        """Generate human-readable insight from prediction."""
+        """Generate human-readable insight from prediction in Ukrainian."""
+        
+        # Game type labels in Ukrainian
+        game_labels = {
+            'math': 'математиці',
+            'memory': 'іграх на пам\'ять',
+            'words': 'пазлах зі словами',
+            'sound': 'іграх зі звуками',
+            'sentences': 'побудові речень',
+            'articulation': 'артикуляційній гімнастиці',
+            'attention': 'іграх на увагу',
+        }
+        game_label = game_labels.get(game_type, 'цій грі')
+        
         score_diff = predicted_score - current_score
         
-        if score_trend > 2:
-            trend_text = "Excellent progress! 🚀"
-        elif score_trend > 0.5:
-            trend_text = "Steady improvement! 📈"
-        elif score_trend < -1:
-            trend_text = "May need additional practice. 💪"
-        else:
-            trend_text = "Maintaining current level. 📊"
-        
+        # Determine skill level and advice
         if predicted_score >= 90:
-            performance = "Near mastery"
+            level_text = "Чудовий результат! Дитина досягла майстерності"
+            if score_trend > 0.5:
+                advice = f"Продовжуйте підтримувати інтерес до {game_label}. Можна переходити до більш складних завдань."
+            else:
+                advice = f"Відмінний рівень у {game_label}! Можна використовувати як мотивацію для інших навичок."
         elif predicted_score >= 75:
-            performance = "Good performance"
+            level_text = "Дуже добрий прогрес"
+            if score_trend > 1.5:
+                advice = f"Дитина активно покращується в {game_label}! Через кілька занять може досягти відмінних результатів."
+            elif score_trend > 0.5:
+                advice = f"Стабільне зростання в {game_label}. Рекомендується продовжити в такому ж темпі."
+            else:
+                advice = f"Хороший рівень у {game_label}, але є місце для росту. Додайте більше практики."
         elif predicted_score >= 60:
-            performance = "Moderate performance"
+            level_text = "Помірний прогрес"
+            if score_trend > 1:
+                advice = f"Дитина напрацьовує навички в {game_label}. Підтримуйте регулярність занять!"
+            elif score_trend > 0:
+                advice = f"Повільне, але стабільне покращення в {game_label}. Варто трохи збільшити час практики."
+            else:
+                advice = f"Навички в {game_label} потребують уваги. Рекомендується додаткова практика та підтримка."
         else:
-            performance = "Developing skills"
+            level_text = "Розвиток навичок"
+            if score_trend > 0.5:
+                advice = f"Є позитивна динаміка в {game_label}! Продовжуйте роботу, результати обов'язково покращаться."
+            elif score_trend >= 0:
+                advice = f"Дитина потребує більше уваги до {game_label}. Спробуйте індивідуальний підхід та додаткову мотивацію."
+            else:
+                advice = f"Виникають труднощі в {game_label}. Варто переглянути методику та приділити більше часу базовим вправам."
         
-        if score_diff > 5:
-            expectation = f"Expected to improve by {score_diff:.0f} points next attempt."
-        elif score_diff > 0:
-            expectation = f"Expected slight improvement of {score_diff:.0f} points."
-        elif score_diff < -5:
-            expectation = "May face challenges in next attempt. Consider review."
+        # Add emotional touch based on trend
+        if score_trend > 2:
+            emotion = "Блискучий прогрес! 🌟"
+        elif score_trend > 1:
+            emotion = "Відмінна динаміка! 📈"
+        elif score_trend > 0.3:
+            emotion = "Є покращення! ✅"
+        elif score_trend > -0.3:
+            emotion = "Стабільний рівень 📊"
         else:
-            expectation = "Expected to maintain current performance level."
+            emotion = "Потрібна увага 💪"
         
-        return f"{trend_text} {performance}. {expectation}"
+        return f"{emotion} {level_text}. {advice}"
     
     def _estimate_mastery(
         self,

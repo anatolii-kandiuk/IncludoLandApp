@@ -24,6 +24,11 @@
                 <span class="nav__icon" aria-hidden="true">🏠</span>
                 <span class="nav__label">Мої Учні</span>
             </a>
+            <a class="nav__item{% if active == 'ml_predictions' %} nav__item--active{% endif %}"
+                href="{% url 'specialist_ml_predictions' %}">
+                <span class="nav__icon" aria-hidden="true">🤖</span>
+                <span class="nav__label">Прогноз AI</span>
+            </a>
             <a class="nav__item{% if active == 'print' %} nav__item--active{% endif %}"
                 href="{% url 'specialist_print' %}">
                 <span class="nav__icon" aria-hidden="true">🖨️</span>

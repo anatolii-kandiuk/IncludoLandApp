@@ -2,6 +2,7 @@ import json
 from datetime import timedelta
 
 from django.contrib.auth import login
+from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, Http404
@@ -2237,6 +2238,7 @@ def predict_performance(request):
     
     Query Parameters:
     - user_id: User ID (defaults to current user)
+    - username: Username (alternative to user_id)
     - game_type: Game type to predict (required)
     - train: If 'true', train model before prediction (optional)
     
@@ -2255,6 +2257,7 @@ def predict_performance(request):
     
     # Get parameters
     user_id = request.GET.get('user_id')
+    username = request.GET.get('username')
     game_type = request.GET.get('game_type')
     should_train = request.GET.get('train', '').lower() == 'true'
     
@@ -2271,8 +2274,17 @@ def predict_performance(request):
             'error': f'Invalid game_type. Must be one of: {", ".join(valid_game_types)}'
         }, status=400)
     
+    # Resolve user_id from username if provided
+    if username and hasattr(request.user, 'specialist_profile'):
+        try:
+            target_user = User.objects.get(username=username)
+            user_id = target_user.id
+        except User.DoesNotExist:
+            return JsonResponse({
+                'error': f'User with username "{username}" not found'
+            }, status=404)
     # Use current user if user_id not specified (or not specialist)
-    if not user_id or not hasattr(request.user, 'specialist_profile'):
+    elif not user_id or not hasattr(request.user, 'specialist_profile'):
         user_id = request.user.id
     else:
         try:
@@ -2324,9 +2336,19 @@ def predict_performance(request):
                 'suggestion': f'User needs at least {predictor.window_size} game results of type "{game_type}"'
             }, status=400)
         
-        # Add model info to response
+        # Get username for display
+        try:
+            target_user = User.objects.get(id=user_id)
+            display_name = target_user.username
+            if target_user.first_name:
+                display_name = target_user.first_name
+        except User.DoesNotExist:
+            display_name = f"User #{user_id}"
+        
+        # Add model info and user info to response
         prediction['model_info'] = model_info
         prediction['user_id'] = user_id
+        prediction['username'] = display_name
         prediction['game_type'] = game_type
         
         return JsonResponse(prediction)
@@ -2337,3 +2359,36 @@ def predict_performance(request):
             'error': 'Internal server error',
             'message': str(e)
         }, status=500)
+
+
+# Specialist ML Predictions Page
+@login_required
+def specialist_ml_predictions(request):
+    """
+    Specialist page for ML-based performance predictions.
+    Allows specialists to enter a student's username and get predictions.
+    """
+    if not hasattr(request.user, 'specialist_profile'):
+        return redirect('child_profile')
+    
+    specialist = request.user.specialist_profile
+    
+    # Get list of specialist's students
+    my_students = list(
+        specialist.students.select_related('user')
+        .order_by('user__username')
+    )
+    
+    # Available game types
+    game_types = [
+        {'value': gt[0], 'label': gt[1]}
+        for gt in GameResult.GameType.choices
+    ]
+    
+    context = {
+        'username': request.user.username,
+        'my_students': my_students,
+        'game_types': game_types,
+    }
+    
+    return render(request, 'profile/specialist_ml_predictions.html', context)

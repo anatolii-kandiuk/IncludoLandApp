@@ -11,6 +11,7 @@ urlpatterns = [
     path('rewards/', views.rewards_entry, name='rewards'),
     path('profile/', views.child_profile, name='child_profile'),
     path('specialist/', views.specialist_profile, name='specialist_profile'),
+    path('specialist/ml-predictions/', views.specialist_ml_predictions, name='specialist_ml_predictions'),
 
     path('specialist/sounds/', views.specialist_sounds, name='specialist_sounds'),
     path('specialist/sounds/<int:card_id>/edit/', views.specialist_sound_edit, name='specialist_sound_edit'),
