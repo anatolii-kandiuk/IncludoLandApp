@@ -2293,6 +2293,23 @@ def predict_performance(request):
             return JsonResponse({
                 'error': 'Невірний user_id'
             }, status=400)
+
+    def build_history(target_user_id: int, target_game_type: str):
+        """Build recent activity history for UI display."""
+        recent_results = (
+            GameResult.objects
+            .filter(user_id=target_user_id, game_type=target_game_type)
+            .order_by('-created_at')
+            .values('score', 'duration_seconds', 'created_at')[:10]
+        )
+        return [
+            {
+                'score': float(item['score']) if item['score'] is not None else None,
+                'duration_seconds': int(item['duration_seconds'] or 0),
+                'created_at': item['created_at'].isoformat() if item['created_at'] else None,
+            }
+            for item in recent_results
+        ]
     
     try:
         # Initialize predictor
@@ -2320,14 +2337,24 @@ def predict_performance(request):
                 return JsonResponse({
                     'error': 'Недостатньо даних для аналізу',
                     'reason': 'Недостатньо даних для цього типу активності',
-                    'suggestion': 'Потрібно більше результатів активностей для аналізу. Спробуйте пізніше коли буде більше даних.'
+                    'suggestion': 'Потрібно більше результатів активностей для аналізу. Спробуйте пізніше коли буде більше даних.',
+                    'model_info': {
+                        'model_trained': False,
+                        'model_loaded': model_loaded,
+                    },
+                    'history': build_history(user_id, game_type),
                 }, status=400)
             except Exception as e:
                 logger.error(f"Training error for {game_type}: {str(e)}", exc_info=True)
                 return JsonResponse({
                     'error': 'Помилка під час аналізу',
                     'reason': 'Технічна помилка під час аналізу даних',
-                    'suggestion': 'Зверніться до адміністратора або спробуйте інший тип активності.'
+                    'suggestion': 'Зверніться до адміністратора або спробуйте інший тип активності.',
+                    'model_info': {
+                        'model_trained': False,
+                        'model_loaded': model_loaded,
+                    },
+                    'history': build_history(user_id, game_type),
                 }, status=500)
         else:
             model_info = {
@@ -2343,7 +2370,9 @@ def predict_performance(request):
             return JsonResponse({
                 'error': 'Неможливо зробити прогноз',
                 'reason': f'Недостатньо даних для цього учня у активності "{game_type}"',
-                'suggestion': f'Учень повинен виконати мінімум {predictor.window_size} активностей типу "{game_type}". Перевірте чи обраний правильний учень та тип активності.'
+                'suggestion': f'Учень повинен виконати мінімум {predictor.window_size} активностей типу "{game_type}". Перевірте чи обраний правильний учень та тип активності.',
+                'model_info': model_info,
+                'history': build_history(user_id, game_type),
             }, status=400)
         
         # Get username for display
@@ -2355,21 +2384,7 @@ def predict_performance(request):
         except User.DoesNotExist:
             display_name = f"Користувач №{user_id}"
 
-        # Collect recent history for transparency in UI
-        recent_results = (
-            GameResult.objects
-            .filter(user_id=user_id, game_type=game_type)
-            .order_by('-created_at')
-            .values('score', 'duration_seconds', 'created_at')[:10]
-        )
-        history = [
-            {
-                'score': float(item['score']) if item['score'] is not None else None,
-                'duration_seconds': int(item['duration_seconds'] or 0),
-                'created_at': item['created_at'].isoformat() if item['created_at'] else None,
-            }
-            for item in recent_results
-        ]
+        history = build_history(user_id, game_type)
         
         # Add model info and user info to response
         prediction['model_info'] = model_info
