@@ -125,6 +125,47 @@
 	padding: 1rem;
 }
 
+.prediction-form {
+	display: grid;
+	gap: 1rem;
+	margin-bottom: 1rem;
+}
+
+.form-group {
+	display: grid;
+	gap: 0.4rem;
+}
+
+.form-group label {
+	font-weight: 600;
+	color: #1f2a37;
+}
+
+.form-group select,
+.form-group input {
+	padding: 0.55rem 0.75rem;
+	border: 1px solid #d1d5db;
+	border-radius: 8px;
+	background: #ffffff;
+	font-size: 0.95rem;
+}
+
+.btn-predict {
+	align-self: flex-start;
+	padding: 0.6rem 1.2rem;
+	border-radius: 8px;
+	border: none;
+	background: #0f7aa5;
+	color: #ffffff;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.btn-predict:hover {
+	background: #0b5f80;
+}
+
 .info-box {
 	padding: 1.5rem;
 	background: #e8f4f8;
