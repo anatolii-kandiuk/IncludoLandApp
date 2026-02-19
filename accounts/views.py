@@ -1628,6 +1628,10 @@ def specialist_student_notes(request, child_profile_id: int):
         'line_datasets': stats['line_datasets'],
         'radar_labels': stats['radar_labels'],
         'radar_values': stats['radar_values'],
+        'game_types': [
+            {'value': gt[0], 'label': gt[1]}
+            for gt in GameResult.GameType.choices
+        ],
     }
     return render(request, 'profile/specialist_notes.html', context)
 

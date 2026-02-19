@@ -8,6 +8,7 @@
     <title>Нотатки — Профіль спеціаліста</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
+    <link rel="stylesheet" href="{% static 'css/specialist_ml_predictions.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
     <script src="{% static 'js/profile_charts.js' %}" defer></script>
     <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
@@ -39,8 +40,6 @@
                     <section class="card card--full">
                         <div class="card__head">
                             <h2 class="card__title">Статистика</h2>
-                            <div class="card__meta">Всього спроб (ігри): {{ results_count }} · Слухань казок: {{
-                                stories_listens_count }}</div>
                         </div>
 
                         <div class="student-focus" aria-label="Зона уваги">
@@ -55,42 +54,103 @@
                             </div>
                         </div>
 
-                        <div class="profile-grid u-mt-16">
-                            <section class="card card--wide">
-                                <div class="card__header">
-                                    <h3 class="card__title">Прогрес завдань</h3>
-                                </div>
-                                <div class="progress-list">
-                                    {% for p in progress %}
-                                    <div class="progress-item">
-                                        <div class="progress-item__row">
-                                            <span class="progress-item__label">{{ p.label }}</span>
-                                            <span class="progress-item__value">{{ p.value }}%</span>
-                                        </div>
-                                        <div class="progress-item__bar" role="progressbar" aria-valuenow="{{ p.value }}"
-                                            aria-valuemin="0" aria-valuemax="100">
-                                            <div class="progress-item__fill" data-width="{{ p.value }}"></div>
-                                        </div>
+                        <div class="row u-mt-16">
+                            <div class="col-12 col-md-8 mx-auto mb-4">
+                                <section class="card">
+                                    <div class="card__header">
+                                        <h3 class="card__title">Статистика успішності</h3>
                                     </div>
-                                    {% endfor %}
-                                </div>
-                            </section>
+                                    <canvas id="lineChart" height="180" data-labels='{{ line_labels|safe }}'
+                                        data-datasets='{{ line_datasets|safe }}'></canvas>
+                                </section>
+                            </div>
 
-                            <section class="card">
-                                <div class="card__header">
-                                    <h3 class="card__title">Статистика успішності</h3>
-                                </div>
-                                <canvas id="lineChart" height="180" data-labels='{{ line_labels|safe }}'
-                                    data-datasets='{{ line_datasets|safe }}'></canvas>
-                            </section>
+                            <div class="col-12 col-md-8 mx-auto mb-4">
+                                <section class="card">
+                                    <div class="card__header">
+                                        <h3 class="card__title">Навички</h3>
+                                    </div>
+                                    <canvas id="radarChart" height="200" data-labels='{{ radar_labels|safe }}'
+                                        data-values='{{ radar_values|safe }}'></canvas>
+                                </section>
+                            </div>
 
-                            <section class="card">
-                                <div class="card__header">
-                                    <h3 class="card__title">Навички</h3>
+                            <div class="col-12 col-md-8 mx-auto mb-4">
+                                <section class="card">
+                                    <div class="card__header">
+                                        <h3 class="card__title">Прогрес завдань</h3>
+                                    </div>
+                                    <div class="progress-list">
+                                        {% for p in progress %}
+                                        <div class="progress-item">
+                                            <div class="progress-item__row">
+                                                <span class="progress-item__label">{{ p.label }}</span>
+                                                <span class="progress-item__value">{{ p.value }}%</span>
+                                            </div>
+                                            <div class="progress-item__bar" role="progressbar"
+                                                aria-valuenow="{{ p.value }}" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-item__fill" data-width="{{ p.value }}"></div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="card card--full">
+                        <div class="card__head">
+                            <h2 class="card__title">Прогноз AI</h2>
+                        </div>
+
+                        <div class="card__body">
+                            <div class="info-box">
+                                <h3>Як це працює?</h3>
+                                <p>Алгоритм машинного навчання аналізує історію активностей дитини і прогнозує:</p>
+                                <ul>
+                                    <li>Очікуваний результат наступної спроби</li>
+                                    <li>Тренд покращення навичок</li>
+                                    <li>Приблизний час до досягнення майстерності (90+ балів)</li>
+                                    <li>Рекомендації для спеціаліста</li>
+                                </ul>
+                                <p><strong>Примітка:</strong> Для точного прогнозу потрібно мінімум 3-5 результатів
+                                    обраної активності.</p>
+                            </div>
+
+                            <form id="predictionForm" class="prediction-form"
+                                data-api-url="{% url 'predict_performance' %}">
+                                <div class="form-group">
+                                    <label for="studentSelect">Обраний учень:</label>
+                                    <select id="studentSelect" name="username" required>
+                                        <option value="{{ student.user.username }}" selected>
+                                            {{ student.user.username }}
+                                            {% if student.user.first_name %}- {{ student.user.first_name }}{% endif %}
+                                        </option>
+                                    </select>
                                 </div>
-                                <canvas id="radarChart" height="200" data-labels='{{ radar_labels|safe }}'
-                                    data-values='{{ radar_values|safe }}'></canvas>
-                            </section>
+
+                                <div class="form-group">
+                                    <label for="gameTypeSelect">Тип активності:</label>
+                                    <select id="gameTypeSelect" name="game_type" required>
+                                        <option value="">-- Оберіть тип активності --</option>
+                                        {% for gt in game_types %}
+                                        <option value="{{ gt.value }}">{{ gt.label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <button type="submit" class="btn-predict">
+                                    Отримати прогноз
+                                </button>
+                            </form>
+
+                            <div id="loading" class="loading">
+                                <div class="spinner"></div>
+                                <p>Аналіз даних та побудова прогнозу...</p>
+                            </div>
+
+                            <div id="result" class="result ml-hidden"></div>
                         </div>
                     </section>
 
@@ -140,6 +200,8 @@
             </section>
         </main>
     </div>
+    {{ game_types|json_script:"mlGameTypes" }}
+    <script src="{% static 'js/specialist_ml_predictions.js' %}"></script>
     {% include 'includes/footer.html' %}
 </body>
 
