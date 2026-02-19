@@ -5,12 +5,13 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Нотатки — Профіль спеціаліста</title>
+    <title>Деталі — Профіль спеціаліста</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/specialist.css' %}">
     <link rel="stylesheet" href="{% static 'css/specialist_ml_predictions.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
     <script src="{% static 'js/profile_charts.js' %}" defer></script>
+    <script src="{% static 'js/specialist_notes_tabs.js' %}" defer></script>
     <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 
@@ -33,158 +34,181 @@
 
             <section class="content">
                 <div class="page-title">
-                    <h1 class="page-title__h">Нотатки: {{ student.user.username }}</h1>
+                    <h1 class="page-title__h">Деталі: {{ student.user.username }}</h1>
+                </div>
+
+                <div class="details-tabs" role="tablist" aria-label="Розділи деталей учня">
+                    <button class="student-row__btn details-tab is-active" type="button" role="tab"
+                        data-tab-target="stats-panel" data-default="true" aria-selected="true">
+                        Статистика
+                    </button>
+                    <button class="student-row__btn details-tab" type="button" role="tab" data-tab-target="ai-panel"
+                        aria-selected="false" tabindex="-1">
+                        AI-Асистент
+                    </button>
+                    <button class="student-row__btn details-tab" type="button" role="tab" data-tab-target="notes-panel"
+                        aria-selected="false" tabindex="-1">
+                        Нотатки
+                    </button>
                 </div>
 
                 <div class="grid grid--single">
-                    <section class="card card--full">
-                        <div class="card__head">
-                            <h2 class="card__title">Статистика</h2>
-                        </div>
-
-
-                        <div class="row u-mt-16">
-                            <div class="col-12 col-md-8 mx-auto mb-4">
-                                <section class="card">
-                                    <div class="card__header">
-                                        <h3 class="card__title">Статистика успішності</h3>
-                                    </div>
-                                    <canvas id="lineChart" height="180" data-labels='{{ line_labels|safe }}'
-                                        data-datasets='{{ line_datasets|safe }}'></canvas>
-                                </section>
+                    <div id="stats-panel" class="details-panel" data-tab-panel>
+                        <section class="card card--full">
+                            <div class="card__head">
+                                <h2 class="card__title">Статистика</h2>
                             </div>
 
-                            <div class="col-12 col-md-8 mx-auto mb-4">
-                                <section class="card">
-                                    <div class="card__header">
-                                        <h3 class="card__title">Навички</h3>
-                                    </div>
-                                    <canvas id="radarChart" height="200" data-labels='{{ radar_labels|safe }}'
-                                        data-values='{{ radar_values|safe }}'></canvas>
-                                </section>
-                            </div>
 
-                            <div class="col-12 col-md-8 mx-auto mb-4">
-                                <section class="card">
-                                    <div class="card__header">
-                                        <h3 class="card__title">Прогрес завдань</h3>
-                                    </div>
-                                    <div class="progress-list">
-                                        {% for p in progress %}
-                                        <div class="progress-item">
-                                            <div class="progress-item__row">
-                                                <span class="progress-item__label">{{ p.label }}</span>
-                                                <span class="progress-item__value">{{ p.value }}%</span>
-                                            </div>
-                                            <div class="progress-item__bar" role="progressbar"
-                                                aria-valuenow="{{ p.value }}" aria-valuemin="0" aria-valuemax="100">
-                                                <div class="progress-item__fill" data-width="{{ p.value }}"></div>
-                                            </div>
+                            <div class="row u-mt-16">
+                                <div class="col-12 col-md-8 mx-auto mb-4">
+                                    <section class="card">
+                                        <div class="card__header">
+                                            <h3 class="card__title">Статистика успішності</h3>
                                         </div>
-                                        {% endfor %}
+                                        <canvas id="lineChart" height="180" data-labels='{{ line_labels|safe }}'
+                                            data-datasets='{{ line_datasets|safe }}'></canvas>
+                                    </section>
+                                </div>
+
+                                <div class="col-12 col-md-8 mx-auto mb-4">
+                                    <section class="card">
+                                        <div class="card__header">
+                                            <h3 class="card__title">Навички</h3>
+                                        </div>
+                                        <canvas id="radarChart" height="200" data-labels='{{ radar_labels|safe }}'
+                                            data-values='{{ radar_values|safe }}'></canvas>
+                                    </section>
+                                </div>
+
+                                <div class="col-12 col-md-8 mx-auto mb-4">
+                                    <section class="card">
+                                        <div class="card__header">
+                                            <h3 class="card__title">Прогрес завдань</h3>
+                                        </div>
+                                        <div class="progress-list">
+                                            {% for p in progress %}
+                                            <div class="progress-item">
+                                                <div class="progress-item__row">
+                                                    <span class="progress-item__label">{{ p.label }}</span>
+                                                    <span class="progress-item__value">{{ p.value }}%</span>
+                                                </div>
+                                                <div class="progress-item__bar" role="progressbar"
+                                                    aria-valuenow="{{ p.value }}" aria-valuemin="0" aria-valuemax="100">
+                                                    <div class="progress-item__fill" data-width="{{ p.value }}"></div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div id="ai-panel" class="details-panel" data-tab-panel hidden>
+                        <section class="card card--full">
+                            <div class="card__head">
+                                <h2 class="card__title">AI-Асистент</h2>
+                            </div>
+
+                            <div class="card__body">
+                                <div class="info-box">
+                                    <h3>Як це працює?</h3>
+                                    <p>Алгоритм машинного навчання аналізує історію активностей дитини і прогнозує:</p>
+                                    <ul>
+                                        <li>Очікуваний результат наступної спроби</li>
+                                        <li>Тренд покращення навичок</li>
+                                        <li>Приблизний час до досягнення майстерності (90+ балів)</li>
+                                        <li>Рекомендації для спеціаліста</li>
+                                    </ul>
+                                    <p><strong>Примітка:</strong> Для точного прогнозу потрібно мінімум 3-5 результатів
+                                        обраної активності.</p>
+                                </div>
+
+                                <form id="predictionForm" class="prediction-form"
+                                    data-api-url="{% url 'predict_performance' %}">
+                                    <div class="form-group">
+                                        <label for="studentSelect">Обраний учень:</label>
+                                        <select id="studentSelect" name="username" required>
+                                            <option value="{{ student.user.username }}" selected>
+                                                {{ student.user.username }}
+                                                {% if student.user.first_name %}- {{ student.user.first_name }}{% endif
+                                                %}
+                                            </option>
+                                        </select>
                                     </div>
-                                </section>
-                            </div>
-                        </div>
-                    </section>
 
-                    <section class="card card--full">
-                        <div class="card__head">
-                            <h2 class="card__title">Прогноз AI</h2>
-                        </div>
+                                    <div class="form-group">
+                                        <label for="gameTypeSelect">Тип активності:</label>
+                                        <select id="gameTypeSelect" name="game_type" required>
+                                            <option value="">-- Оберіть тип активності --</option>
+                                            {% for gt in game_types %}
+                                            <option value="{{ gt.value }}">{{ gt.label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
 
-                        <div class="card__body">
-                            <div class="info-box">
-                                <h3>Як це працює?</h3>
-                                <p>Алгоритм машинного навчання аналізує історію активностей дитини і прогнозує:</p>
-                                <ul>
-                                    <li>Очікуваний результат наступної спроби</li>
-                                    <li>Тренд покращення навичок</li>
-                                    <li>Приблизний час до досягнення майстерності (90+ балів)</li>
-                                    <li>Рекомендації для спеціаліста</li>
-                                </ul>
-                                <p><strong>Примітка:</strong> Для точного прогнозу потрібно мінімум 3-5 результатів
-                                    обраної активності.</p>
-                            </div>
+                                    <button type="submit" class="btn-predict">
+                                        Отримати прогноз
+                                    </button>
+                                </form>
 
-                            <form id="predictionForm" class="prediction-form"
-                                data-api-url="{% url 'predict_performance' %}">
-                                <div class="form-group">
-                                    <label for="studentSelect">Обраний учень:</label>
-                                    <select id="studentSelect" name="username" required>
-                                        <option value="{{ student.user.username }}" selected>
-                                            {{ student.user.username }}
-                                            {% if student.user.first_name %}- {{ student.user.first_name }}{% endif %}
-                                        </option>
-                                    </select>
+                                <div id="loading" class="loading">
+                                    <div class="spinner"></div>
+                                    <p>Аналіз даних та побудова прогнозу...</p>
                                 </div>
 
-                                <div class="form-group">
-                                    <label for="gameTypeSelect">Тип активності:</label>
-                                    <select id="gameTypeSelect" name="game_type" required>
-                                        <option value="">-- Оберіть тип активності --</option>
-                                        {% for gt in game_types %}
-                                        <option value="{{ gt.value }}">{{ gt.label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
+                                <div id="result" class="result ml-hidden"></div>
+                            </div>
+                        </section>
+                    </div>
 
-                                <button type="submit" class="btn-predict">
-                                    Отримати прогноз
-                                </button>
+                    <div id="notes-panel" class="details-panel" data-tab-panel hidden>
+                        <section class="card card--full">
+                            <div class="card__head">
+                                <h2 class="card__title">Додати нотатку</h2>
+                            </div>
+
+                            <form class="note-form" method="post"
+                                action="{% url 'specialist_student_notes' student.id %}">
+                                {% csrf_token %}
+                                <div class="note-form__field">
+                                    {{ form.text }}
+                                    {% if form.text.errors %}
+                                    <div class="note-form__error">{{ form.text.errors|striptags }}</div>
+                                    {% endif %}
+                                </div>
+                                <button class="student-row__btn" type="submit">Зберегти</button>
                             </form>
+                        </section>
 
-                            <div id="loading" class="loading">
-                                <div class="spinner"></div>
-                                <p>Аналіз даних та побудова прогнозу...</p>
+                        <section class="card card--full">
+                            <div class="card__head">
+                                <h2 class="card__title">Мої нотатки</h2>
                             </div>
 
-                            <div id="result" class="result ml-hidden"></div>
-                        </div>
-                    </section>
-
-                    <section class="card card--full">
-                        <div class="card__head">
-                            <h2 class="card__title">Додати нотатку</h2>
-                        </div>
-
-                        <form class="note-form" method="post" action="{% url 'specialist_student_notes' student.id %}">
-                            {% csrf_token %}
-                            <div class="note-form__field">
-                                {{ form.text }}
-                                {% if form.text.errors %}
-                                <div class="note-form__error">{{ form.text.errors|striptags }}</div>
-                                {% endif %}
-                            </div>
-                            <button class="student-row__btn" type="submit">Зберегти</button>
-                        </form>
-                    </section>
-
-                    <section class="card card--full">
-                        <div class="card__head">
-                            <h2 class="card__title">Мої нотатки</h2>
-                        </div>
-
-                        {% if notes %}
-                        <div class="note-list" aria-label="Список нотаток">
-                            {% for n in notes %}
-                            <div class="note">
-                                <div class="note__top">
-                                    <div class="note__date">{{ n.created_at|date:"d.m.Y H:i" }}</div>
-                                    <form action="{% url 'specialist_student_note_delete' n.id %}" method="post">
-                                        {% csrf_token %}
-                                        <button class="student-row__btn student-row__btn--danger"
-                                            type="submit">Видалити</button>
-                                    </form>
+                            {% if notes %}
+                            <div class="note-list" aria-label="Список нотаток">
+                                {% for n in notes %}
+                                <div class="note">
+                                    <div class="note__top">
+                                        <div class="note__date">{{ n.created_at|date:"d.m.Y H:i" }}</div>
+                                        <form action="{% url 'specialist_student_note_delete' n.id %}" method="post">
+                                            {% csrf_token %}
+                                            <button class="student-row__btn student-row__btn--danger"
+                                                type="submit">Видалити</button>
+                                        </form>
+                                    </div>
+                                    <div class="note__text">{{ n.text|linebreaksbr }}</div>
                                 </div>
-                                <div class="note__text">{{ n.text|linebreaksbr }}</div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <div class="student-search__empty">Поки що немає нотаток.</div>
-                        {% endif %}
-                    </section>
+                            {% else %}
+                            <div class="student-search__empty">Поки що немає нотаток.</div>
+                            {% endif %}
+                        </section>
+                    </div>
                 </div>
             </section>
         </main>
