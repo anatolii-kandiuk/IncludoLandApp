@@ -62,9 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	const renderMetrics = (modelInfo) => {
 		const metrics = modelInfo.metrics || {};
-		const modelState = modelInfo.model_trained
-			? 'Навчена зараз'
-			: (modelInfo.model_loaded ? 'Завантажена' : 'Невідомо');
+		const modelState = modelInfo.analysis_mode === 'heuristic'
+			? 'Накопичення даних'
+			: (modelInfo.model_trained
+				? 'Навчена зараз'
+				: (modelInfo.model_loaded ? 'Завантажена' : 'Невідомо'));
 
 		return `
 			<div class="ml-result-stats">

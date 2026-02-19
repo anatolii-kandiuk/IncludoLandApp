@@ -246,8 +246,16 @@ class ProgressPredictor:
             # Clip to valid score range
             predicted_score = np.clip(predicted_score, 0, 100)
             
-            # Calculate confidence (inverse of test RMSE, normalized)
-            confidence = max(0, min(100, 100 - self.metrics.get('test_rmse', 20)))
+            # Calculate confidence based on model type
+            if self.model_type == 'random_forest' and hasattr(self.model, 'estimators_'):
+                tree_predictions = [
+                    estimator.predict(X_pred_scaled)[0]
+                    for estimator in self.model.estimators_
+                ]
+                prediction_std = float(np.std(tree_predictions)) if len(tree_predictions) > 1 else 0.0
+                confidence = max(0, min(100, 100 - (prediction_std * 2)))
+            else:
+                confidence = max(0, min(100, 100 - self.metrics.get('test_rmse', 20)))
             
             # Generate insight
             insight = self._generate_insight(
@@ -342,19 +350,7 @@ class ProgressPredictor:
             else:
                 advice = f"Виникають труднощі в {game_label}. Варто переглянути методику та приділити більше часу базовим вправам."
         
-        # Add status based on trend
-        if score_trend > 2:
-            status = "Блискучий прогрес."
-        elif score_trend > 1:
-            status = "Відмінна динаміка."
-        elif score_trend > 0.3:
-            status = "Є покращення."
-        elif score_trend > -0.3:
-            status = "Стабільний рівень."
-        else:
-            status = "Потрібна увага."
-        
-        return f"{status} {level_text}. {advice}"
+        return f"{level_text}. {advice}"
     
     def _estimate_mastery(
         self,

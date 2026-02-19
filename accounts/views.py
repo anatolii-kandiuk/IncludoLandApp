@@ -12,6 +12,7 @@ from django.db.models import Avg, Q
 from django.db.models.functions import TruncDate
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from django.db.models import F
 
 import random
@@ -2299,7 +2300,7 @@ def predict_performance(request):
         recent_results = (
             GameResult.objects
             .filter(user_id=target_user_id, game_type=target_game_type)
-            .order_by('-created_at')
+            .order_by('created_at')
             .values('score', 'duration_seconds', 'created_at')[:10]
         )
         return [
@@ -2310,6 +2311,65 @@ def predict_performance(request):
             }
             for item in recent_results
         ]
+
+    def build_heuristic_prediction(history, predictor_instance: ProgressPredictor, activity_type: str):
+        """Build a heuristic prediction when training data is insufficient."""
+        scores = [item['score'] for item in history if item.get('score') is not None]
+        if not scores:
+            return None
+
+        current_score = scores[-1]
+        window_size = min(len(scores), predictor_instance.window_size)
+        window_scores = scores[-window_size:]
+        avg_score = sum(window_scores) / window_size
+        score_trend = scores[-1] - scores[-2] if len(scores) > 1 else 0.0
+
+        predicted_score = avg_score + score_trend
+        if current_score >= 90 and score_trend >= 0:
+            predicted_score = max(predicted_score, current_score - 15)
+
+        predicted_score = max(0.0, min(100.0, predicted_score))
+
+        if len(window_scores) > 1:
+            mean = sum(window_scores) / len(window_scores)
+            variance = sum((value - mean) ** 2 for value in window_scores) / len(window_scores)
+            std_dev = variance ** 0.5
+            confidence = max(0.0, min(100.0, 100 - (std_dev * 2)))
+        else:
+            confidence = 50.0
+
+        created_dates = [parse_datetime(item['created_at']) for item in history]
+        created_dates = [value for value in created_dates if value is not None]
+        if len(created_dates) >= 2:
+            days_since_start = (created_dates[-1] - created_dates[0]).total_seconds() / 86400
+        else:
+            days_since_start = 0.0
+
+        days_to_mastery, attempts_to_mastery = predictor_instance._estimate_mastery(
+            current_score=current_score,
+            predicted_score=predicted_score,
+            score_trend=score_trend,
+            days_since_start=days_since_start,
+            attempt_number=len(scores) + 1,
+            mastery_threshold=90,
+        )
+
+        insight = predictor_instance._generate_insight(
+            predicted_score=predicted_score,
+            current_score=current_score,
+            score_trend=score_trend,
+            game_type=activity_type,
+        )
+
+        return {
+            'predicted_score': round(predicted_score, 1),
+            'current_score': round(current_score, 1),
+            'confidence': round(confidence, 1),
+            'insight': insight,
+            'days_to_mastery': days_to_mastery,
+            'attempts_to_mastery': attempts_to_mastery,
+            'score_trend': round(score_trend, 2),
+        }
     
     try:
         # Initialize predictor
@@ -2334,6 +2394,23 @@ def predict_performance(request):
                 }
             except ValueError as e:
                 logger.warning(f"Insufficient training data for {game_type}: {str(e)}")
+                history = build_history(user_id, game_type)
+                heuristic = build_heuristic_prediction(history, predictor, game_type)
+                if heuristic:
+                    heuristic['model_info'] = {
+                        'model_trained': False,
+                        'model_loaded': model_loaded,
+                        'analysis_mode': 'heuristic',
+                    }
+                    heuristic['user_id'] = user_id
+                    try:
+                        target_user = User.objects.get(id=user_id)
+                        heuristic['username'] = target_user.first_name or target_user.username
+                    except User.DoesNotExist:
+                        heuristic['username'] = f"Користувач №{user_id}"
+                    heuristic['game_type'] = game_type
+                    heuristic['history'] = history
+                    return JsonResponse(heuristic)
                 return JsonResponse({
                     'error': 'Недостатньо даних для аналізу',
                     'reason': 'Недостатньо даних для цього типу активності',
@@ -2346,6 +2423,7 @@ def predict_performance(request):
                 }, status=400)
             except Exception as e:
                 logger.error(f"Training error for {game_type}: {str(e)}", exc_info=True)
+                history = build_history(user_id, game_type)
                 return JsonResponse({
                     'error': 'Помилка під час аналізу',
                     'reason': 'Технічна помилка під час аналізу даних',
@@ -2354,7 +2432,7 @@ def predict_performance(request):
                         'model_trained': False,
                         'model_loaded': model_loaded,
                     },
-                    'history': build_history(user_id, game_type),
+                    'history': history,
                 }, status=500)
         else:
             model_info = {
@@ -2367,12 +2445,13 @@ def predict_performance(request):
         
         if prediction is None:
             logger.warning(f"Cannot predict for user_id={user_id}, game_type={game_type} - insufficient data")
+            history = build_history(user_id, game_type)
             return JsonResponse({
                 'error': 'Неможливо зробити прогноз',
                 'reason': f'Недостатньо даних для цього учня у активності "{game_type}"',
                 'suggestion': f'Учень повинен виконати мінімум {predictor.window_size} активностей типу "{game_type}". Перевірте чи обраний правильний учень та тип активності.',
                 'model_info': model_info,
-                'history': build_history(user_id, game_type),
+                'history': history,
             }, status=400)
         
         # Get username for display
