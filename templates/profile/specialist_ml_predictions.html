@@ -219,7 +219,8 @@
                                 обраного типу.</p>
                         </div>
 
-                        <form id="predictionForm" class="prediction-form">
+                        <form id="predictionForm" class="prediction-form"
+                            data-api-url="{% url 'predict_performance' %}">
                             <div class="form-group">
                                 <label for="studentSelect">Оберіть учня:</label>
                                 <select id="studentSelect" name="username" required>
@@ -281,31 +282,45 @@
             result.style.display = 'none';
 
             try {
-                const response = await fetch(
-                    `/api/predict-performance/?username=${encodeURIComponent(username)}&game_type=${encodeURIComponent(gameType)}`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
-                        }
+                const apiUrl = form.dataset.apiUrl;
+                const requestUrl = `${apiUrl}?username=${encodeURIComponent(username)}&game_type=${encodeURIComponent(gameType)}`;
+                const response = await fetch(requestUrl, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
                     }
-                );
+                });
 
                 loading.classList.remove('active');
 
+                const contentType = response.headers.get('content-type') || '';
+
                 if (!response.ok) {
-                    // Try to parse error response
-                    try {
+                    // Try to parse JSON error response, fallback to plain text
+                    if (contentType.includes('application/json')) {
                         const errorData = await response.json();
                         displayError(errorData);
-                    } catch (e) {
+                    } else {
+                        const text = await response.text();
                         displayError({
                             error: 'Помилка сервера',
                             reason: `HTTP ${response.status}: ${response.statusText}`,
-                            suggestion: 'Перевірте чи запущений сервер та база даних'
+                            suggestion: 'Перевірте чи запущений сервер та база даних',
+                            details: text
                         });
                     }
+                    return;
+                }
+
+                if (!contentType.includes('application/json')) {
+                    const text = await response.text();
+                    displayError({
+                        error: 'Отримано неочікувану відповідь сервера',
+                        reason: 'Сервер повернув не JSON',
+                        suggestion: 'Перевірте чи ви увійшли в систему та чи доступний API',
+                        details: text
+                    });
                     return;
                 }
 
@@ -404,6 +419,7 @@
                         <p class="error-message">${data.error || 'Невідома помилка'}</p>
                         ${data.reason ? `<p><strong>Причина:</strong> ${data.reason}</p>` : ''}
                         ${data.suggestion ? `<p><strong>Рекомендація:</strong> ${data.suggestion}</p>` : ''}
+                        ${data.details ? `<p><strong>Деталі відповіді:</strong> ${data.details.substring(0, 300)}</p>` : ''}
                     </div>
                 </div>
             `;
