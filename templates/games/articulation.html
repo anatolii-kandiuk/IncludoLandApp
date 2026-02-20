@@ -29,7 +29,7 @@
                 <select class="art-filter__select" id="art-sound" name="sound" onchange="this.form.submit()">
                     <option value="" {% if not selected_sound %}selected{% endif %}>Всі звуки</option>
                     {% for sound in sounds %}
-                    <option value="{{ sound }}" {% if selected_sound==sound %}selected{% endif %}>{{ sound }}</option>
+                    <option value="{{ sound }}" {% if selected_sound == sound %}selected{% endif %}>{{ sound }}</option>
                     {% endfor %}
                 </select>
             </form>
