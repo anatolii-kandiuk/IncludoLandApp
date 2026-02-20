@@ -313,9 +313,12 @@ class ProgressPredictor:
         score_trend: float,
         game_type: str,
     ) -> str:
-        """Generate a specialist-facing insight from the prediction."""
-        
-        # Game type labels in Ukrainian
+        """
+        Generate a specialist insight based on model output.
+        The logic considers absolute score, historical trend, and expected deviation.
+        """
+
+        # Dictionary with proper Ukrainian cases for activity labels
         game_labels = {
             'math': 'математиці',
             'memory': 'іграх на пам\'ять',
@@ -323,43 +326,125 @@ class ProgressPredictor:
             'sound': 'іграх зі звуками',
             'sentences': 'побудові речень',
             'articulation': 'артикуляційній гімнастиці',
-            'attention': 'іграх на увагу',
+            'attention': 'вправах на увагу',
         }
-        game_label = game_labels.get(game_type, 'цій грі')
-        
-        # Determine skill level and advice
+        game_label = game_labels.get(game_type, 'цій активності')
+
+        # Delta: difference between predicted and current score.
+        # delta > 0 means expected improvement, delta < 0 means expected decline.
+        delta = predicted_score - current_score
+
+        # === Level 1: Mastery (90-100) ===
         if predicted_score >= 90:
-            level_text = "Чудовий результат! Дитина досягла майстерності"
-            if score_trend > 0.5:
-                advice = f"Продовжуйте підтримувати інтерес до {game_label}. Можна переходити до більш складних завдань."
-            else:
-                advice = f"Відмінний рівень у {game_label}! Можна використовувати як мотивацію для інших навичок."
-        elif predicted_score >= 75:
-            level_text = "Дуже добрий прогрес"
-            if score_trend > 1.5:
-                advice = f"Дитина активно покращується в {game_label}! Через кілька занять може досягти відмінних результатів."
+            status = 'Рівень майстерності.'
+
+            if delta < -5:
+                advice = (
+                    f'Попри високі результати, прогнозується зниження ефективності у {game_label}. '
+                    f'Ймовірно, дитина відчуває втому або втрачає інтерес до одноманітних завдань. '
+                    f'Рекомендується зробити перерву або змінити тип активності.'
+                )
+            elif current_score >= 95 and delta >= 0:
+                # Absolute top performance
+                advice = (
+                    f'Навичка у {game_label} засвоєна на відмінно. '
+                    f'Для підтримки нейропластичності варто переходити до значно складніших завдань '
+                    f"або використовувати цю гру як 'бонус' для мотивації."
+                )
             elif score_trend > 0.5:
-                advice = f"Стабільне зростання в {game_label}. Рекомендується продовжити в такому ж темпі."
+                # Stable growth at high performance level
+                advice = (
+                    f'Спостерігається стійка позитивна динаміка. Дитина впевнено закріплює матеріал. '
+                    f'Можна сміливо підвищувати рівень складності.'
+                )
             else:
-                advice = f"Хороший рівень у {game_label}, але є місце для росту. Додайте більше практики."
+                # Stable high plateau
+                advice = (
+                    f'Результати стабільно високі. Рекомендується періодична практика у {game_label} '
+                    f'для профілактики забування, але основний акцент варто змістити на інші навички.'
+                )
+
+        # === Level 2: Confident skill (75-89) ===
+        elif predicted_score >= 75:
+            status = 'Впевнене володіння навичкою.'
+
+            if score_trend > 2.0:
+                # Sharp upward jump
+                advice = (
+                    f'Зафіксовано стрімкий прогрес у {game_label}! Дитина увійшла в стан потоку. '
+                    f'Важливо підтримати цей імпульс похвалою та не переривати серію занять.'
+                )
+            elif delta > 5:
+                # Model expects meaningful improvement
+                advice = (
+                    f'Аналіз показує високий потенціал до росту. У наступних спробах очікується покращення результатів. '
+                    f'Продовжуйте заняття в поточному темпі.'
+                )
+            elif delta < -10:
+                # Model expects sharp decline
+                advice = (
+                    f'Увага: модель прогнозує суттєвий спад результативності. '
+                    f'Можливо, завдання стало занадто складним або нудним. Спробуйте спростити умови.'
+                )
+            else:
+                # Slow, steady progress
+                advice = (
+                    f'Хороший робочий рівень у {game_label}. Є простір для вдосконалення швидкості реакції. '
+                    f'Рекомендується регулярна практика.'
+                )
+
+        # === Level 3: Skill formation (60-74) ===
         elif predicted_score >= 60:
-            level_text = "Помірний прогрес"
-            if score_trend > 1:
-                advice = f"Дитина напрацьовує навички в {game_label}. Підтримуйте регулярність занять!"
-            elif score_trend > 0:
-                advice = f"Повільне, але стабільне покращення в {game_label}. Варто трохи збільшити час практики."
+            status = 'Етап активного формування навички.'
+
+            if score_trend > 1.5 and delta > 0:
+                advice = (
+                    f'Позитивний зсув у {game_label}. Дитина починає розуміти алгоритм виконання. '
+                    f'Зараз критично важливо не підвищувати складність, щоб закріпити успіх.'
+                )
+            elif score_trend < -1.0:
+                advice = (
+                    f'Спостерігається негативна динаміка. Дитина може відчувати фрустрацію. '
+                    f'Варто збільшити кількість підказок або повернутися на крок назад.'
+                )
+            elif delta < 0:
+                advice = (
+                    f'Результати у {game_label} нестабільні. Прогнозується коливання ефективності. '
+                    f'Потребує додаткового контролю з боку спеціаліста.'
+                )
             else:
-                advice = f"Навички в {game_label} потребують уваги. Рекомендується додаткова практика та підтримка."
+                advice = (
+                    f'Помірний прогрес. Дитина виконує завдання, але потребує більше часу на обдумування. '
+                    f'Не підганяйте учня, дайте можливість працювати у власному темпі.'
+                )
+
+        # === Level 4: Entry level / difficulties (<60) ===
         else:
-            level_text = "Розвиток навичок"
-            if score_trend > 0.5:
-                advice = f"Є позитивна динаміка в {game_label}! Продовжуйте роботу, результати обов'язково покращаться."
-            elif score_trend >= 0:
-                advice = f"Дитина потребує більше уваги до {game_label}. Спробуйте індивідуальний підхід та додаткову мотивацію."
+            status = 'Потребує посиленої уваги.'
+
+            if delta > 10:
+                # Low score but optimistic breakthrough prediction
+                advice = (
+                    f'Модель прогнозує значний прорив у {game_label}! '
+                    f"Схоже, дитина нарешті зрозуміла принцип завдання. Обов'язково підтримайте ці спроби."
+                )
+            elif score_trend > 0:
+                advice = (
+                    f'Є перші ознаки покращення, але навичка у {game_label} ще не сформована. '
+                    f'Рекомендується використання наочних матеріалів та спільне виконання завдань.'
+                )
+            elif score_trend < 0 and current_score < 30:
+                advice = (
+                    f'Критично низькі показники. Дитина не справляється із завданням у {game_label}. '
+                    f'Необхідно змінити методику навчання або тимчасово виключити цю вправу.'
+                )
             else:
-                advice = f"Виникають труднощі в {game_label}. Варто переглянути методику та приділити більше часу базовим вправам."
-        
-        return f"{level_text}. {advice}"
+                advice = (
+                    f'Виникають систематичні труднощі. Рекомендується розбити завдання на простіші етапи '
+                    f'та збільшити частоту коротких сесій.'
+                )
+
+        return f'{status} {advice}'
     
     def _estimate_mastery(
         self,
