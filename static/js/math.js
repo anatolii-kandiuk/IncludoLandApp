@@ -37,6 +37,8 @@
         startedAt: 0,
         firstActionAt: 0,
         failedAttempts: 0,
+        currentStreak: 0,
+        maxStreak: 0,
     };
 
     function getCookie(name) {
@@ -270,6 +272,7 @@
             duration_seconds: timeSec,
             failed_attempts: state.failedAttempts,
             hesitation_time: hesitationSec,
+            max_streak: state.maxStreak,
             details: {
                 level: els.level?.value,
                 op: els.op?.value,
@@ -293,9 +296,12 @@
         state.step += 1;
         if (ok) {
             state.correct += 1;
+            state.currentStreak += 1;
+            state.maxStreak = Math.max(state.maxStreak, state.currentStreak);
             setMsg('Правильно! Так тримати!', 'ok');
         } else {
             state.failedAttempts += 1;
+            state.currentStreak = 0;
             setMsg(`Майже! Правильна відповідь: ${state.current.answer}`, 'bad');
         }
 
@@ -318,6 +324,8 @@
         state.current = null;
         state.firstActionAt = 0;
         state.failedAttempts = 0;
+        state.currentStreak = 0;
+        state.maxStreak = 0;
 
         els.best.textContent = String(readBest());
         els.time.textContent = '0';

@@ -239,6 +239,45 @@
     gap: 10px;
 }
 
+.art-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(31, 42, 51, 0.14);
+    border-radius: 999px;
+    padding: 8px 12px;
+}
+
+.art-rating__label {
+    font-weight: 700;
+    color: rgba(31, 42, 51, 0.78);
+}
+
+.art-rating__stars {
+    display: inline-flex;
+    gap: 6px;
+}
+
+.art-star {
+    border: 0;
+    background: transparent;
+    color: #c3cad4;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.12s ease, color 0.12s ease;
+}
+
+.art-star:hover {
+    transform: translateY(-1px) scale(1.04);
+}
+
+.art-star.is-active {
+    color: #f2a435;
+}
+
 .art-btn {
     padding: 10px 16px;
     border-radius: 999px;

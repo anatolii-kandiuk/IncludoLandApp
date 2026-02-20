@@ -7,12 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const countEl = document.getElementById('art-count');
     const startBtn = document.getElementById('art-start');
     const doneBtn = document.getElementById('art-done');
-    const successBtn = document.getElementById('art-success');
-    const failBtn = document.getElementById('art-fail');
+    const ratingWrap = document.getElementById('art-rating');
+    const ratingButtons = Array.from(document.querySelectorAll('.art-star'));
     const nextImageBtn = document.getElementById('art-next-image');
     const msgEl = document.getElementById('art-msg');
 
-    if (!shell || !imageEl || !titleEl || !instructionEl || !countEl || !startBtn || !doneBtn || !successBtn || !failBtn || !nextImageBtn || !msgEl) return;
+    if (!shell || !imageEl || !titleEl || !instructionEl || !countEl || !startBtn || !doneBtn || !ratingWrap || !nextImageBtn || !msgEl) return;
 
     let cards = [];
     const dataEl = document.getElementById('articulation-cards-data');
@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let startedAt = null;
     let firstActionAt = null;
     let completed = 0;
+    let currentStreak = 0;
+    let maxStreak = 0;
 
     function getCookie(name) {
         const value = `; ${document.cookie}`;
@@ -87,15 +89,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setButtons(mode) {
         const isRunning = mode === 'running';
-        const isAwaitingOutcome = mode === 'awaiting_outcome';
+        const isAwaitingRating = mode === 'awaiting_rating';
 
-        startBtn.disabled = isRunning || isAwaitingOutcome;
+        startBtn.disabled = isRunning || isAwaitingRating;
         doneBtn.hidden = !isRunning;
-        successBtn.hidden = !isAwaitingOutcome;
-        failBtn.hidden = !isAwaitingOutcome;
+        ratingWrap.hidden = !isAwaitingRating;
     }
 
-    async function sendResult({ score, durationSeconds, outcome, failedAttempts, hesitationTime }) {
+    function updateRatingHighlight(stars) {
+        ratingButtons.forEach((btn) => {
+            const buttonRating = Number(btn.dataset.rating || '0');
+            btn.classList.toggle('is-active', buttonRating <= stars);
+        });
+    }
+
+    async function sendResult({ score, rawScore, maxScore, ratingStars, durationSeconds, failedAttempts, hesitationTime, sessionMaxStreak }) {
         const csrfToken = getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]')?.value;
         if (!csrfToken) return;
         try {
@@ -109,15 +117,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({
                     game_type: 'articulation',
                     score,
-                    raw_score: outcome === 'success' ? 1 : 0,
-                    max_score: 1,
+                    raw_score: rawScore,
+                    max_score: maxScore,
                     duration_seconds: durationSeconds,
                     failed_attempts: failedAttempts,
                     hesitation_time: hesitationTime,
+                    max_streak: sessionMaxStreak,
                     details: {
                         card_id: current?.id,
                         card_title: current?.title,
-                        outcome,
+                        rating_stars: ratingStars,
+                        successful_attempts: rawScore,
                     },
                 }),
             });
@@ -143,23 +153,38 @@ document.addEventListener('DOMContentLoaded', () => {
     function finishExercise() {
         if (!startedAt) return;
         if (!firstActionAt) firstActionAt = Date.now();
-        setButtons('awaiting_outcome');
-        setMessage('Оціни виконання вправи: обери "Вийшло" або "Не вийшло".');
+        updateRatingHighlight(0);
+        setButtons('awaiting_rating');
+        setMessage('Оціни виконання вправи від 1 до 5 зірок.');
     }
 
-    function completeWithOutcome(outcome) {
+    function completeWithRating(ratingStars) {
         if (!startedAt) return;
+        const stars = Math.max(1, Math.min(5, Number(ratingStars || 0)));
         const endedAt = Date.now();
         const durationSeconds = Math.max(1, Math.round((endedAt - startedAt) / 1000));
         const hesitationTime = Math.max(0, Math.round(((firstActionAt || endedAt) - startedAt) / 1000));
-        const isSuccess = outcome === 'success';
+        const score = stars * 20;
+        const failedAttempts = 5 - stars;
+
+        if (stars >= 3) {
+            currentStreak += 1;
+            maxStreak = Math.max(maxStreak, currentStreak);
+        } else {
+            currentStreak = 0;
+        }
+
+        updateRatingHighlight(stars);
 
         sendResult({
-            score: isSuccess ? 100 : 0,
+            score,
+            rawScore: stars,
+            maxScore: 5,
+            ratingStars: stars,
             durationSeconds,
-            outcome,
-            failedAttempts: isSuccess ? 0 : 1,
+            failedAttempts,
             hesitationTime,
+            sessionMaxStreak: maxStreak,
         });
 
         startedAt = null;
@@ -178,8 +203,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     startBtn.addEventListener('click', startExercise);
     doneBtn.addEventListener('click', finishExercise);
-    successBtn.addEventListener('click', () => completeWithOutcome('success'));
-    failBtn.addEventListener('click', () => completeWithOutcome('failed'));
+    ratingButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            completeWithRating(btn.dataset.rating);
+        });
+    });
     nextImageBtn.addEventListener('click', showNextImage);
 
     if (!cards.length) {

@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let startTime = null;
     let firstGuessAt = null;
     let failedAttempts = 0;
+    let currentStreak = 0;
+    let maxStreak = 0;
     let accepting = false;
 
     const player = new Audio();
@@ -118,9 +120,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const correct = currentTarget && key === currentTarget.key;
         if (correct) {
             score += 1;
+            currentStreak += 1;
+            maxStreak = Math.max(maxStreak, currentStreak);
             helperBubble.textContent = 'Правильно! Наступний звук скоро.';
         } else {
             failedAttempts += 1;
+            currentStreak = 0;
             helperBubble.textContent = 'Спробуй ще! Йдемо далі.';
         }
         round += 1;
@@ -148,6 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
         round = 0;
         firstGuessAt = null;
         failedAttempts = 0;
+        currentStreak = 0;
+        maxStreak = 0;
         updateProgress();
         helperBubble.textContent = 'Починаємо! Відтворюю перший звук.';
         startTime = Date.now();
@@ -172,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 hesitation_time: firstGuessAt && startTime
                     ? Math.max(0, Math.floor((firstGuessAt - startTime) / 1000))
                     : 0,
+                max_streak: maxStreak,
             }),
         }).catch(() => {
             /* ignore network errors for now */

@@ -85,6 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let startTime = null;
     let firstActionAt = null;
     let failedAttempts = 0;
+    let currentStreak = 0;
+    let maxStreak = 0;
     let timerId = null;
 
     let runExercises = [];
@@ -264,6 +266,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (guess === target) {
             correct += 1;
+            currentStreak += 1;
+            maxStreak = Math.max(maxStreak, currentStreak);
             setState('correct');
             msgEl.textContent = 'Правильно!';
             window.setTimeout(() => {
@@ -272,6 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 700);
         } else {
             failedAttempts += 1;
+            currentStreak = 0;
             setState('wrong');
             msgEl.textContent = 'Не зовсім. Спробуй ще раз!';
         }
@@ -322,6 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hesitation_time: firstActionAt && startTime
                 ? Math.max(0, Math.floor((firstActionAt - startTime) / 1000))
                 : 0,
+            max_streak: maxStreak,
             details: {
                 rounds: TOTAL_ROUNDS,
             },
@@ -339,6 +345,8 @@ document.addEventListener('DOMContentLoaded', () => {
         round = 0;
         correct = 0;
         failedAttempts = 0;
+        currentStreak = 0;
+        maxStreak = 0;
         firstActionAt = null;
         startTime = Date.now();
         startTimer();

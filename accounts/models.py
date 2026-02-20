@@ -113,6 +113,7 @@ class GameResult(models.Model):
     # Optional raw score info (e.g., correct/total for math)
     raw_score = models.PositiveIntegerField(null=True, blank=True)
     max_score = models.PositiveIntegerField(null=True, blank=True)
+    max_streak = models.PositiveIntegerField(null=True, blank=True)
 
     duration_seconds = models.PositiveIntegerField(null=True, blank=True)
     details = models.JSONField(default=dict, blank=True)

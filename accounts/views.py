@@ -2068,6 +2068,7 @@ def record_game_result(request):
 
     raw_score = to_int(payload.get('raw_score'), min_value=0)
     max_score = to_int(payload.get('max_score'), min_value=0)
+    max_streak = to_int(payload.get('max_streak'), min_value=0)
     duration_seconds = to_int(payload.get('duration_seconds'), min_value=0)
 
     details = payload.get('details')
@@ -2081,16 +2082,21 @@ def record_game_result(request):
 
     details_failed_attempts = to_int(details.get('failed_attempts'), min_value=0)
     details_hesitation_time = to_int(details.get('hesitation_time'), min_value=0)
+    details_max_streak = to_int(details.get('max_streak'), min_value=0)
 
     if failed_attempts is None:
         failed_attempts = details_failed_attempts
     if hesitation_time is None:
         hesitation_time = details_hesitation_time
+    if max_streak is None:
+        max_streak = details_max_streak
 
     if failed_attempts is not None:
         details['failed_attempts'] = failed_attempts
     if hesitation_time is not None:
         details['hesitation_time'] = hesitation_time
+    if max_streak is not None:
+        details['max_streak'] = max_streak
 
     result = GameResult.objects.create(
         user=request.user,
@@ -2098,6 +2104,7 @@ def record_game_result(request):
         score=score,
         raw_score=raw_score,
         max_score=max_score,
+        max_streak=max_streak,
         duration_seconds=duration_seconds,
         details=details,
     )

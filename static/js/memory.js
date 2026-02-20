@@ -55,6 +55,8 @@
     let startedAt = null;
     let firstFlipAt = null;
     let failedAttempts = 0;
+    let currentStreak = 0;
+    let maxStreak = 0;
 
     function getCookie(name) {
         const value = `; ${document.cookie}`;
@@ -164,11 +166,15 @@
                     duration_seconds: timeSec,
                     failed_attempts: failedAttempts,
                     hesitation_time: Math.max(0, Math.floor(((firstFlipAt || Date.now()) - sessionStartedAt) / 1000)),
+                    max_streak: maxStreak,
                     details: {
                         pairs: totalPairs,
                     },
                 });
             }
+
+            currentStreak += 1;
+            maxStreak = Math.max(maxStreak, currentStreak);
 
             first = null;
             second = null;
@@ -178,6 +184,7 @@
 
         setMsg('Не пара. Спробуй ще!');
         failedAttempts += 1;
+        currentStreak = 0;
         window.setTimeout(() => {
             if (first) {
                 first.dataset.state = 'hidden';

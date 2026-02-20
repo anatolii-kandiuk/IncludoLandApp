@@ -59,6 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let startTime = null;
     let firstActionAt = null;
     let failedAttempts = 0;
+    let currentStreak = 0;
+    let maxStreak = 0;
     let timerId = null;
 
     let runWords = [];
@@ -224,10 +226,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (ok) {
             correct += 1;
+            currentStreak += 1;
+            maxStreak = Math.max(maxStreak, currentStreak);
             setState('correct');
             msgEl.textContent = 'Правильно!';
         } else {
             failedAttempts += 1;
+            currentStreak = 0;
             setState('wrong');
             msgEl.textContent = `Не зовсім. Правильне слово: ${target}`;
         }
@@ -265,6 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 hesitation_time: firstActionAt && startTime
                     ? Math.max(0, Math.floor((firstActionAt - startTime) / 1000))
                     : 0,
+                max_streak: maxStreak,
             }),
         }).catch(() => {
             /* ignore network errors for now */
@@ -302,6 +308,8 @@ document.addEventListener('DOMContentLoaded', () => {
         round = 0;
         correct = 0;
         failedAttempts = 0;
+        currentStreak = 0;
+        maxStreak = 0;
         firstActionAt = null;
         startTime = Date.now();
         startTimer();

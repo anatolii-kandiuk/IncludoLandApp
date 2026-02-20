@@ -44,6 +44,8 @@ class ProgressPredictor:
         'avg_successful_attempts',
         'avg_failed_attempts',
         'failed_attempts_trend',
+        'avg_max_streak',
+        'time_of_day',
         'score_trend',
         'last_score',
         'score_improvement',

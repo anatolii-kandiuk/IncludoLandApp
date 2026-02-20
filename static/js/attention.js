@@ -42,6 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
         found: new Set(),
         total,
         misses: 0,
+        currentStreak: 0,
+        maxStreak: 0,
     };
 
     let levelStartedAt = Date.now();
@@ -113,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             duration_seconds: durationSeconds,
             failed_attempts: state.misses,
             hesitation_time: hesitationTime,
+            max_streak: state.maxStreak,
             details: {
                 level,
                 shapes_count: Number(shapesEl?.textContent || 0) || null,
@@ -155,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const onMiss = () => {
         if (state.misses >= MAX_MISSES) return;
         maybeMarkFirstClick();
+        state.currentStreak = 0;
         state.misses += 1;
         updateMisses();
 
@@ -209,6 +213,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetLevelState = () => {
         state.found = new Set();
         state.misses = 0;
+        state.currentStreak = 0;
+        state.maxStreak = 0;
         levelStartedAt = Date.now();
         firstClickAt = null;
         resultPosted = false;
@@ -266,11 +272,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (info.is_diff) {
                     if (state.found.has(targetId)) return;
                     btn.classList.add('found');
+                    state.currentStreak += 1;
+                    state.maxStreak = Math.max(state.maxStreak, state.currentStreak);
                     const mark = diffMarkById.get(targetId);
                     if (mark) mark.classList.add('revealed');
                     onFound(targetId);
                 } else {
                     setMessage('Не тут 🙂 Спробуй ще!');
+                    state.currentStreak = 0;
                     // Show miss marker centered on the clicked shape.
                     const miss = document.createElement('span');
                     miss.className = 'miss-mark';

@@ -12,6 +12,18 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
+def encode_time_of_day(timestamp) -> int:
+    if timestamp is None:
+        return 1
+
+    hour = int(getattr(timestamp, 'hour', 12))
+    if 6 <= hour < 12:
+        return 0
+    if 12 <= hour < 18:
+        return 1
+    return 2
+
+
 def extract_game_data(
     user_id: Optional[int] = None,
     game_type: Optional[str] = None,
@@ -27,7 +39,8 @@ def extract_game_data(
         
     Returns:
         DataFrame with columns: user_id, game_type, score, duration_seconds,
-        hints_used, attempts, successful_attempts, failed_attempts, created_at
+        hints_used, attempts, successful_attempts, failed_attempts, max_streak,
+        time_of_day, created_at
         
     Raises:
         ValueError: If insufficient data is available
@@ -59,6 +72,9 @@ def extract_game_data(
                     return default
 
             failed_attempts = _to_non_negative_int(details.get('failed_attempts'), 0)
+            max_streak = _to_non_negative_int(result.max_streak, 0)
+            if max_streak == 0:
+                max_streak = _to_non_negative_int(details.get('max_streak'), 0)
             if details.get('successful_attempts') is not None:
                 successful_attempts = _to_non_negative_int(details.get('successful_attempts'), 0)
             elif result.raw_score is not None:
@@ -77,6 +93,8 @@ def extract_game_data(
                 'attempts': details.get('attempts', 1),
                 'successful_attempts': successful_attempts,
                 'failed_attempts': failed_attempts,
+                'max_streak': max_streak,
+                'time_of_day': encode_time_of_day(result.created_at),
                 'created_at': result.created_at,
             })
         
@@ -141,7 +159,8 @@ def preprocess_features(
     """
     required_cols = [
         'user_id', 'game_type', 'score', 'duration_seconds',
-        'hints_used', 'attempts', 'successful_attempts', 'failed_attempts', 'created_at'
+        'hints_used', 'attempts', 'successful_attempts', 'failed_attempts',
+        'max_streak', 'time_of_day', 'created_at'
     ]
     
     missing_cols = set(required_cols) - set(df.columns)
@@ -186,6 +205,8 @@ def preprocess_features(
             avg_successful_attempts = window_data['successful_attempts'].mean()
             avg_failed_attempts = window_data['failed_attempts'].mean()
             failed_attempts_trend = window_data['failed_attempts'].iloc[-1] - window_data['failed_attempts'].iloc[0]
+            avg_max_streak = window_data['max_streak'].mean()
+            time_of_day = int(window_data['time_of_day'].iloc[-1])
             
             # Calculate score trend (linear regression slope)
             if len(window_data) > 1:
@@ -223,6 +244,8 @@ def preprocess_features(
                 'avg_successful_attempts': avg_successful_attempts,
                 'avg_failed_attempts': avg_failed_attempts,
                 'failed_attempts_trend': failed_attempts_trend,
+                'avg_max_streak': avg_max_streak,
+                'time_of_day': time_of_day,
                 'score_trend': slope,
                 'last_score': last_score,
                 'score_improvement': score_improvement,
@@ -282,6 +305,8 @@ def extract_user_features(
         avg_successful_attempts = df['successful_attempts'].mean()
         avg_failed_attempts = df['failed_attempts'].mean()
         failed_attempts_trend = float(df['failed_attempts'].iloc[-1] - df['failed_attempts'].iloc[0])
+        avg_max_streak = df['max_streak'].mean()
+        time_of_day = float(df['time_of_day'].iloc[-1])
         
         # Calculate trend
         if len(df) > 1:
@@ -316,6 +341,8 @@ def extract_user_features(
             'avg_successful_attempts': float(avg_successful_attempts),
             'avg_failed_attempts': float(avg_failed_attempts),
             'failed_attempts_trend': float(failed_attempts_trend),
+            'avg_max_streak': float(avg_max_streak),
+            'time_of_day': float(time_of_day),
             'score_trend': float(slope),
             'last_score': float(last_score),
             'score_improvement': float(score_improvement),
