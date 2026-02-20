@@ -44,6 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			return '<div class="ml-history-empty">Дані відсутні</div>';
 		}
 
+		const withScroll = history.length > 15;
+
 		const rows = history.map((item) => `
 			<div>${formatDate(item.created_at)}</div>
 			<div>${toFixedOrDash(item.score, 1)}</div>
@@ -53,13 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
 		`).join('');
 
 		return `
-			<div class="ml-history-grid">
-				<div class="ml-history-header">Дата</div>
-				<div class="ml-history-header">Результат</div>
-				<div class="ml-history-header">Тривалість (с)</div>
-				<div class="ml-history-header">Вдалі спроби</div>
-				<div class="ml-history-header">Невдалі спроби</div>
-				${rows}
+			<div class="ml-history-scroll ${withScroll ? 'is-scrollable' : ''}">
+				<div class="ml-history-grid">
+					<div class="ml-history-header">Дата</div>
+					<div class="ml-history-header">Результат</div>
+					<div class="ml-history-header">Тривалість (с)</div>
+					<div class="ml-history-header">Вдалі спроби</div>
+					<div class="ml-history-header">Невдалі спроби</div>
+					${rows}
+				</div>
 			</div>
 		`;
 	};

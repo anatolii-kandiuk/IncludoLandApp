@@ -156,6 +156,12 @@
 	border: 1px solid #e5e7eb;
 }
 
+.ml-history-scroll.is-scrollable {
+	max-height: 34rem;
+	overflow-y: auto;
+	padding-right: 0.25rem;
+}
+
 .ml-history-grid {
 	margin-top: 0.5rem;
 	display: grid;

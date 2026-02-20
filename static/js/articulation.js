@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    async function sendResult({ score, rawScore, maxScore, ratingStars, durationSeconds, failedAttempts, hesitationTime, sessionMaxStreak }) {
+    async function sendResult({ score, rawScore, maxScore, ratingStars, durationSeconds, failedAttempts, hesitationTime, sessionMaxStreak, successfulAttempts }) {
         const csrfToken = getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]')?.value;
         if (!csrfToken) return;
         try {
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         card_id: current?.id,
                         card_title: current?.title,
                         rating_stars: ratingStars,
-                        successful_attempts: rawScore,
+                        successful_attempts: successfulAttempts,
                     },
                 }),
             });
@@ -165,9 +165,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const durationSeconds = Math.max(1, Math.round((endedAt - startedAt) / 1000));
         const hesitationTime = Math.max(0, Math.round(((firstActionAt || endedAt) - startedAt) / 1000));
         const score = stars * 20;
-        const failedAttempts = 5 - stars;
+        const isSuccessful = stars >= 3;
+        const failedAttempts = isSuccessful ? 0 : 1;
+        const successfulAttempts = isSuccessful ? 1 : 0;
 
-        if (stars >= 3) {
+        if (isSuccessful) {
             currentStreak += 1;
             maxStreak = Math.max(maxStreak, currentStreak);
         } else {
@@ -185,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
             failedAttempts,
             hesitationTime,
             sessionMaxStreak: maxStreak,
+            successfulAttempts,
         });
 
         startedAt = null;

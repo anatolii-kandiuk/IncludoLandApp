@@ -2300,11 +2300,11 @@ def predict_performance(request):
 
     def build_history(target_user_id: int, target_game_type: str):
         """Build recent activity history for UI display."""
-        recent_results = (
+        recent_results = list(
             GameResult.objects
             .filter(user_id=target_user_id, game_type=target_game_type)
-            .order_by('created_at')
-            .values('score', 'raw_score', 'max_score', 'duration_seconds', 'details', 'created_at')[:10]
+            .order_by('-created_at')
+            .values('score', 'raw_score', 'max_score', 'duration_seconds', 'details', 'created_at')[:100]
         )
 
         def to_non_negative_int(value, default=0):
@@ -2323,6 +2323,11 @@ def predict_performance(request):
 
             if details.get('successful_attempts') is not None:
                 successful_attempts = to_non_negative_int(details.get('successful_attempts'), 0)
+            elif details.get('rating_stars') is not None:
+                rating_stars = to_non_negative_int(details.get('rating_stars'), 0)
+                successful_attempts = 1 if rating_stars >= 3 else 0
+                if failed_attempts == 0 and rating_stars <= 2:
+                    failed_attempts = 1
             elif item.get('raw_score') is not None:
                 successful_attempts = to_non_negative_int(item.get('raw_score'), 0)
             elif item.get('max_score') is not None and item.get('score') is not None:
@@ -2333,7 +2338,7 @@ def predict_performance(request):
 
             return successful_attempts, failed_attempts
 
-        return [
+        history = [
             {
                 'score': float(item['score']) if item['score'] is not None else None,
                 'duration_seconds': int(item['duration_seconds'] or 0),
@@ -2343,6 +2348,8 @@ def predict_performance(request):
             }
             for item in recent_results
         ]
+        history.reverse()
+        return history
 
     def build_heuristic_prediction(history, predictor_instance: ProgressPredictor, activity_type: str):
         """Build a heuristic prediction when training data is insufficient."""
