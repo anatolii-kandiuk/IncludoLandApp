@@ -91,11 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
 					<div class="ml-stat-value">${modelState}</div>
 				</div>
 				<div class="ml-stat-card">
-					<div class="ml-stat-label">${metricLabelWithInfo('Test MAE', 'Середня абсолютна помилка. Менше значення = краща точність прогнозу.')}</div>
+					<div class="ml-stat-label">${metricLabelWithInfo('Test MAE', 'Показує, наскільки в середньому прогноз моделі відрізняється від реального результату. Чим менше число — тим краще.')}</div>
 					<div class="ml-stat-value">${toFixedOrDash(metrics.test_mae, 2)}</div>
 				</div>
 				<div class="ml-stat-card">
-					<div class="ml-stat-label">${metricLabelWithInfo('Test RMSE', 'Корінь із середньоквадратичної помилки. Сильніше штрафує великі похибки; менше = краще.')}</div>
+					<div class="ml-stat-label">${metricLabelWithInfo('Test RMSE', 'Також показує точність прогнозу, але сильніше реагує на великі промахи. Чим менше число — тим надійніший прогноз.')}</div>
 					<div class="ml-stat-value">${toFixedOrDash(metrics.test_rmse, 2)}</div>
 				</div>
 			</div>
