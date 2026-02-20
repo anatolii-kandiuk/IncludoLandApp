@@ -73,8 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		const modelState = modelInfo.analysis_mode === 'heuristic'
 			? 'Накопичення даних'
 			: (modelInfo.model_trained
-				? 'Навчена зараз'
-				: (modelInfo.model_loaded ? 'Завантажена' : 'Невідомо'));
+				? 'Оновлена'
+				: (modelInfo.model_loaded ? 'Активна' : 'Очікування'));
 
 		const metricLabelWithInfo = (label, hint) => `
 			<span class="ml-stat-label-with-info">
