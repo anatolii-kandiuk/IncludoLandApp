@@ -68,6 +68,18 @@ document.addEventListener('DOMContentLoaded', () => {
 				? 'Навчена зараз'
 				: (modelInfo.model_loaded ? 'Завантажена' : 'Невідомо'));
 
+		const metricLabelWithInfo = (label, hint) => `
+			<span class="ml-stat-label-with-info">
+				${label}
+				<button
+					type="button"
+					class="ml-info-icon"
+					aria-label="Пояснення: ${label}"
+					data-tooltip="${hint}"
+				>i</button>
+			</span>
+		`;
+
 		return `
 			<div class="ml-result-stats">
 				<div class="ml-stat-card">
@@ -75,11 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
 					<div class="ml-stat-value">${modelState}</div>
 				</div>
 				<div class="ml-stat-card">
-					<div class="ml-stat-label">Test MAE</div>
+					<div class="ml-stat-label">${metricLabelWithInfo('Test MAE', 'Середня абсолютна помилка. Менше значення = краща точність прогнозу.')}</div>
 					<div class="ml-stat-value">${toFixedOrDash(metrics.test_mae, 2)}</div>
 				</div>
 				<div class="ml-stat-card">
-					<div class="ml-stat-label">Test RMSE</div>
+					<div class="ml-stat-label">${metricLabelWithInfo('Test RMSE', 'Корінь із середньоквадратичної помилки. Сильніше штрафує великі похибки; менше = краще.')}</div>
 					<div class="ml-stat-value">${toFixedOrDash(metrics.test_rmse, 2)}</div>
 				</div>
 			</div>
