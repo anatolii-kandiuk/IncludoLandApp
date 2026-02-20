@@ -27,7 +27,7 @@ def extract_game_data(
         
     Returns:
         DataFrame with columns: user_id, game_type, score, duration_seconds,
-        hints_used, attempts, created_at
+        hints_used, attempts, successful_attempts, failed_attempts, created_at
         
     Raises:
         ValueError: If insufficient data is available
@@ -50,6 +50,23 @@ def extract_game_data(
         
         for result in queryset:
             details: Dict[str, Any] = result.details or {}
+
+            def _to_non_negative_int(value: Any, default: int = 0) -> int:
+                try:
+                    parsed = int(value)
+                    return parsed if parsed >= 0 else default
+                except (TypeError, ValueError):
+                    return default
+
+            failed_attempts = _to_non_negative_int(details.get('failed_attempts'), 0)
+            if details.get('successful_attempts') is not None:
+                successful_attempts = _to_non_negative_int(details.get('successful_attempts'), 0)
+            elif result.raw_score is not None:
+                successful_attempts = _to_non_negative_int(result.raw_score, 0)
+            elif result.max_score is not None and result.score is not None:
+                successful_attempts = _to_non_negative_int(round(result.max_score * (result.score / 100.0)), 0)
+            else:
+                successful_attempts = 1 if int(result.score or 0) >= 70 else 0
             
             data.append({
                 'user_id': result.user_id,
@@ -58,6 +75,8 @@ def extract_game_data(
                 'duration_seconds': result.duration_seconds or 0,
                 'hints_used': details.get('hints_used', 0),
                 'attempts': details.get('attempts', 1),
+                'successful_attempts': successful_attempts,
+                'failed_attempts': failed_attempts,
                 'created_at': result.created_at,
             })
         
@@ -122,7 +141,7 @@ def preprocess_features(
     """
     required_cols = [
         'user_id', 'game_type', 'score', 'duration_seconds',
-        'hints_used', 'attempts', 'created_at'
+        'hints_used', 'attempts', 'successful_attempts', 'failed_attempts', 'created_at'
     ]
     
     missing_cols = set(required_cols) - set(df.columns)
@@ -164,6 +183,9 @@ def preprocess_features(
             std_score = window_data['score'].std() if len(window_data) > 1 else 0
             avg_duration = window_data['duration_seconds'].mean()
             total_hints = window_data['hints_used'].sum()
+            avg_successful_attempts = window_data['successful_attempts'].mean()
+            avg_failed_attempts = window_data['failed_attempts'].mean()
+            failed_attempts_trend = window_data['failed_attempts'].iloc[-1] - window_data['failed_attempts'].iloc[0]
             
             # Calculate score trend (linear regression slope)
             if len(window_data) > 1:
@@ -198,6 +220,9 @@ def preprocess_features(
                 'std_score': std_score,
                 'avg_duration': avg_duration,
                 'total_hints': total_hints,
+                'avg_successful_attempts': avg_successful_attempts,
+                'avg_failed_attempts': avg_failed_attempts,
+                'failed_attempts_trend': failed_attempts_trend,
                 'score_trend': slope,
                 'last_score': last_score,
                 'score_improvement': score_improvement,
@@ -254,6 +279,9 @@ def extract_user_features(
         std_score = df['score'].std() if len(df) > 1 else 0
         avg_duration = df['duration_seconds'].mean()
         total_hints = df['hints_used'].sum()
+        avg_successful_attempts = df['successful_attempts'].mean()
+        avg_failed_attempts = df['failed_attempts'].mean()
+        failed_attempts_trend = float(df['failed_attempts'].iloc[-1] - df['failed_attempts'].iloc[0])
         
         # Calculate trend
         if len(df) > 1:
@@ -285,6 +313,9 @@ def extract_user_features(
             'std_score': float(std_score),
             'avg_duration': float(avg_duration),
             'total_hints': float(total_hints),
+            'avg_successful_attempts': float(avg_successful_attempts),
+            'avg_failed_attempts': float(avg_failed_attempts),
+            'failed_attempts_trend': float(failed_attempts_trend),
             'score_trend': float(slope),
             'last_score': float(last_score),
             'score_improvement': float(score_improvement),

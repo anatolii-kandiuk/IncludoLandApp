@@ -2297,12 +2297,41 @@ def predict_performance(request):
             GameResult.objects
             .filter(user_id=target_user_id, game_type=target_game_type)
             .order_by('created_at')
-            .values('score', 'duration_seconds', 'created_at')[:10]
+            .values('score', 'raw_score', 'max_score', 'duration_seconds', 'details', 'created_at')[:10]
         )
+
+        def to_non_negative_int(value, default=0):
+            try:
+                parsed = int(value)
+                return parsed if parsed >= 0 else default
+            except (TypeError, ValueError):
+                return default
+
+        def resolve_attempts(item):
+            details = item.get('details') or {}
+            if not isinstance(details, dict):
+                details = {}
+
+            failed_attempts = to_non_negative_int(details.get('failed_attempts'), 0)
+
+            if details.get('successful_attempts') is not None:
+                successful_attempts = to_non_negative_int(details.get('successful_attempts'), 0)
+            elif item.get('raw_score') is not None:
+                successful_attempts = to_non_negative_int(item.get('raw_score'), 0)
+            elif item.get('max_score') is not None and item.get('score') is not None:
+                max_score = to_non_negative_int(item.get('max_score'), 0)
+                successful_attempts = to_non_negative_int(round(max_score * (float(item.get('score')) / 100.0)), 0)
+            else:
+                successful_attempts = 1 if to_non_negative_int(item.get('score'), 0) >= 70 else 0
+
+            return successful_attempts, failed_attempts
+
         return [
             {
                 'score': float(item['score']) if item['score'] is not None else None,
                 'duration_seconds': int(item['duration_seconds'] or 0),
+                'successful_attempts': resolve_attempts(item)[0],
+                'failed_attempts': resolve_attempts(item)[1],
                 'created_at': item['created_at'].isoformat() if item['created_at'] else None,
             }
             for item in recent_results

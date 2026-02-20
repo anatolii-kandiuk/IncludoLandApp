@@ -48,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			<div>${formatDate(item.created_at)}</div>
 			<div>${toFixedOrDash(item.score, 1)}</div>
 			<div>${toIntegerOrDash(item.duration_seconds)}</div>
+			<div>${toIntegerOrDash(item.successful_attempts)}</div>
+			<div>${toIntegerOrDash(item.failed_attempts)}</div>
 		`).join('');
 
 		return `
@@ -55,6 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				<div class="ml-history-header">Дата</div>
 				<div class="ml-history-header">Результат</div>
 				<div class="ml-history-header">Тривалість (с)</div>
+				<div class="ml-history-header">Вдалі спроби</div>
+				<div class="ml-history-header">Невдалі спроби</div>
 				${rows}
 			</div>
 		`;

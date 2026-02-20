@@ -41,6 +41,9 @@ class ProgressPredictor:
         'std_score',
         'avg_duration',
         'total_hints',
+        'avg_successful_attempts',
+        'avg_failed_attempts',
+        'failed_attempts_trend',
         'score_trend',
         'last_score',
         'score_improvement',
@@ -449,6 +452,17 @@ class ProgressPredictor:
             # Load model and scaler
             self.model = joblib.load(model_file)
             self.scaler = joblib.load(scaler_file)
+
+            expected_features = len(self.FEATURE_COLUMNS)
+            scaler_features = getattr(self.scaler, 'n_features_in_', None)
+            if scaler_features is not None and int(scaler_features) != expected_features:
+                logger.warning(
+                    "Loaded scaler expects %s features, but current schema has %s. "
+                    "Model will be treated as outdated.",
+                    scaler_features,
+                    expected_features,
+                )
+                return False
             
             # Load metrics if available
             if metrics_file.exists():
