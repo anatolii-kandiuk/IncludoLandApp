@@ -29,7 +29,7 @@
                 <select class="art-filter__select" id="art-sound" name="sound" onchange="this.form.submit()">
                     <option value="" {% if not selected_sound %}selected{% endif %}>Всі звуки</option>
                     {% for sound in sounds %}
-                    <option value="{{ sound }}" {% if selected_sound == sound %}selected{% endif %}>{{ sound }}</option>
+                    <option value="{{ sound }}" {% if selected_sound==sound %}selected{% endif %}>{{ sound }}</option>
                     {% endfor %}
                 </select>
             </form>
@@ -74,6 +74,9 @@
                         <div class="art-card__actions">
                             <button class="art-btn art-btn--primary" id="art-start" type="button">Почати вправу</button>
                             <button class="art-btn art-btn--ghost" id="art-done" type="button" hidden>Завершити</button>
+                            <button class="art-btn art-btn--primary" id="art-success" type="button"
+                                hidden>Вийшло</button>
+                            <button class="art-btn art-btn--ghost" id="art-fail" type="button" hidden>Не вийшло</button>
                             <button class="art-btn art-btn--ghost" id="art-next-image" type="button" hidden>Інша
                                 картинка</button>
                         </div>

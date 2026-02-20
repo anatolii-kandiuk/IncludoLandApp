@@ -216,6 +216,7 @@ def _build_child_stats_for_user(user):
     words_values = [r.score if r.game_type == GameResult.GameType.WORDS else None for r in results]
     sentences_values = [r.score if r.game_type == GameResult.GameType.SENTENCES else None for r in results]
     articulation_values = [r.score if r.game_type == GameResult.GameType.ARTICULATION else None for r in results]
+    attention_values = [r.score if r.game_type == GameResult.GameType.ATTENTION else None for r in results]
 
     def avg_score(game_type: str) -> int:
         values = [r.score for r in results if r.game_type == game_type]
@@ -225,6 +226,7 @@ def _build_child_stats_for_user(user):
 
     math_avg = avg_score(GameResult.GameType.MATH)
     memory_avg = avg_score(GameResult.GameType.MEMORY)
+    attention_avg = avg_score(GameResult.GameType.ATTENTION)
     sound_avg = avg_score(GameResult.GameType.SOUND)
     words_avg = avg_score(GameResult.GameType.WORDS)
     sentences_avg = avg_score(GameResult.GameType.SENTENCES)
@@ -242,6 +244,7 @@ def _build_child_stats_for_user(user):
     progress = [
         {'label': 'Математика', 'value': math_avg},
         {'label': "Памʼять", 'value': memory_avg},
+        {'label': 'Увага', 'value': attention_avg},
         {'label': 'Звуки', 'value': sound_avg},
         {'label': 'Пазли слів', 'value': words_avg},
         {'label': 'Побудова речень', 'value': sentences_avg},
@@ -249,12 +252,13 @@ def _build_child_stats_for_user(user):
         {'label': 'Казки (слухання)', 'value': stories_listen_pct},
     ]
 
-    radar_labels = ['Математика', "Памʼять", 'Звуки', 'Пазли слів', 'Речення', 'Артикуляція', 'Казки']
-    radar_values = [math_avg, memory_avg, sound_avg, words_avg, sentences_avg, articulation_avg, stories_listen_pct]
+    radar_labels = ['Математика', "Памʼять", 'Увага', 'Звуки', 'Пазли слів', 'Речення', 'Артикуляція', 'Казки']
+    radar_values = [math_avg, memory_avg, attention_avg, sound_avg, words_avg, sentences_avg, articulation_avg, stories_listen_pct]
 
     line_datasets = [
         {'label': 'Математика', 'data': math_values, 'color': '#2b97e5'},
         {'label': "Памʼять", 'data': memory_values, 'color': '#19b3b9'},
+        {'label': 'Увага', 'data': attention_values, 'color': '#f97316'},
         {'label': 'Звуки', 'data': sound_values, 'color': '#c28b00'},
         {'label': 'Пазли слів', 'data': words_values, 'color': '#7c3aed'},
         {'label': 'Побудова речень', 'data': sentences_values, 'color': '#8b5cf6'},
@@ -274,6 +278,7 @@ def _build_child_stats_for_user(user):
         'avg': {
             'math': math_avg,
             'memory': memory_avg,
+            'attention': attention_avg,
             'sound': sound_avg,
             'words': words_avg,
             'sentences': sentences_avg,
@@ -489,6 +494,7 @@ def specialist_profile(request):
         game_palette = {
             GameResult.GameType.MATH: '#2b97e5',
             GameResult.GameType.MEMORY: '#19b3b9',
+            GameResult.GameType.ATTENTION: '#f97316',
             GameResult.GameType.SOUND: '#c28b00',
             GameResult.GameType.WORDS: '#7c3aed',
             GameResult.GameType.SENTENCES: '#8b5cf6',
@@ -497,6 +503,7 @@ def specialist_profile(request):
         game_labels = {
             GameResult.GameType.MATH: 'Математика',
             GameResult.GameType.MEMORY: "Памʼять",
+            GameResult.GameType.ATTENTION: 'Увага',
             GameResult.GameType.SOUND: 'Звуки',
             GameResult.GameType.WORDS: 'Пазли слів',
             GameResult.GameType.SENTENCES: 'Побудова речень',
@@ -507,6 +514,7 @@ def specialist_profile(request):
             for gt in (
                 GameResult.GameType.MATH,
                 GameResult.GameType.MEMORY,
+                GameResult.GameType.ATTENTION,
                 GameResult.GameType.SOUND,
                 GameResult.GameType.WORDS,
                 GameResult.GameType.SENTENCES,
@@ -2033,6 +2041,7 @@ def record_game_result(request):
     if game_type not in (
         GameResult.GameType.MATH,
         GameResult.GameType.MEMORY,
+        GameResult.GameType.ATTENTION,
         GameResult.GameType.SOUND,
         GameResult.GameType.WORDS,
         GameResult.GameType.SENTENCES,
@@ -2067,6 +2076,22 @@ def record_game_result(request):
     if not isinstance(details, dict):
         return JsonResponse({'ok': False, 'error': 'invalid_details'}, status=400)
 
+    failed_attempts = to_int(payload.get('failed_attempts'), min_value=0)
+    hesitation_time = to_int(payload.get('hesitation_time'), min_value=0)
+
+    details_failed_attempts = to_int(details.get('failed_attempts'), min_value=0)
+    details_hesitation_time = to_int(details.get('hesitation_time'), min_value=0)
+
+    if failed_attempts is None:
+        failed_attempts = details_failed_attempts
+    if hesitation_time is None:
+        hesitation_time = details_hesitation_time
+
+    if failed_attempts is not None:
+        details['failed_attempts'] = failed_attempts
+    if hesitation_time is not None:
+        details['hesitation_time'] = hesitation_time
+
     result = GameResult.objects.create(
         user=request.user,
         game_type=game_type,
@@ -2089,6 +2114,7 @@ def record_game_result(request):
     counts_by_game = {
         GameResult.GameType.MATH: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.MATH).count(),
         GameResult.GameType.MEMORY: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.MEMORY).count(),
+        GameResult.GameType.ATTENTION: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.ATTENTION).count(),
         GameResult.GameType.SOUND: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.SOUND).count(),
         GameResult.GameType.WORDS: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.WORDS).count(),
         GameResult.GameType.SENTENCES: GameResult.objects.filter(user=request.user, game_type=GameResult.GameType.SENTENCES).count(),

@@ -83,6 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let round = 0;
     let correct = 0;
     let startTime = null;
+    let firstActionAt = null;
+    let failedAttempts = 0;
     let timerId = null;
 
     let runExercises = [];
@@ -183,6 +185,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const source = from === 'bank' ? bankTokens : pickedTokens;
         const dest = to === 'bank' ? bankTokens : pickedTokens;
 
+        if (!firstActionAt && from === 'bank' && to === 'picked') {
+            firstActionAt = Date.now();
+        }
+
         const token = findAndRemove(source, id);
         if (!token) return;
 
@@ -265,6 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 nextRound();
             }, 700);
         } else {
+            failedAttempts += 1;
             setState('wrong');
             msgEl.textContent = 'Не зовсім. Спробуй ще раз!';
         }
@@ -311,6 +318,10 @@ document.addEventListener('DOMContentLoaded', () => {
             raw_score: correct,
             max_score: TOTAL_ROUNDS,
             duration_seconds: Math.round(durationMs / 1000),
+            failed_attempts: failedAttempts,
+            hesitation_time: firstActionAt && startTime
+                ? Math.max(0, Math.floor((firstActionAt - startTime) / 1000))
+                : 0,
             details: {
                 rounds: TOTAL_ROUNDS,
             },
@@ -327,6 +338,8 @@ document.addEventListener('DOMContentLoaded', () => {
         runExercises = shuffle(POOL).slice(0, TOTAL_ROUNDS);
         round = 0;
         correct = 0;
+        failedAttempts = 0;
+        firstActionAt = null;
         startTime = Date.now();
         startTimer();
         nextRound();

@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalRounds = 5;
     let round = 0;
     let startTime = null;
+    let firstGuessAt = null;
+    let failedAttempts = 0;
     let accepting = false;
 
     const player = new Audio();
@@ -110,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleGuess = (key) => {
         if (!accepting) return;
+        if (!firstGuessAt) firstGuessAt = Date.now();
         lock();
         stopAllAudio();
         const correct = currentTarget && key === currentTarget.key;
@@ -117,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             score += 1;
             helperBubble.textContent = 'Правильно! Наступний звук скоро.';
         } else {
+            failedAttempts += 1;
             helperBubble.textContent = 'Спробуй ще! Йдемо далі.';
         }
         round += 1;
@@ -142,6 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         score = 0;
         round = 0;
+        firstGuessAt = null;
+        failedAttempts = 0;
         updateProgress();
         helperBubble.textContent = 'Починаємо! Відтворюю перший звук.';
         startTime = Date.now();
@@ -162,6 +168,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 game_type: 'sound',
                 score: scoreVal,
                 duration_seconds: Math.round(durationMs / 1000),
+                failed_attempts: failedAttempts,
+                hesitation_time: firstGuessAt && startTime
+                    ? Math.max(0, Math.floor((firstGuessAt - startTime) / 1000))
+                    : 0,
             }),
         }).catch(() => {
             /* ignore network errors for now */

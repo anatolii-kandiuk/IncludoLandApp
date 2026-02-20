@@ -7,10 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const countEl = document.getElementById('art-count');
     const startBtn = document.getElementById('art-start');
     const doneBtn = document.getElementById('art-done');
+    const successBtn = document.getElementById('art-success');
+    const failBtn = document.getElementById('art-fail');
     const nextImageBtn = document.getElementById('art-next-image');
     const msgEl = document.getElementById('art-msg');
 
-    if (!shell || !imageEl || !titleEl || !instructionEl || !countEl || !startBtn || !doneBtn || !nextImageBtn || !msgEl) return;
+    if (!shell || !imageEl || !titleEl || !instructionEl || !countEl || !startBtn || !doneBtn || !successBtn || !failBtn || !nextImageBtn || !msgEl) return;
 
     let cards = [];
     const dataEl = document.getElementById('articulation-cards-data');
@@ -26,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentImages = [];
     let currentImageIndex = 0;
     let startedAt = null;
+    let firstActionAt = null;
     let completed = 0;
 
     function getCookie(name) {
@@ -82,12 +85,17 @@ document.addEventListener('DOMContentLoaded', () => {
         setMessage('Натисни "Почати вправу", коли готовий.');
     }
 
-    function setButtons(running) {
-        startBtn.disabled = running;
-        doneBtn.hidden = !running;
+    function setButtons(mode) {
+        const isRunning = mode === 'running';
+        const isAwaitingOutcome = mode === 'awaiting_outcome';
+
+        startBtn.disabled = isRunning || isAwaitingOutcome;
+        doneBtn.hidden = !isRunning;
+        successBtn.hidden = !isAwaitingOutcome;
+        failBtn.hidden = !isAwaitingOutcome;
     }
 
-    async function sendResult(score, durationSeconds) {
+    async function sendResult({ score, durationSeconds, outcome, failedAttempts, hesitationTime }) {
         const csrfToken = getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]')?.value;
         if (!csrfToken) return;
         try {
@@ -101,10 +109,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({
                     game_type: 'articulation',
                     score,
+                    raw_score: outcome === 'success' ? 1 : 0,
+                    max_score: 1,
                     duration_seconds: durationSeconds,
+                    failed_attempts: failedAttempts,
+                    hesitation_time: hesitationTime,
                     details: {
                         card_id: current?.id,
                         card_title: current?.title,
+                        outcome,
                     },
                 }),
             });
@@ -122,19 +135,39 @@ document.addEventListener('DOMContentLoaded', () => {
             applyCard(cards[0]);
         }
         startedAt = Date.now();
-        setButtons(true);
+        firstActionAt = null;
+        setButtons('running');
         setMessage('Чудово! Виконуй вправу, а потім натисни "Завершити".');
     }
 
     function finishExercise() {
         if (!startedAt) return;
-        const duration = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
+        if (!firstActionAt) firstActionAt = Date.now();
+        setButtons('awaiting_outcome');
+        setMessage('Оціни виконання вправи: обери "Вийшло" або "Не вийшло".');
+    }
+
+    function completeWithOutcome(outcome) {
+        if (!startedAt) return;
+        const endedAt = Date.now();
+        const durationSeconds = Math.max(1, Math.round((endedAt - startedAt) / 1000));
+        const hesitationTime = Math.max(0, Math.round(((firstActionAt || endedAt) - startedAt) / 1000));
+        const isSuccess = outcome === 'success';
+
+        sendResult({
+            score: isSuccess ? 100 : 0,
+            durationSeconds,
+            outcome,
+            failedAttempts: isSuccess ? 0 : 1,
+            hesitationTime,
+        });
+
         startedAt = null;
+        firstActionAt = null;
         completed += 1;
         countEl.textContent = String(completed);
-        setButtons(false);
-        setMessage('Молодець! Вправа завершена. Можеш обрати наступну.');
-        sendResult(100, duration);
+        setButtons('idle');
+        setMessage('Результат збережено. Можеш обрати наступну вправу.');
     }
 
     navItems.forEach((btn) => {
@@ -145,6 +178,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     startBtn.addEventListener('click', startExercise);
     doneBtn.addEventListener('click', finishExercise);
+    successBtn.addEventListener('click', () => completeWithOutcome('success'));
+    failBtn.addEventListener('click', () => completeWithOutcome('failed'));
     nextImageBtn.addEventListener('click', showNextImage);
 
     if (!cards.length) {
@@ -152,6 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setMessage('Поки що немає вправ. Спеціаліст має додати картки.');
         return;
     }
+
+    setButtons('idle');
 
     if (navItems.length) {
         selectCard(navItems[0].dataset.cardId);

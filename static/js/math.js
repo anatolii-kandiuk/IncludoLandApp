@@ -35,6 +35,8 @@
         current: null,
         timerId: null,
         startedAt: 0,
+        firstActionAt: 0,
+        failedAttempts: 0,
     };
 
     function getCookie(name) {
@@ -252,6 +254,9 @@
         els.best.textContent = String(readBest());
 
         const timeSec = Math.floor((Date.now() - state.startedAt) / 1000);
+        const hesitationSec = state.firstActionAt
+            ? Math.max(0, Math.floor((state.firstActionAt - state.startedAt) / 1000))
+            : timeSec;
         setMsg(`Готово! Результат: ${state.correct}/${TOTAL}. Час: ${timeSec}с.`, 'done');
 
         els.expression.textContent = 'Натисни “Почати”,\nщоб зіграти ще раз';
@@ -263,6 +268,8 @@
             raw_score: state.correct,
             max_score: TOTAL,
             duration_seconds: timeSec,
+            failed_attempts: state.failedAttempts,
+            hesitation_time: hesitationSec,
             details: {
                 level: els.level?.value,
                 op: els.op?.value,
@@ -272,6 +279,7 @@
 
     function submitAnswer() {
         if (!state.active || !state.current) return;
+        if (!state.firstActionAt) state.firstActionAt = Date.now();
 
         const raw = els.answer.value.trim();
         if (!raw) {
@@ -287,6 +295,7 @@
             state.correct += 1;
             setMsg('Правильно! Так тримати!', 'ok');
         } else {
+            state.failedAttempts += 1;
             setMsg(`Майже! Правильна відповідь: ${state.current.answer}`, 'bad');
         }
 
@@ -307,6 +316,8 @@
         state.step = 0;
         state.correct = 0;
         state.current = null;
+        state.firstActionAt = 0;
+        state.failedAttempts = 0;
 
         els.best.textContent = String(readBest());
         els.time.textContent = '0';

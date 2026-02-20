@@ -44,6 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
         misses: 0,
     };
 
+    let levelStartedAt = Date.now();
+    let firstClickAt = null;
+    let resultPosted = false;
+
     const MAX_MISSES = 3;
 
     let targets = initialTargets;
@@ -60,6 +64,68 @@ document.addEventListener('DOMContentLoaded', () => {
     const setMessage = (text) => {
         helperMsg.textContent = text;
     };
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    async function postResult(payload) {
+        try {
+            const csrf = getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+            const res = await fetch('/api/game-results/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(csrf ? { 'X-CSRFToken': csrf } : {}),
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(payload),
+            });
+            return res.ok;
+        } catch (_e) {
+            return false;
+        }
+    }
+
+    function maybeMarkFirstClick() {
+        if (!firstClickAt) firstClickAt = Date.now();
+    }
+
+    function buildResultPayload(completed) {
+        const now = Date.now();
+        const durationSeconds = Math.max(1, Math.round((now - levelStartedAt) / 1000));
+        const hesitationTime = Math.max(0, Math.round(((firstClickAt || now) - levelStartedAt) / 1000));
+        const foundCount = state.found.size;
+        const foundScore = state.total ? Math.round((foundCount * 100) / state.total) : 0;
+        const missPenalty = state.misses * 10;
+        const score = completed
+            ? Math.max(0, Math.min(100, 100 - missPenalty))
+            : Math.max(0, Math.min(100, foundScore - missPenalty));
+
+        return {
+            game_type: 'attention',
+            score,
+            raw_score: foundCount,
+            max_score: state.total,
+            duration_seconds: durationSeconds,
+            failed_attempts: state.misses,
+            hesitation_time: hesitationTime,
+            details: {
+                level,
+                shapes_count: Number(shapesEl?.textContent || 0) || null,
+                completed,
+            },
+        };
+    }
+
+    function sendLevelResult(completed) {
+        if (resultPosted) return;
+        resultPosted = true;
+        postResult(buildResultPayload(completed));
+    }
 
     const updateMisses = () => {
         if (!missesEl) return;
@@ -88,10 +154,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const onMiss = () => {
         if (state.misses >= MAX_MISSES) return;
+        maybeMarkFirstClick();
         state.misses += 1;
         updateMisses();
 
         if (state.misses < MAX_MISSES) return;
+
+        sendLevelResult(false);
 
         // Go back one difficulty step (levels are grouped by 3).
         const downgradedLevel = Math.max(1, level - 3);
@@ -114,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.found.add(id);
         updateProgress();
         if (state.found.size === state.total) {
+            sendLevelResult(true);
             setMessage('Молодець! Рівень пройдено. Натисни «Наступний рівень».');
             rightCard.classList.add('is-complete');
             if (nextBtn) nextBtn.hidden = false;
@@ -139,6 +209,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetLevelState = () => {
         state.found = new Set();
         state.misses = 0;
+        levelStartedAt = Date.now();
+        firstClickAt = null;
+        resultPosted = false;
         rightCard.classList.remove('is-complete');
         if (nextBtn) nextBtn.hidden = true;
         updateProgress();
@@ -185,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', (ev) => {
                 ev.stopPropagation();
                 if (state.found.size === state.total) return;
+                maybeMarkFirstClick();
 
                 const info = targetById.get(targetId);
                 if (!info) return;
@@ -249,6 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     rightCard.addEventListener('click', (ev) => {
         if (state.found.size === state.total) return;
+        maybeMarkFirstClick();
         // If click wasn't captured by a hotspot, it's a miss.
         setMessage('Не тут 🙂 Спробуй ще!');
         showMiss(ev.clientX, ev.clientY);

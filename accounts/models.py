@@ -94,6 +94,7 @@ class GameResult(models.Model):
     class GameType(models.TextChoices):
         MATH = 'math', 'Math'
         MEMORY = 'memory', 'Memory'
+        ATTENTION = 'attention', 'Attention'
         SOUND = 'sound', 'Sound'
         WORDS = 'words', 'Words'
         SENTENCES = 'sentences', 'Sentences'

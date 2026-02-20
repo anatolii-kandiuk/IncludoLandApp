@@ -57,6 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let round = 0;
     let correct = 0;
     let startTime = null;
+    let firstActionAt = null;
+    let failedAttempts = 0;
     let timerId = null;
 
     let runWords = [];
@@ -174,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function pickLetter(ch) {
         if (!current) return;
         if (picked.length >= current.word.length) return;
+        if (!firstActionAt) firstActionAt = Date.now();
         picked.push(ch);
         fillSlotsFromPicked();
         setState('');
@@ -224,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setState('correct');
             msgEl.textContent = 'Правильно!';
         } else {
+            failedAttempts += 1;
             setState('wrong');
             msgEl.textContent = `Не зовсім. Правильне слово: ${target}`;
         }
@@ -257,6 +261,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 raw_score: correct,
                 max_score: TOTAL_ROUNDS,
                 duration_seconds: Math.round(durationMs / 1000),
+                failed_attempts: failedAttempts,
+                hesitation_time: firstActionAt && startTime
+                    ? Math.max(0, Math.floor((firstActionAt - startTime) / 1000))
+                    : 0,
             }),
         }).catch(() => {
             /* ignore network errors for now */
@@ -293,6 +301,8 @@ document.addEventListener('DOMContentLoaded', () => {
         runWords = shuffle(WORD_POOL).slice(0, TOTAL_ROUNDS);
         round = 0;
         correct = 0;
+        failedAttempts = 0;
+        firstActionAt = null;
         startTime = Date.now();
         startTimer();
         startBtn.textContent = 'Перезапустити';

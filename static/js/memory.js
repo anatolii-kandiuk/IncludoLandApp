@@ -51,7 +51,10 @@
     let second = null;
     let locked = false;
     let matchedPairs = 0;
+    let sessionStartedAt = Date.now();
     let startedAt = null;
+    let firstFlipAt = null;
+    let failedAttempts = 0;
 
     function getCookie(name) {
         const value = `; ${document.cookie}`;
@@ -125,6 +128,7 @@
         if (btn.dataset.state === 'flipped') return;
 
         if (!startedAt) startedAt = Date.now();
+        if (!firstFlipAt) firstFlipAt = Date.now();
 
         btn.dataset.state = 'flipped';
         btn.setAttribute('aria-pressed', 'true');
@@ -158,6 +162,8 @@
                     raw_score: totalPairs,
                     max_score: totalPairs,
                     duration_seconds: timeSec,
+                    failed_attempts: failedAttempts,
+                    hesitation_time: Math.max(0, Math.floor(((firstFlipAt || Date.now()) - sessionStartedAt) / 1000)),
                     details: {
                         pairs: totalPairs,
                     },
@@ -171,6 +177,7 @@
         }
 
         setMsg('Не пара. Спробуй ще!');
+        failedAttempts += 1;
         window.setTimeout(() => {
             if (first) {
                 first.dataset.state = 'hidden';
