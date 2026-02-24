@@ -9,10 +9,14 @@
     function decodeEscapedText(value) {
         if (!value) return '';
         return String(value)
+            .replace(/\\\\u([0-9a-fA-F]{4})/g, (_, code) => String.fromCharCode(parseInt(code, 16)))
+            .replace(/\\u([0-9a-fA-F]{4})/g, (_, code) => String.fromCharCode(parseInt(code, 16)))
             .replace(/\\r\\n/g, '\n')
             .replace(/\\n/g, '\n')
             .replace(/\\r/g, '\n')
-            .replace(/\\t/g, '\t');
+            .replace(/\\t/g, '\t')
+            .replace(/\r\n/g, '\n')
+            .replace(/\r/g, '\n');
     }
 
     function downloadTextFile(filename, text) {
