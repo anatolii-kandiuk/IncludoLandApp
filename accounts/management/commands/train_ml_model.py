@@ -17,9 +17,9 @@ class Command(BaseCommand):
         parser.add_argument(
             '--model-type',
             type=str,
-            default='random_forest',
-            choices=['linear', 'random_forest'],
-            help='Type of ML model to use (default: random_forest)',
+            default='xgboost',
+            choices=['linear', 'xgboost'],
+            help='Type of ML model to use (default: xgboost)',
         )
         parser.add_argument(
             '--window-size',

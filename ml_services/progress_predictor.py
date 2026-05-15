@@ -1,6 +1,3 @@
-"""
-ML service for predicting game performance.
-"""
 from typing import Dict, Optional, Tuple, Any
 import logging
 from pathlib import Path
@@ -8,11 +5,11 @@ import json
 
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
+from xgboost import XGBRegressor
 import joblib
 
 from .data_extractor import extract_game_data, preprocess_features, extract_user_features
@@ -21,20 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 class ProgressPredictor:
-    """
-    ML model for predicting child's future game performance.
-    
-    Supports two model types:
-    - 'linear': Linear Regression (faster, interpretable)
-    - 'random_forest': Random Forest Regressor (more accurate, handles non-linearity)
-    
-    Features:
-    - Training on historical game data
-    - Predicting next score for a specific user and game_type
-    - Model persistence with joblib
-    - Performance metrics tracking
-    """
-    
     FEATURE_COLUMNS = [
         'attempt_number',
         'avg_score',
@@ -54,20 +37,12 @@ class ProgressPredictor:
     
     def __init__(
         self,
-        model_type: str = 'random_forest',
+        model_type: str = 'xgboost',
         model_dir: str = 'ml_models',
         window_size: int = 3,
     ):
-        """
-        Initialize the ProgressPredictor.
-        
-        Args:
-            model_type: 'linear' or 'random_forest'
-            model_dir: Directory to save/load models
-            window_size: Number of past games to use for features
-        """
-        if model_type not in ['linear', 'random_forest']:
-            raise ValueError("model_type must be 'linear' or 'random_forest'")
+        if model_type not in ['linear', 'xgboost']:
+            raise ValueError("model_type must be 'linear' or 'xgboost'")
         
         self.model_type = model_type
         self.window_size = window_size
@@ -78,11 +53,13 @@ class ProgressPredictor:
         if model_type == 'linear':
             self.model = LinearRegression()
         else:
-            self.model = RandomForestRegressor(
-                n_estimators=100,
+            self.model = XGBRegressor(
+                n_estimators=300,
+                learning_rate=0.05,
                 max_depth=10,
-                min_samples_split=5,
-                min_samples_leaf=2,
+                subsample=0.9,
+                colsample_bytree=0.9,
+                objective='reg:squarederror',
                 random_state=42,
                 n_jobs=-1,
             )
@@ -105,20 +82,6 @@ class ProgressPredictor:
         test_size: float = 0.2,
         min_entries: int = 5,
     ) -> Dict[str, float]:
-        """
-        Train the model on historical game data.
-        
-        Args:
-            game_type: Specific game type to train on (None for all)
-            test_size: Fraction of data to use for testing
-            min_entries: Minimum entries per user-game combination
-            
-        Returns:
-            Dictionary of performance metrics (MAE, RMSE, R²)
-            
-        Raises:
-            ValueError: If insufficient training data
-        """
         try:
             logger.info(f"Starting training for game_type={game_type}")
             
@@ -187,8 +150,8 @@ class ProgressPredictor:
                 f"Test R²: {self.metrics['test_r2']:.3f}"
             )
             
-            # Feature importance (for Random Forest)
-            if self.model_type == 'random_forest':
+            # Feature importance (for tree-based models)
+            if self.model_type == 'xgboost':
                 feature_importance = dict(zip(
                     self.FEATURE_COLUMNS,
                     self.model.feature_importances_
@@ -206,23 +169,6 @@ class ProgressPredictor:
         user_id: int,
         game_type: str,
     ) -> Optional[Dict[str, Any]]:
-        """
-        Predict next score and insights for a specific user and game type.
-        
-        Args:
-            user_id: User ID
-            game_type: Game type
-            
-        Returns:
-            Dictionary with:
-            - predicted_score: Predicted next score (0-100)
-            - confidence: Confidence level (based on model performance)
-            - insight: Human-readable insight string
-            - days_to_mastery: Estimated days to reach mastery (score >= 90)
-            - attempts_to_mastery: Estimated attempts to reach mastery
-            
-        Returns None if prediction cannot be made (insufficient data or untrained model)
-        """
         if not self.is_trained:
             logger.warning("Model is not trained. Call train() first.")
             return None
@@ -255,16 +201,8 @@ class ProgressPredictor:
             if features['last_score'] >= 90 and features['score_trend'] > 0:
                 predicted_score = max(predicted_score, features['last_score'] - 15)
             
-            # Calculate confidence based on model type
-            if self.model_type == 'random_forest' and hasattr(self.model, 'estimators_'):
-                tree_predictions = [
-                    estimator.predict(X_pred_scaled)[0]
-                    for estimator in self.model.estimators_
-                ]
-                prediction_std = float(np.std(tree_predictions)) if len(tree_predictions) > 1 else 0.0
-                confidence = max(0, min(100, 100 - (prediction_std * 2)))
-            else:
-                confidence = max(0, min(100, 100 - self.metrics.get('test_rmse', 20)))
+            # Calculate confidence based on model quality metrics
+            confidence = max(0, min(100, 100 - self.metrics.get('test_rmse', 20)))
             
             # Generate insight
             insight = self._generate_insight(
@@ -313,11 +251,6 @@ class ProgressPredictor:
         score_trend: float,
         game_type: str,
     ) -> str:
-        """
-        Generate a specialist insight based on model output.
-        The logic considers absolute score, historical trend, and expected deviation.
-        """
-
         # Dictionary with proper Ukrainian cases for activity labels
         game_labels = {
             'math': 'математиці',
@@ -455,13 +388,6 @@ class ProgressPredictor:
         attempt_number: float,
         mastery_threshold: float = 90,
     ) -> Tuple[Optional[int], Optional[int]]:
-        """
-        Estimate days and attempts needed to reach mastery.
-        
-        Returns:
-            Tuple of (days_to_mastery, attempts_to_mastery)
-            None values indicate already at mastery or trend is negative
-        """
         if current_score >= mastery_threshold:
             return (0, 0)
         
@@ -483,18 +409,6 @@ class ProgressPredictor:
         return (days_needed, attempts_needed)
     
     def save(self, game_type: Optional[str] = None) -> Path:
-        """
-        Save trained model and scaler to disk.
-        
-        Args:
-            game_type: Game type identifier for filename (optional)
-            
-        Returns:
-            Path to saved model file
-            
-        Raises:
-            ValueError: If model is not trained
-        """
         if not self.is_trained:
             raise ValueError("Cannot save untrained model")
         
@@ -516,15 +430,6 @@ class ProgressPredictor:
         return model_file
     
     def load(self, game_type: Optional[str] = None) -> bool:
-        """
-        Load trained model and scaler from disk.
-        
-        Args:
-            game_type: Game type identifier for filename (optional)
-            
-        Returns:
-            True if loaded successfully, False otherwise
-        """
         try:
             # Create filename
             game_suffix = f"_{game_type}" if game_type else "_all"
@@ -566,12 +471,6 @@ class ProgressPredictor:
             return False
     
     def get_model_info(self) -> Dict[str, Any]:
-        """
-        Get information about the current model.
-        
-        Returns:
-            Dictionary with model type, training status, and metrics
-        """
         return {
             'model_type': self.model_type,
             'is_trained': self.is_trained,

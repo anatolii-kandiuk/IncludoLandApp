@@ -1,16 +1,3 @@
-"""
-Example script demonstrating ML service usage.
-
-This script shows how to:
-1. Train a model
-2. Make predictions
-3. Save and load models
-4. Extract and analyze features
-
-Run this after collecting sufficient game data:
-    python -m ml_services.example_usage
-"""
-
 import os
 import sys
 from pathlib import Path
@@ -90,9 +77,9 @@ def example_training():
     print_section("Example 3: Model Training")
     
     try:
-        # Initialize predictor with Random Forest
+        # Initialize predictor with XGBoost
         predictor = ProgressPredictor(
-            model_type='random_forest',
+            model_type='xgboost',
             model_dir='ml_models',
             window_size=3,
         )
@@ -133,7 +120,7 @@ def example_prediction(predictor=None):
     # Load model if not provided
     if predictor is None:
         predictor = ProgressPredictor(
-            model_type='random_forest',
+            model_type='xgboost',
             model_dir='ml_models',
             window_size=3,
         )
@@ -181,10 +168,10 @@ def example_prediction(predictor=None):
 
 
 def example_model_comparison():
-    """Example 5: Compare Linear vs Random Forest."""
+    """Example 5: Compare Linear vs XGBoost."""
     print_section("Example 5: Model Comparison")
     
-    models = ['linear', 'random_forest']
+    models = ['linear', 'xgboost']
     results = {}
     
     for model_type in models:
@@ -213,12 +200,12 @@ def example_model_comparison():
         print("\n" + "-" * 60)
         print("Comparison:")
         print(f"  Linear MAE:        {results['linear']['test_mae']:.2f}")
-        print(f"  Random Forest MAE: {results['random_forest']['test_mae']:.2f}")
+        print(f"  XGBoost MAE:       {results['xgboost']['test_mae']:.2f}")
         print(f"  Linear R²:         {results['linear']['test_r2']:.3f}")
-        print(f"  Random Forest R²:  {results['random_forest']['test_r2']:.3f}")
+        print(f"  XGBoost R²:        {results['xgboost']['test_r2']:.3f}")
         
-        if results['random_forest']['test_mae'] < results['linear']['test_mae']:
-            print("\n  Winner: Random Forest (lower error)")
+        if results['xgboost']['test_mae'] < results['linear']['test_mae']:
+            print("\n  Winner: XGBoost (lower error)")
         else:
             print("\n  Winner: Linear (lower error)")
 

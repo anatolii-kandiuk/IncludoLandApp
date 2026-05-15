@@ -22,7 +22,7 @@ def test_insight_generation():
     print("Testing Ukrainian Insight Generation")
     print("=" * 60)
     
-    predictor = ProgressPredictor(model_type='random_forest')
+    predictor = ProgressPredictor(model_type='xgboost')
     
     # Test different scenarios
     test_cases = [

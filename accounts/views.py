@@ -2423,7 +2423,7 @@ def predict_performance(request):
     try:
         # Initialize predictor
         predictor = ProgressPredictor(
-            model_type='random_forest',
+            model_type='xgboost',
             model_dir='ml_models',
             window_size=3,
         )

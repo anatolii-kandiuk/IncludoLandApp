@@ -29,22 +29,7 @@ def extract_game_data(
     game_type: Optional[str] = None,
     min_entries: int = 5,
 ) -> pd.DataFrame:
-    """
-    Extract historical GameResult data for training or prediction.
-    
-    Args:
-        user_id: User ID to filter by (None for all users)
-        game_type: Game type to filter by (None for all game types)
-        min_entries: Minimum number of entries required per user-game combination
-        
-    Returns:
-        DataFrame with columns: user_id, game_type, score, duration_seconds,
-        hints_used, attempts, successful_attempts, failed_attempts, max_streak,
-        time_of_day, created_at
-        
-    Raises:
-        ValueError: If insufficient data is available
-    """
+
     try:
         # Build query with optimized select_related and filters
         queryset: QuerySet[GameResult] = GameResult.objects.select_related('user')
@@ -135,28 +120,7 @@ def preprocess_features(
     df: pd.DataFrame,
     window_size: int = 3,
 ) -> Tuple[pd.DataFrame, pd.Series]:
-    """
-    Engineer features from raw game data for training.
     
-    Creates features like:
-    - Moving average of last N scores
-    - Average duration
-    - Total hints used in last N games
-    - Attempt number (sequence position)
-    - Days since first attempt
-    - Score trend (slope)
-    
-    Args:
-        df: DataFrame from extract_game_data()
-        window_size: Number of past games to include in rolling features
-        
-    Returns:
-        Tuple of (X features DataFrame, y target Series)
-        Target is the score of the next attempt
-        
-    Raises:
-        ValueError: If dataframe is too small or missing required columns
-    """
     required_cols = [
         'user_id', 'game_type', 'score', 'duration_seconds',
         'hints_used', 'attempts', 'successful_attempts', 'failed_attempts',
@@ -273,17 +237,6 @@ def extract_user_features(
     game_type: str,
     window_size: int = 3,
 ) -> Optional[Dict[str, float]]:
-    """
-    Extract features for a specific user and game type for prediction.
-    
-    Args:
-        user_id: User ID
-        game_type: Game type
-        window_size: Number of past games to include
-        
-    Returns:
-        Dictionary of features, or None if insufficient data
-    """
     try:
         df = extract_game_data(user_id=user_id, game_type=game_type, min_entries=window_size)
         
