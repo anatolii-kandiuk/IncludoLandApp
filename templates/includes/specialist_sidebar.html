@@ -24,6 +24,11 @@
                 <span class="nav__icon" aria-hidden="true">🏠</span>
                 <span class="nav__label">Мої Учні</span>
             </a>
+            <a class="nav__item{% if active == 'all_activities' %} nav__item--active{% endif %}"
+                href="{% url 'home' %}#games">
+                <span class="nav__icon" aria-hidden="true">🎮</span>
+                <span class="nav__label">Всі активності</span>
+            </a>
             <a class="nav__item{% if active == 'print' %} nav__item--active{% endif %}"
                 href="{% url 'specialist_print' %}">
                 <span class="nav__icon" aria-hidden="true">🖨️</span>
@@ -67,30 +72,6 @@
                 href="{% url 'specialist_activity_builder' %}">
                 <span class="nav__icon" aria-hidden="true">🎬</span>
                 <span class="nav__label">Активності</span>
-            </a>
-        </div>
-
-        <div class="nav__section" aria-label="Ігри">
-            <div class="nav__title">Ігри</div>
-            <a class="nav__item" href="{% url 'game_words' %}">
-                <span class="nav__icon" aria-hidden="true">🔤</span>
-                <span class="nav__label">Пазли слів</span>
-            </a>
-            <a class="nav__item" href="{% url 'game_sentences' %}">
-                <span class="nav__icon" aria-hidden="true">🧩</span>
-                <span class="nav__label">Побудова речень</span>
-            </a>
-            <a class="nav__item" href="{% url 'game_articulation' %}">
-                <span class="nav__icon" aria-hidden="true">👄</span>
-                <span class="nav__label">Артикуляція</span>
-            </a>
-            <a class="nav__item" href="{% url 'game_attention' %}">
-                <span class="nav__icon" aria-hidden="true">🎯</span>
-                <span class="nav__label">Увага</span>
-            </a>
-            <a class="nav__item" href="{% url 'game_math' %}">
-                <span class="nav__icon" aria-hidden="true">➗</span>
-                <span class="nav__label">Математика</span>
             </a>
         </div>
 
