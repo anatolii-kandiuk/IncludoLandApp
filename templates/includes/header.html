@@ -52,11 +52,11 @@
                     <span>Друк</span>
                 </a>
                 {% else %}
-                <button class="pill" type="button" id="timer-pill" aria-controls="timer-popover" aria-expanded="false"
+                <!-- <button class="pill" type="button" id="timer-pill" aria-controls="timer-popover" aria-expanded="false"
                     title="Таймер">
                     <span class="pill__ico" aria-hidden="true">⏱</span>
                     <span id="timer-pill-time">25:00</span>
-                </button>
+                </button> -->
                 <a class="pill" href="{% url 'print_hub' %}">
                     <span class="pill__ico" aria-hidden="true">🖨️</span>
                     <span>Друк</span>
@@ -90,7 +90,7 @@
         </div>
     </div>
 </header>
-
+<!-- 
 {% if user.is_authenticated and not user.specialist_profile %}
 <div class="timer-popover" id="timer-popover" hidden>
     <div class="timer-popover__top">
@@ -117,4 +117,4 @@
 </div>
 
 <script src="{% static 'js/pomodoro.js' %}" defer></script>
-{% endif %}
+{% endif %} -->
